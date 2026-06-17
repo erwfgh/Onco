@@ -2,12 +2,15 @@ import { useState, useCallback } from 'react'
 import OrganViewer from './components/OrganViewer'
 import OrganSelector from './components/OrganSelector'
 import StageSelector from './components/StageSelector'
+import InfoPanel from './components/InfoPanel'
+import LandingPage from './components/LandingPage'
 import ORGANS from './data/organs'
 
 export default function App() {
   const [selectedOrgan, setSelectedOrgan] = useState(null)
   const [stage, setStage] = useState(1)
   const [highlights, setHighlights] = useState([])
+  const [showLanding, setShowLanding] = useState(true)
 
   const handleOrganSelect = useCallback(key => {
     setSelectedOrgan(key)
@@ -27,7 +30,8 @@ export default function App() {
   const organ = selectedOrgan ? ORGANS[selectedOrgan] : null
 
   return (
-    <div className="flex flex-col h-full bg-[#060d1a] text-white select-none">
+    <div className="flex flex-col h-full bg-[#060d1a] text-white select-none relative">
+      {showLanding && <LandingPage onEnter={() => setShowLanding(false)} />
 
       {/* Top bar */}
       <header className="flex items-center justify-between px-5 py-2.5 border-b border-slate-700/60 bg-[#0a1525]/90 backdrop-blur-sm flex-shrink-0 z-10">
@@ -118,6 +122,8 @@ export default function App() {
             <StageSelector stage={stage} onStageChange={handleStageChange} />
           </div>
         </div>
+
+        <InfoPanel organKey={selectedOrgan} stage={stage} />
       </div>
     </div>
   )
