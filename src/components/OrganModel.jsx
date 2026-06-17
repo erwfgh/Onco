@@ -1,16 +1,16 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react'
 import * as THREE from 'three'
 
-const VOXEL_SIZE = 0.88
+const VOXEL_SIZE = 0.86
 
-const STAGE_RADIUS = { 1: 0, 2: 1.5, 3: 2.8, 4: 4.5 }
-const STAGE_SCATTER_CHANCE = { 1: 0, 2: 0, 3: 0, 4: 0.12 }
+const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
+const STAGE_SCATTER = { 1: 0, 2: 0, 3: 0.04, 4: 0.18 }
 
 const PURPLE = {
-  1: new THREE.Color('#a855f7'),
-  2: new THREE.Color('#9333ea'),
+  1: new THREE.Color('#c084fc'),
+  2: new THREE.Color('#a855f7'),
   3: new THREE.Color('#7c3aed'),
-  4: new THREE.Color('#6d28d9'),
+  4: new THREE.Color('#4c1d95'),
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
@@ -29,20 +29,18 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
   const purple = PURPLE[stage]
   const dummy = useMemo(() => new THREE.Object3D(), [])
 
-  // Scatter map is seeded once per (highlights + stage) combo so it's stable
   const highlightedSet = useMemo(() => {
     const radius = STAGE_RADIUS[stage]
-    const scatterChance = STAGE_SCATTER_CHANCE[stage]
+    const scatterChance = STAGE_SCATTER[stage]
     const set = new Set()
 
-    // Use a seeded-like approach: pre-pick scatter indices
-    const scatterIndices = new Set()
+    // Deterministic scatter (seeded by position hash)
+    const scatterSet = new Set()
     if (scatterChance > 0) {
       for (let i = 0; i < positions.length; i++) {
-        // deterministic-ish: hash based on position
         const { x, y, z } = positions[i]
-        const hash = (Math.sin(x * 127.1 + y * 311.7 + z * 74.3) * 43758.5453) % 1
-        if (Math.abs(hash) < scatterChance) scatterIndices.add(i)
+        const h = Math.abs((Math.sin(x * 127.1 + y * 311.7 + z * 74.3) * 43758.5453) % 1)
+        if (h < scatterChance) scatterSet.add(i)
       }
     }
 
@@ -50,19 +48,16 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
       const origin = positions[hi]
       if (!origin) continue
       positions.forEach((pos, i) => {
-        if (origin.distanceTo(pos) <= radius + 0.5) set.add(i)
+        if (origin.distanceTo(pos) <= radius) set.add(i)
       })
       set.add(hi)
     }
 
-    if (highlights.length > 0) {
-      scatterIndices.forEach(i => set.add(i))
-    }
-
+    if (highlights.length > 0) scatterSet.forEach(i => set.add(i))
     return set
   }, [highlights, positions, stage])
 
-  // Set matrices once when voxels change
+  // Set matrices once per organ
   useEffect(() => {
     const mesh = meshRef.current
     if (!mesh) return
@@ -74,7 +69,7 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
     mesh.instanceMatrix.needsUpdate = true
   }, [positions, dummy])
 
-  // Update colors when highlights/stage/organ change
+  // Update colors on highlight/stage change
   useEffect(() => {
     const mesh = meshRef.current
     if (!mesh) return
@@ -97,7 +92,7 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
       castShadow
       receiveShadow
     >
-      <meshStandardMaterial vertexColors />
+      <meshStandardMaterial vertexColors roughness={0.6} metalness={0.1} />
     </instancedMesh>
   )
 }
