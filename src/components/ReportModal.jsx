@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import CLINICAL from '../data/clinicalData'
 import ORGANS from '../data/organs'
+import REGIMENS from '../data/regimens'
 
 const STAGE_LABEL = ['I', 'II', 'III', 'IV']
 const DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -15,6 +16,7 @@ export default function ReportModal({ organKey, stage, highlights, caseId, notes
   const tnm = data.tnm?.[stage] || {}
   const survival = data.survival5yr?.[stage] || '—'
   const treatments = data.treatments?.[stage] || []
+  const regimens = REGIMENS[organKey]?.[stage] || []
   const stageLabel = STAGE_LABEL[stage - 1]
 
   const handlePrint = () => {
@@ -124,6 +126,24 @@ export default function ReportModal({ organKey, stage, highlights, caseId, notes
                 ))}
               </ul>
             </div>
+
+            {/* Named Regimens */}
+            {regimens.length > 0 && (
+              <div style={{ marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>Named Regimens — Stage {stageLabel}</h2>
+                {regimens.map((r, i) => (
+                  <div key={i} style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #f0f0f0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <strong style={{ fontSize: '12px' }}>{r.name}</strong>
+                      <span style={{ fontSize: '10px', background: '#f0f0f0', borderRadius: '3px', padding: '2px 6px' }}>{r.category}</span>
+                    </div>
+                    <div style={{ fontSize: '10px', color: '#777', marginTop: '2px' }}>{r.drugs.join(' + ')}</div>
+                    <div style={{ fontSize: '10px', color: '#888', marginTop: '1px' }}>⏱ {r.cycle}</div>
+                    <div style={{ fontSize: '10px', color: '#555', marginTop: '2px' }}>{r.notes}</div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Biomarkers */}
             <div style={{ marginBottom: '20px' }}>
