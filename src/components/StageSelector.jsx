@@ -41,7 +41,15 @@ const STAGES = [
   },
 ]
 
-export default function StageSelector({ stage, onStageChange }) {
+const SURVIVAL_COLOR = pct => {
+  const n = parseInt(pct || '0')
+  if (n >= 70) return 'text-emerald-400'
+  if (n >= 40) return 'text-yellow-400'
+  if (n >= 20) return 'text-orange-400'
+  return 'text-red-400'
+}
+
+export default function StageSelector({ stage, onStageChange, clinical }) {
   const current = STAGES.find(s => s.value === stage)
 
   return (
@@ -49,20 +57,26 @@ export default function StageSelector({ stage, onStageChange }) {
       <div>
         <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-2">Cancer Stage</p>
         <div className="flex gap-1.5">
-          {STAGES.map(s => (
-            <button
-              key={s.value}
-              onClick={() => onStageChange(s.value)}
-              className={`flex flex-col items-center w-20 py-2.5 rounded-lg border-2 transition-all duration-150 ${
-                stage === s.value
-                  ? s.active + ' shadow-lg shadow-violet-900/30'
-                  : 'border-slate-700 bg-slate-800/30 text-slate-500 hover:border-slate-600 hover:text-slate-400'
-              }`}
-            >
-              <span className={`text-lg font-black tracking-tighter ${stage === s.value ? 'text-violet-200' : ''}`}>{s.label}</span>
-              <span className="text-xs mt-0.5">{s.desc}</span>
-            </button>
-          ))}
+          {STAGES.map(s => {
+            const surv = clinical?.survival5yr?.[s.value]
+            return (
+              <button
+                key={s.value}
+                onClick={() => onStageChange(s.value)}
+                className={`flex flex-col items-center w-20 py-2 rounded-lg border-2 transition-all duration-150 ${
+                  stage === s.value
+                    ? s.active + ' shadow-lg shadow-violet-900/30'
+                    : 'border-slate-700 bg-slate-800/30 text-slate-500 hover:border-slate-600 hover:text-slate-400'
+                }`}
+              >
+                <span className={`text-lg font-black tracking-tighter ${stage === s.value ? 'text-violet-200' : ''}`}>{s.label}</span>
+                <span className="text-xs mt-0.5">{s.desc}</span>
+                {surv && (
+                  <span className={`text-[9px] mt-0.5 font-semibold ${SURVIVAL_COLOR(surv)}`}>{surv}</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -71,6 +85,11 @@ export default function StageSelector({ stage, onStageChange }) {
         <div className="flex items-center gap-2 mb-1">
           <div className={`w-3 h-3 rounded-sm ${current.dot}`}></div>
           <span className="text-sm font-semibold text-slate-200">{current.name} — {current.desc}</span>
+          {clinical?.survival5yr?.[stage] && (
+            <span className={`text-xs font-bold ml-2 ${SURVIVAL_COLOR(clinical.survival5yr[stage])}`}>
+              {clinical.survival5yr[stage]} 5-yr survival
+            </span>
+          )}
         </div>
         <p className="text-xs text-slate-500">{current.detail}</p>
         <p className="text-xs text-slate-600 mt-1">Click any voxel to mark tumor site • Multiple sites supported</p>
