@@ -20,6 +20,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick }) 
       <OrganModel
         voxels={organ.voxels}
         baseColor={organ.color}
+        zones={organ.zones}
         stage={stage}
         highlights={highlights}
         onVoxelClick={onVoxelClick}

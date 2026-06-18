@@ -1,42 +1,42 @@
 // ─── Primitive generators ─────────────────────────────────────────────────
 
-function ellipsoid(cx, cy, cz, rx, ry, rz) {
+function ellipsoid(cx, cy, cz, rx, ry, rz, zone) {
   const v = []
   for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++)
     for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++)
       for (let z = Math.floor(cz - rz); z <= Math.ceil(cz + rz); z++)
         if (((x-cx)/rx)**2 + ((y-cy)/ry)**2 + ((z-cz)/rz)**2 <= 1)
-          v.push({ x, y, z })
+          v.push(zone ? { x, y, z, zone } : { x, y, z })
   return v
 }
 
-function sphere(cx, cy, cz, r) {
-  return ellipsoid(cx, cy, cz, r, r, r)
+function sphere(cx, cy, cz, r, zone) {
+  return ellipsoid(cx, cy, cz, r, r, r, zone)
 }
 
-function cylinder(cx, cz, y0, y1, r) {
+function cylinder(cx, cz, y0, y1, r, zone) {
   const v = []
   for (let x = Math.floor(cx - r); x <= Math.ceil(cx + r); x++)
     for (let y = y0; y <= y1; y++)
       for (let z = Math.floor(cz - r); z <= Math.ceil(cz + r); z++)
         if ((x-cx)**2 + (z-cz)**2 <= r*r)
-          v.push({ x, y, z })
+          v.push(zone ? { x, y, z, zone } : { x, y, z })
   return v
 }
 
-function hollowCylinder(cx, cz, y0, y1, rOuter, rInner) {
+function hollowCylinder(cx, cz, y0, y1, rOuter, rInner, zone) {
   const v = []
   for (let x = Math.floor(cx - rOuter); x <= Math.ceil(cx + rOuter); x++)
     for (let y = y0; y <= y1; y++)
       for (let z = Math.floor(cz - rOuter); z <= Math.ceil(cz + rOuter); z++) {
         const d2 = (x-cx)**2 + (z-cz)**2
         if (d2 <= rOuter*rOuter && d2 >= rInner*rInner)
-          v.push({ x, y, z })
+          v.push(zone ? { x, y, z, zone } : { x, y, z })
       }
   return v
 }
 
-function tube(points, r) {
+function tube(points, r, zone) {
   const v = []
   for (let i = 0; i < points.length - 1; i++) {
     const [ax, ay, az] = points[i]
@@ -44,9 +44,40 @@ function tube(points, r) {
     const steps = Math.ceil(Math.max(Math.abs(bx-ax), Math.abs(by-ay), Math.abs(bz-az)) * 3)
     for (let t = 0; t <= steps; t++) {
       const f = t / steps
-      sphere(ax + (bx-ax)*f, ay + (by-ay)*f, az + (bz-az)*f, r).forEach(p => v.push(p))
+      sphere(ax + (bx-ax)*f, ay + (by-ay)*f, az + (bz-az)*f, r, zone).forEach(p => v.push(p))
     }
   }
+  return v
+}
+
+// Ellipsoid with sinusoidal surface noise — creates organic bumpy/folded appearance
+function noisyEllipsoid(cx, cy, cz, rx, ry, rz, amp, freq, zone) {
+  const v = []
+  const pad = Math.ceil(amp) + 1
+  for (let x = Math.floor(cx - rx - pad); x <= Math.ceil(cx + rx + pad); x++)
+    for (let y = Math.floor(cy - ry - pad); y <= Math.ceil(cy + ry + pad); y++)
+      for (let z = Math.floor(cz - rz - pad); z <= Math.ceil(cz + rz + pad); z++) {
+        const noise = amp * Math.sin(x * freq) * Math.cos(y * freq * 1.3) * Math.sin(z * freq * 0.9)
+        if (((x-cx)/rx)**2 + ((y-cy)/ry)**2 + ((z-cz)/rz)**2 <= (1 + noise) ** 2)
+          v.push(zone ? { x, y, z, zone } : { x, y, z })
+      }
+  return v
+}
+
+// Cerebral gyri — tighter multi-frequency folds to simulate cortical folding
+function gyralEllipsoid(cx, cy, cz, rx, ry, rz, zone) {
+  const v = []
+  const pad = 2
+  for (let x = Math.floor(cx - rx - pad); x <= Math.ceil(cx + rx + pad); x++)
+    for (let y = Math.floor(cy - ry - pad); y <= Math.ceil(cy + ry + pad); y++)
+      for (let z = Math.floor(cz - rz - pad); z <= Math.ceil(cz + rz + pad); z++) {
+        const fold =
+          0.10 * Math.sin(x * 0.9 + z * 0.4) * Math.cos(y * 1.1) +
+          0.06 * Math.sin(x * 1.8 - y * 0.6) * Math.cos(z * 1.0) +
+          0.04 * Math.cos(x * 0.5 + y * 1.4 - z * 0.8)
+        if (((x-cx)/rx)**2 + ((y-cy)/ry)**2 + ((z-cz)/rz)**2 <= (1 + fold) ** 2)
+          v.push(zone ? { x, y, z, zone } : { x, y, z })
+      }
   return v
 }
 
@@ -65,6 +96,10 @@ function unique(voxels) {
   })
 }
 
+function tag(voxels, zone) {
+  return voxels.map(({ x, y, z }) => ({ x, y, z, zone }))
+}
+
 // ─── Organ definitions ────────────────────────────────────────────────────
 
 const ORGANS = {
@@ -76,18 +111,26 @@ const ORGANS = {
     system: 'Thoracic',
     icon: 'Ψ',
     color: '#e87a7a',
+    zones: { parenchyma: '#e87a7a', lobe: '#d46060', bronchi: '#c04848', vessel: '#8b1a1a' },
     description: 'Non-small cell & small cell lung carcinoma',
     voxels: unique([
-      // right lung — 3 lobes
-      ...ellipsoid(-3.5, -1, 0, 2.5, 5.5, 2.2),
-      ...ellipsoid(-3.2, 4, 0.3, 1.8, 2, 1.6),
-      // left lung — 2 lobes (cardiac notch)
-      ...ellipsoid(3.2, -1, 0, 2.1, 5.5, 2.0),
-      ...ellipsoid(3, 4, 0.3, 1.4, 2, 1.4),
-      // bronchi stubs
-      ...cylinder(0, 0, -1, 2, 0.6),
-      ...tube([[0,2,0],[-2,1,0]], 0.5),
-      ...tube([[0,2,0],[2,1,0]], 0.5),
+      // Right lung — 3 lobes with organic surface
+      ...tag(noisyEllipsoid(-3.5, -1, 0, 2.6, 5.6, 2.3, 0.18, 0.8), 'parenchyma'),
+      ...tag(noisyEllipsoid(-3.2, 4.2, 0.3, 1.9, 2.1, 1.7, 0.15, 0.9), 'lobe'),
+      ...tag(ellipsoid(-3.8, -5.5, 0, 1.6, 1.4, 1.4), 'lobe'),
+      // Left lung — 2 lobes (cardiac notch cuts into medial border)
+      ...tag(noisyEllipsoid(3.2, -1, 0, 2.2, 5.6, 2.1, 0.18, 0.8), 'parenchyma'),
+      ...tag(noisyEllipsoid(3, 4.2, 0.3, 1.5, 2.1, 1.5, 0.15, 0.9), 'lobe'),
+      // Main bronchi
+      ...tag(cylinder(0, 0, -1, 2, 0.7), 'bronchi'),
+      ...tag(tube([[0,2,0],[-2.5,1.5,0]], 0.55), 'bronchi'),
+      ...tag(tube([[0,2,0],[2.5,1.5,0]], 0.55), 'bronchi'),
+      // Lobar bronchi
+      ...tag(tube([[-2.5,1.5,0],[-3.5,3,0],[-3.2,5,0]], 0.4), 'bronchi'),
+      ...tag(tube([[2.5,1.5,0],[3,3,0],[3,5,0]], 0.4), 'bronchi'),
+      // Pulmonary vessels (hilum)
+      ...tag(sphere(-2.2, 0.5, 0.5, 0.9), 'vessel'),
+      ...tag(sphere(2.2, 0.5, 0.5, 0.9), 'vessel'),
     ]),
   },
 
@@ -96,15 +139,28 @@ const ORGANS = {
     system: 'Thoracic',
     icon: '♡',
     color: '#9e1818',
+    zones: { myocardium: '#9e1818', atrium: '#b82828', vessel: '#6a0808', valve: '#cc4040' },
     description: 'Cardiac tumors & pericardial mesothelioma',
     voxels: unique([
-      ...ellipsoid(0, 0, 0, 3.5, 4, 3),
-      ...ellipsoid(-1, 2.5, 0, 2, 2, 2),   // left atrium
-      ...ellipsoid(1.5, 2.5, 0, 1.8, 1.8, 1.8), // right atrium
-      // aorta stub
-      ...cylinder(-1, 0, 4, 7, 1),
-      // pulmonary artery
-      ...cylinder(1.5, 0, 3, 5, 0.8),
+      // Left ventricle (larger, forms apex)
+      ...tag(ellipsoid(-1, -1, 0, 3.0, 4.2, 2.8), 'myocardium'),
+      // Right ventricle
+      ...tag(ellipsoid(1.8, -0.5, 0.5, 2.2, 3.2, 2.0), 'myocardium'),
+      // Left atrium
+      ...tag(ellipsoid(-1.2, 3.2, 0, 2.2, 2.0, 2.0), 'atrium'),
+      // Right atrium
+      ...tag(ellipsoid(1.8, 3.0, 0, 1.8, 1.8, 1.8), 'atrium'),
+      // Aorta
+      ...tag(cylinder(-1, 0, 4, 8, 1.1), 'vessel'),
+      // Aortic arch
+      ...tag(tube([[-1,8,0],[0,9,0],[1.5,8.5,0],[2,7,0]], 0.9), 'vessel'),
+      // Pulmonary artery
+      ...tag(cylinder(1.5, 0, 3.5, 6, 0.9), 'vessel'),
+      // Superior vena cava
+      ...tag(cylinder(2.5, 0, 4, 7, 0.7), 'vessel'),
+      // Coronary vessels (surface detail)
+      ...tag(tube([[-1,2,2.8],[0,0,3],[1,-2,2.8],[1,-3,2]], 0.35), 'valve'),
+      ...tag(tube([[-1,2,2.8],[-2,0,2.5],[-1.5,-2,2]], 0.30), 'valve'),
     ]),
   },
 
@@ -112,7 +168,7 @@ const ORGANS = {
     label: 'Esophagus',
     system: 'Thoracic',
     icon: '⌇',
-    color: '#c07060',
+    color: '#c06858',
     description: 'Adenocarcinoma & squamous cell carcinoma',
     voxels: unique(tube([
       [0, 10, 0], [0, 8, 0], [0, 5, 0],
@@ -125,7 +181,7 @@ const ORGANS = {
     label: 'Thymus',
     system: 'Thoracic',
     icon: '✦',
-    color: '#b898c0',
+    color: '#c8a8a0',
     description: 'Thymoma & thymic carcinoma',
     voxels: unique([
       ...ellipsoid(-1.2, 0, 0, 1.5, 2.5, 1),
@@ -140,12 +196,21 @@ const ORGANS = {
     system: 'Abdominal',
     icon: '◈',
     color: '#7a2200',
+    zones: { parenchyma: '#7a2200', leftLobe: '#6a1a00', vessel: '#4a1000', bile: '#5a7800' },
     description: 'Hepatocellular carcinoma & cholangiocarcinoma',
     voxels: unique([
-      ...ellipsoid(0, 0, 0, 6, 3.5, 3.5),
-      ...ellipsoid(-2, 0.5, 0, 5, 3, 3),
-      ...ellipsoid(2.5, -0.5, 0, 3.5, 2.5, 2.5),
-      ...ellipsoid(-4, -1, 0, 2, 1.5, 2),  // left lobe tail
+      // Right lobe — dominant, with organic surface texture
+      ...tag(noisyEllipsoid(1, 0, 0, 5.5, 3.5, 3.5, 0.14, 0.7), 'parenchyma'),
+      // Left lobe — wedge-shaped
+      ...tag(noisyEllipsoid(-3.5, 0.5, 0, 3.8, 2.8, 2.8, 0.12, 0.7), 'leftLobe'),
+      // Caudate lobe (posterior)
+      ...tag(ellipsoid(0.5, 1, -2.5, 1.5, 1.5, 1), 'leftLobe'),
+      // Portal vein (hilum)
+      ...tag(tube([[0,-1,0],[0,0,0],[1,1,0],[-1,1,0]], 0.7), 'vessel'),
+      // Hepatic veins
+      ...tag(tube([[0,2,0],[0,3,0],[2,3.5,0],[-2,3.5,0]], 0.5), 'vessel'),
+      // Gallbladder fossa
+      ...tag(ellipsoid(3, -1.5, 1, 1, 2, 0.8), 'bile'),
     ]),
   },
 
@@ -153,11 +218,13 @@ const ORGANS = {
     label: 'Gallbladder',
     system: 'Abdominal',
     icon: '◉',
-    color: '#3d6b1a',
+    color: '#4a7820',
+    zones: { wall: '#4a7820', bile: '#2a5a10', duct: '#3a6818' },
     description: 'Gallbladder carcinoma & biliary tract cancer',
     voxels: unique([
-      ...ellipsoid(0, 0, 0, 1.2, 2.5, 1.2),
-      ...cylinder(0, 0, 2, 3, 0.6),   // cystic duct
+      ...tag(ellipsoid(0, 0, 0, 1.2, 2.8, 1.2), 'wall'),
+      ...tag(ellipsoid(0, 0, 0, 0.7, 2.3, 0.7), 'bile'),
+      ...tag(cylinder(0, 0, 2.8, 4.5, 0.55), 'duct'),
     ]),
   },
 
@@ -166,14 +233,19 @@ const ORGANS = {
     system: 'Abdominal',
     icon: '∿',
     color: '#e0b870',
+    zones: { head: '#e0b870', body: '#d4aa60', tail: '#c89850', duct: '#b88040' },
     description: 'Pancreatic ductal adenocarcinoma (PDAC)',
     voxels: unique([
-      // head
-      ...ellipsoid(-3, 0, 0, 2, 2, 1.5),
-      // body
-      ...ellipsoid(0, 0.5, 0, 2, 1.5, 1.2),
-      // tail
-      ...ellipsoid(3.5, 1, 0, 2, 1.2, 1),
+      // Head (wraps around duodenum)
+      ...tag(noisyEllipsoid(-3, 0, 0, 2.2, 2.2, 1.6, 0.12, 0.9), 'head'),
+      // Uncinate process
+      ...tag(ellipsoid(-3.5, -1.5, 0, 1.4, 1.2, 1), 'head'),
+      // Body
+      ...tag(noisyEllipsoid(0, 0.5, 0, 2.2, 1.6, 1.3, 0.10, 0.9), 'body'),
+      // Tail (narrows)
+      ...tag(noisyEllipsoid(3.5, 1, 0, 2.0, 1.3, 1.0, 0.10, 0.9), 'tail'),
+      // Main pancreatic duct
+      ...tag(tube([[-3.5,0,0],[-1,0.3,0],[0,0.5,0],[2,0.8,0],[4,1,0]], 0.4), 'duct'),
     ]),
   },
 
@@ -182,14 +254,21 @@ const ORGANS = {
     system: 'Abdominal',
     icon: '∪',
     color: '#c89060',
+    zones: { fundus: '#c89060', body: '#b87850', pylorus: '#a86840', mucosa: '#d4a878' },
     description: 'Gastric adenocarcinoma & GIST',
     voxels: unique([
-      ...ellipsoid(1, 0, 0, 3.5, 3, 2.5),
-      ...ellipsoid(-1, 1, 0, 2, 2.5, 2),
-      // pylorus
-      ...cylinder(3.5, 0, -1, 1, 0.8),
-      // cardia
-      ...cylinder(-2, 0, 2, 4, 0.8),
+      // Fundus
+      ...tag(noisyEllipsoid(-1.5, 2, 0, 2.5, 2.5, 2.2, 0.12, 0.8), 'fundus'),
+      // Body
+      ...tag(noisyEllipsoid(0.5, 0, 0, 3.2, 2.8, 2.4, 0.10, 0.8), 'body'),
+      // Antrum/pylorus
+      ...tag(ellipsoid(3.5, -1.5, 0, 2.0, 1.8, 1.6), 'pylorus'),
+      // Pyloric sphincter
+      ...tag(cylinder(5, 0, -2, 0, 0.9), 'pylorus'),
+      // Cardia inlet
+      ...tag(cylinder(-3, 0, 1, 4, 0.9), 'mucosa'),
+      // Rugae (mucosal folds) hint
+      ...tag(tube([[-2,-1,0],[0,-1.5,0],[2,-1,0],[4,-0.5,0]], 0.45), 'mucosa'),
     ]),
   },
 
@@ -197,7 +276,7 @@ const ORGANS = {
     label: 'Small Intestine',
     system: 'Abdominal',
     icon: '≋',
-    color: '#d4a048',
+    color: '#d4a878',
     description: 'Carcinoid tumors & small bowel adenocarcinoma',
     voxels: unique(tube([
       [3,-1,0],[2,1,0],[0,2,0],[-2,1,0],[-3,-1,0],
@@ -215,13 +294,13 @@ const ORGANS = {
     color: '#a87040',
     description: 'Colorectal adenocarcinoma',
     voxels: unique(tube([
-      [-5,-5,0],[-5,5,0],  // ascending
-      [-5,6,0],[0,7,0],     // hepatic flexure
-      [0,7,0],[5,6,0],      // transverse
-      [5,6,0],[5,-4,0],     // descending
-      [5,-4,0],[3,-6,0],    // sigmoid
+      [-5,-5,0],[-5,5,0],
+      [-5,6,0],[0,7,0],
+      [0,7,0],[5,6,0],
+      [5,6,0],[5,-4,0],
+      [5,-4,0],[3,-6,0],
       [3,-6,0],[0,-7,0],
-      [0,-7,0],[-1,-5,0],   // rectum
+      [0,-7,0],[-1,-5,0],
       [-1,-5,0],[0,-8,0],
     ], 1.4)),
   },
@@ -231,10 +310,13 @@ const ORGANS = {
     system: 'Abdominal',
     icon: '◑',
     color: '#7a2858',
+    zones: { capsule: '#7a2858', pulp: '#5a1838', hilum: '#4a1028' },
     description: 'Splenic lymphoma & metastases',
     voxels: unique([
-      ...ellipsoid(0, 0, 0, 3, 2.5, 2),
-      ...ellipsoid(0.5, 0, 0.5, 2.5, 2, 1.5),
+      ...tag(noisyEllipsoid(0, 0, 0, 3.2, 2.7, 2.2, 0.13, 0.8), 'capsule'),
+      ...tag(ellipsoid(0, 0, 0, 2.5, 2.0, 1.6), 'pulp'),
+      // Hilum vessels
+      ...tag(sphere(0.8, 0, 0.5, 0.9), 'hilum'),
     ]),
   },
 
@@ -245,18 +327,25 @@ const ORGANS = {
     system: 'Urological',
     icon: '⊕',
     color: '#aa3818',
+    zones: { cortex: '#aa3818', medulla: '#7a2010', pelvis: '#e8c870', ureter: '#c09040' },
     description: 'Renal cell carcinoma (clear cell, papillary)',
     voxels: unique([
-      // right kidney
-      ...ellipsoid(-5.5, 0, 0, 2, 3.8, 1.8),
-      ...ellipsoid(-5.5, 0, 0, 1.4, 3.2, 1.3),
-      // renal pelvis right
-      ...sphere(-4.5, 0, 0, 0.8),
-      // left kidney
-      ...ellipsoid(5.5, 0, 0, 2, 3.8, 1.8),
-      ...ellipsoid(5.5, 0, 0, 1.4, 3.2, 1.3),
-      // renal pelvis left
-      ...sphere(4.5, 0, 0, 0.8),
+      // Right kidney — bean shape: cortex shell
+      ...tag(ellipsoid(-5.5, 0, 0, 2.1, 3.9, 1.9), 'cortex'),
+      // Medulla (inner region)
+      ...tag(ellipsoid(-5.5, 0, 0, 1.4, 3.2, 1.3), 'medulla'),
+      // Renal sinus/pelvis (hilum indentation at medial border)
+      ...tag(sphere(-4.3, 0, 0, 1.0), 'pelvis'),
+      // Ureter right
+      ...tag(tube([[-4.3,0,0],[-4,-2,0],[-4,-5,0]], 0.45), 'ureter'),
+      // Left kidney
+      ...tag(ellipsoid(5.5, 0, 0, 2.1, 3.9, 1.9), 'cortex'),
+      ...tag(ellipsoid(5.5, 0, 0, 1.4, 3.2, 1.3), 'medulla'),
+      ...tag(sphere(4.3, 0, 0, 1.0), 'pelvis'),
+      ...tag(tube([[4.3,0,0],[4,-2,0],[4,-5,0]], 0.45), 'ureter'),
+      // Adrenal gland caps (tiny, sits atop each kidney)
+      ...tag(ellipsoid(-5.5, 4.2, 0, 1.2, 0.8, 0.8), 'cortex'),
+      ...tag(ellipsoid(5.5, 4.2, 0, 1.2, 0.8, 0.8), 'cortex'),
     ]),
   },
 
@@ -264,12 +353,19 @@ const ORGANS = {
     label: 'Bladder',
     system: 'Urological',
     icon: '▽',
-    color: '#c0b830',
+    color: '#c8b840',
+    zones: { wall: '#c8b840', mucosa: '#d4cc60', neck: '#a89030' },
     description: 'Urothelial (transitional cell) carcinoma',
     voxels: unique([
-      ...ellipsoid(0, 0, 0, 3.5, 3, 3),
-      // trigone & neck
-      ...cylinder(0, 0, -3.5, -2, 0.8),
+      // Outer wall
+      ...tag(ellipsoid(0, 0, 0, 3.6, 3.2, 3.2), 'wall'),
+      // Mucosal surface (inner)
+      ...tag(ellipsoid(0, 0, 0, 2.8, 2.5, 2.5), 'mucosa'),
+      // Bladder neck / trigone
+      ...tag(cylinder(0, 0, -3.5, -2, 1.0), 'neck'),
+      // Ureteric orifices
+      ...tag(sphere(-1.5, -2, 0.5, 0.5), 'neck'),
+      ...tag(sphere(1.5, -2, 0.5, 0.5), 'neck'),
     ]),
   },
 
@@ -278,12 +374,18 @@ const ORGANS = {
     system: 'Urological',
     icon: '⊓',
     color: '#c08038',
+    zones: { peripheral: '#c08038', central: '#a86828', transition: '#d49848', vesicle: '#e0a848' },
     description: 'Prostate adenocarcinoma (Gleason scoring)',
     voxels: unique([
-      ...ellipsoid(0, 0, 0, 2.8, 2.2, 2.5),
-      // seminal vesicles
-      ...ellipsoid(-2, 1.5, 0, 1.5, 1, 1),
-      ...ellipsoid(2, 1.5, 0, 1.5, 1, 1),
+      // Peripheral zone (posterior, most cancers arise here)
+      ...tag(ellipsoid(0, -0.5, 0, 2.9, 2.3, 2.6), 'peripheral'),
+      // Central zone (surrounds ejaculatory ducts)
+      ...tag(ellipsoid(0, 0.5, 0, 1.8, 1.5, 1.6), 'central'),
+      // Transition zone (surrounds urethra)
+      ...tag(ellipsoid(0, 0, 0, 1.0, 2.0, 1.0), 'transition'),
+      // Seminal vesicles
+      ...tag(noisyEllipsoid(-2, 2.2, 0, 1.6, 1.1, 1.0, 0.12, 1.0), 'vesicle'),
+      ...tag(noisyEllipsoid(2, 2.2, 0, 1.6, 1.1, 1.0, 0.12, 1.0), 'vesicle'),
     ]),
   },
 
@@ -292,13 +394,18 @@ const ORGANS = {
     system: 'Urological',
     icon: '◎',
     color: '#e0c898',
+    zones: { parenchyma: '#e0c898', epididymis: '#c0a870', cord: '#d4b880' },
     description: 'Testicular germ cell tumors (seminoma, NSGCT)',
     voxels: unique([
-      ...ellipsoid(-2.5, 0, 0, 1.8, 2.2, 1.8),
-      ...ellipsoid(2.5, 0, 0, 1.8, 2.2, 1.8),
-      // epididymis
-      ...sphere(-3, 2, 0, 0.8),
-      ...sphere(3, 2, 0, 0.8),
+      // Testes
+      ...tag(ellipsoid(-2.5, 0, 0, 1.9, 2.3, 1.9), 'parenchyma'),
+      ...tag(ellipsoid(2.5, 0, 0, 1.9, 2.3, 1.9), 'parenchyma'),
+      // Epididymis (coiled structure along posterior border)
+      ...tag(noisyEllipsoid(-3.2, 2.2, 0, 0.9, 1.5, 0.7, 0.2, 1.4), 'epididymis'),
+      ...tag(noisyEllipsoid(3.2, 2.2, 0, 0.9, 1.5, 0.7, 0.2, 1.4), 'epididymis'),
+      // Spermatic cord
+      ...tag(tube([[-2.5,3,0],[-2,5,0]], 0.5), 'cord'),
+      ...tag(tube([[2.5,3,0],[2,5,0]], 0.5), 'cord'),
     ]),
   },
 
@@ -309,13 +416,21 @@ const ORGANS = {
     system: 'Gynecological',
     icon: '◌',
     color: '#cc88a8',
+    zones: { cortex: '#cc88a8', follicle: '#e8a8c0', tube: '#b87898' },
     description: 'Epithelial ovarian carcinoma (high-grade serous)',
     voxels: unique([
-      ...ellipsoid(-3.5, 0, 0, 2, 2.5, 1.8),
-      ...ellipsoid(3.5, 0, 0, 2, 2.5, 1.8),
-      // fallopian tubes
-      ...tube([[-3.5,2,0],[-1.5,3,0],[0,3,0]], 0.5),
-      ...tube([[3.5,2,0],[1.5,3,0],[0,3,0]], 0.5),
+      // Ovaries with surface follicle bumps
+      ...tag(noisyEllipsoid(-3.5, 0, 0, 2.1, 2.6, 1.9, 0.18, 1.1), 'cortex'),
+      ...tag(noisyEllipsoid(3.5, 0, 0, 2.1, 2.6, 1.9, 0.18, 1.1), 'cortex'),
+      // Corpus luteum hints
+      ...tag(sphere(-4.2, 1, 0.5, 0.7), 'follicle'),
+      ...tag(sphere(4.2, 1, 0.5, 0.7), 'follicle'),
+      // Fallopian tubes with fimbriae
+      ...tag(tube([[-3.5,2,0],[-1.8,3.2,0],[0,3.2,0]], 0.5), 'tube'),
+      ...tag(tube([[3.5,2,0],[1.8,3.2,0],[0,3.2,0]], 0.5), 'tube'),
+      // Fimbriae
+      ...tag(noisyEllipsoid(-3.8, 2.5, 0, 0.9, 0.8, 0.8, 0.3, 1.5), 'follicle'),
+      ...tag(noisyEllipsoid(3.8, 2.5, 0, 0.9, 0.8, 0.8, 0.3, 1.5), 'follicle'),
     ]),
   },
 
@@ -324,14 +439,20 @@ const ORGANS = {
     system: 'Gynecological',
     icon: '∩',
     color: '#c05068',
+    zones: { myometrium: '#c05068', endometrium: '#e07888', cervix: '#a03858' },
     description: 'Endometrial carcinoma & uterine sarcoma',
     voxels: unique([
-      // corpus
-      ...ellipsoid(0, 1, 0, 3, 4, 2.5),
-      // cervix
-      ...cylinder(0, 0, -3, -1, 1.5),
-      // fundus dome
-      ...ellipsoid(0, 4, 0, 2.5, 1.5, 2),
+      // Corpus (body)
+      ...tag(ellipsoid(0, 1, 0, 3.1, 4.2, 2.6), 'myometrium'),
+      // Endometrial cavity
+      ...tag(ellipsoid(0, 1, 0, 2.0, 3.2, 1.6), 'endometrium'),
+      // Fundus dome
+      ...tag(noisyEllipsoid(0, 4.2, 0, 2.6, 1.6, 2.1, 0.10, 0.9), 'myometrium'),
+      // Cervix
+      ...tag(cylinder(0, 0, -3.2, -1, 1.6), 'cervix'),
+      // Cornual regions (tubes attachment)
+      ...tag(sphere(-2.5, 3.5, 0, 1.0), 'myometrium'),
+      ...tag(sphere(2.5, 3.5, 0, 1.0), 'myometrium'),
     ]),
   },
 
@@ -343,9 +464,8 @@ const ORGANS = {
     description: 'Cervical squamous cell carcinoma & adenocarcinoma',
     voxels: unique([
       ...cylinder(0, 0, -2, 1, 1.8),
-      ...ellipsoid(0, -2, 0, 1.8, 1, 1.5),
-      // ectocervix
-      ...ellipsoid(0, 1, 0, 2, 0.8, 1.8),
+      ...ellipsoid(0, -2, 0, 1.8, 1.0, 1.5),
+      ...ellipsoid(0, 1, 0, 2.0, 0.8, 1.8),
     ]),
   },
 
@@ -355,20 +475,34 @@ const ORGANS = {
     label: 'Brain',
     system: 'Head & Neck',
     icon: 'Ω',
-    color: '#e8a888',
+    color: '#d4a090',
+    zones: {
+      cortex: '#d4a090',
+      whitematter: '#f0e0d4',
+      cerebellum: '#b88878',
+      brainstem: '#906858',
+      fissure: '#b89080',
+    },
     description: 'Glioblastoma, meningioma, brain metastases',
     voxels: unique([
-      // cerebrum
-      ...ellipsoid(0, 0, 0, 6, 5, 6),
-      // cerebral fissure — subtract midline
-      ...subtract(
-        ellipsoid(0, 0, 0, 0.8, 5, 6),
-        [] // keep fissure visible by leaving a gap
-      ),
-      // cerebellum
-      ...ellipsoid(0, -4, -3, 3.5, 2.5, 3),
-      // brain stem
-      ...cylinder(0, 0, -6, -4, 1.2),
+      // Cerebral cortex — gyri (folded surface) right hemisphere
+      ...tag(gyralEllipsoid(2.5, 0.5, 0, 3.8, 5.0, 5.5), 'cortex'),
+      // Left hemisphere
+      ...tag(gyralEllipsoid(-2.5, 0.5, 0, 3.8, 5.0, 5.5), 'cortex'),
+      // White matter core (inner)
+      ...tag(ellipsoid(2.5, 0.5, 0, 2.6, 3.8, 4.0), 'whitematter'),
+      ...tag(ellipsoid(-2.5, 0.5, 0, 2.6, 3.8, 4.0), 'whitematter'),
+      // Corpus callosum (bridges hemispheres)
+      ...tag(ellipsoid(0, 1, 0, 1.0, 1.5, 3.5), 'whitematter'),
+      // Cerebellum — posterior, with foliae texture
+      ...tag(noisyEllipsoid(0, -4.5, -3.5, 3.8, 2.8, 3.2, 0.20, 1.2), 'cerebellum'),
+      // Cerebellar vermis
+      ...tag(ellipsoid(0, -4.5, -3, 1.0, 2.2, 1.8), 'cerebellum'),
+      // Brainstem
+      ...tag(cylinder(0, 0, -7.5, -5.5, 1.4), 'brainstem'),
+      ...tag(ellipsoid(0, -2.5, -5.5, 1.8, 2.0, 1.5), 'brainstem'),
+      // Interhemispheric fissure (visible midline gap)
+      ...tag(ellipsoid(0, 0.5, 0, 0.6, 4.5, 5.0), 'fissure'),
     ]),
   },
 
@@ -376,13 +510,21 @@ const ORGANS = {
     label: 'Thyroid',
     system: 'Head & Neck',
     icon: '∞',
-    color: '#cc4444',
+    color: '#b83838',
+    zones: { lobe: '#b83838', isthmus: '#943030', vessel: '#781818' },
     description: 'Papillary, follicular, medullary & anaplastic carcinoma',
     voxels: unique([
-      ...ellipsoid(-2, 0, 0, 2, 2.5, 1.2),
-      ...ellipsoid(2, 0, 0, 2, 2.5, 1.2),
-      // isthmus
-      ...cylinder(0, 0, -0.5, 0.5, 0.8),
+      // Left lobe
+      ...tag(noisyEllipsoid(-2.2, 0, 0, 2.1, 2.7, 1.3, 0.10, 0.9), 'lobe'),
+      // Right lobe
+      ...tag(noisyEllipsoid(2.2, 0, 0, 2.1, 2.7, 1.3, 0.10, 0.9), 'lobe'),
+      // Isthmus
+      ...tag(ellipsoid(0, -0.5, 0, 1.5, 0.8, 1.0), 'isthmus'),
+      // Pyramidal lobe (present in ~50%)
+      ...tag(tube([[0,0.5,0],[0,2,0],[0,3,0]], 0.5), 'isthmus'),
+      // Follicular texture hint
+      ...tag(sphere(-2.5, 0.5, 0.5, 0.6), 'vessel'),
+      ...tag(sphere(2.5, 0.5, 0.5, 0.6), 'vessel'),
     ]),
   },
 
@@ -394,9 +536,7 @@ const ORGANS = {
     description: 'Laryngeal squamous cell carcinoma',
     voxels: unique([
       ...hollowCylinder(0, 0, -1, 4, 2.5, 1.5),
-      // epiglottis
-      ...ellipsoid(0, 4.5, -0.5, 1.5, 1, 0.5),
-      // vocal cords
+      ...ellipsoid(0, 4.5, -0.5, 1.5, 1.0, 0.5),
       ...ellipsoid(0, 1, 0, 2, 0.4, 1.4),
     ]),
   },
@@ -408,13 +548,9 @@ const ORGANS = {
     color: '#cc4040',
     description: 'Oral squamous cell carcinoma (tongue, floor, buccal)',
     voxels: unique([
-      // tongue
       ...ellipsoid(0, -1, 0, 3, 2, 2),
-      // floor of mouth
       ...ellipsoid(0, -3, 0, 3.5, 1, 2),
-      // palate
       ...ellipsoid(0, 1, 0, 3.5, 0.8, 2.5),
-      // cheeks
       ...ellipsoid(-3.5, 0, 0, 0.8, 2, 2),
       ...ellipsoid(3.5, 0, 0, 0.8, 2, 2),
     ]),
@@ -427,13 +563,10 @@ const ORGANS = {
     color: '#7898b8',
     description: 'Mucoepidermoid carcinoma & adenoid cystic carcinoma',
     voxels: unique([
-      // parotid (largest)
       ...ellipsoid(-4, 2, 2, 2.5, 3, 2),
       ...ellipsoid(4, 2, 2, 2.5, 3, 2),
-      // submandibular
       ...ellipsoid(-3, -1, 0, 1.5, 1.5, 1.2),
       ...ellipsoid(3, -1, 0, 1.5, 1.5, 1.2),
-      // sublingual
       ...ellipsoid(-1.5, -2, 0, 1, 1, 0.8),
       ...ellipsoid(1.5, -2, 0, 1, 1, 0.8),
     ]),
@@ -447,9 +580,7 @@ const ORGANS = {
     description: 'Nasopharyngeal carcinoma (EBV-associated)',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 3, 2, 3),
-      // nasal cavity
       ...ellipsoid(0, 2, 0, 2.5, 1.5, 2),
-      // turbinates
       ...ellipsoid(-1, 2, 0.5, 0.8, 1.2, 0.5),
       ...ellipsoid(1, 2, 0.5, 0.8, 1.2, 0.5),
     ]),
@@ -462,18 +593,26 @@ const ORGANS = {
     system: 'Breast',
     icon: '⌒',
     color: '#f0a0b0',
+    zones: { parenchyma: '#f0a0b0', duct: '#d07888', nipple: '#e88898', fat: '#f8c8a0' },
     description: 'Invasive ductal & lobular carcinoma, HER2+, TNBC',
     voxels: unique([
-      // right breast parenchyma
-      ...ellipsoid(-5, 0, 2, 3.5, 3.5, 3),
-      // ductal system right
-      ...tube([[-5,0,2],[-5,0,-1],[-4,0,-2]], 0.6),
-      // left breast
-      ...ellipsoid(5, 0, 2, 3.5, 3.5, 3),
-      ...tube([[5,0,2],[5,0,-1],[4,0,-2]], 0.6),
-      // nipple area
-      ...sphere(-5, 0, 4.8, 0.8),
-      ...sphere(5, 0, 4.8, 0.8),
+      // Right breast parenchyma
+      ...tag(noisyEllipsoid(-5, 0, 2, 3.6, 3.6, 3.1, 0.12, 0.7), 'parenchyma'),
+      // Left breast
+      ...tag(noisyEllipsoid(5, 0, 2, 3.6, 3.6, 3.1, 0.12, 0.7), 'parenchyma'),
+      // Ductal system right (15–20 lobes)
+      ...tag(tube([[-5,0,2],[-5,1,-1],[-4.5,0.5,-2],[-3.8,0,-2.5]], 0.55), 'duct'),
+      ...tag(tube([[-5,0,2],[-5.5,0.5,-1],[-5,0,-2]], 0.45), 'duct'),
+      ...tag(tube([[-5,0,2],[-4.5,-0.5,-1.5]], 0.45), 'duct'),
+      // Ductal system left
+      ...tag(tube([[5,0,2],[5,1,-1],[4.5,0.5,-2],[3.8,0,-2.5]], 0.55), 'duct'),
+      ...tag(tube([[5,0,2],[5.5,0.5,-1],[5,0,-2]], 0.45), 'duct'),
+      // Nipple-areola
+      ...tag(sphere(-5, 0, 5.0, 1.0), 'nipple'),
+      ...tag(sphere(5, 0, 5.0, 1.0), 'nipple'),
+      // Subcutaneous fat layer
+      ...tag(ellipsoid(-5, 0, 0.5, 4.2, 4.0, 3.5), 'fat'),
+      ...tag(ellipsoid(5, 0, 0.5, 4.2, 4.0, 3.5), 'fat'),
     ]),
   },
 
@@ -484,27 +623,39 @@ const ORGANS = {
     system: 'Hematological',
     icon: '❖',
     color: '#c01010',
+    zones: { redmarrow: '#c01010', bone: '#e8e0c8', trabecular: '#d4cca8', femoral: '#cc1818' },
     description: 'AML, ALL, MDS, multiple myeloma',
     voxels: unique([
-      // vertebral column
-      ...ellipsoid(0, 7, 0, 2.8, 1.2, 2.8),
-      ...ellipsoid(0, 4, 0, 2.8, 1.2, 2.8),
-      ...ellipsoid(0, 1, 0, 2.8, 1.2, 2.8),
-      ...ellipsoid(0, -2, 0, 2.8, 1.2, 2.8),
-      ...ellipsoid(0, -5, 0, 2.8, 1.2, 2.8),
-      // pedicles connecting
-      ...cylinder(0, 0, 5.5, 7.5, 0.7),
-      ...cylinder(0, 0, 2.5, 4.5, 0.7),
-      ...cylinder(0, 0, -0.5, 2.5, 0.7),
-      ...cylinder(0, 0, -3.5, -0.5, 0.7),
-      // iliac crests (high marrow content)
-      ...ellipsoid(-5, -1, 0, 3.5, 2, 2),
-      ...ellipsoid(5, -1, 0, 3.5, 2, 2),
-      // sternum
-      ...ellipsoid(0, 3, 3.5, 0.8, 5, 0.5),
-      // femoral heads
-      ...sphere(-4, -7, 0, 2),
-      ...sphere(4, -7, 0, 2),
+      // Vertebral bodies (5 lumbar + sacrum)
+      ...tag(ellipsoid(0, 7, 0, 2.9, 1.3, 2.9), 'bone'),
+      ...tag(ellipsoid(0, 4, 0, 2.9, 1.3, 2.9), 'bone'),
+      ...tag(ellipsoid(0, 1, 0, 2.9, 1.3, 2.9), 'bone'),
+      ...tag(ellipsoid(0, -2, 0, 2.9, 1.3, 2.9), 'bone'),
+      ...tag(ellipsoid(0, -5, 0, 2.9, 1.3, 2.9), 'bone'),
+      // Vertebral marrow (inner)
+      ...tag(ellipsoid(0, 7, 0, 1.8, 0.8, 1.8), 'redmarrow'),
+      ...tag(ellipsoid(0, 4, 0, 1.8, 0.8, 1.8), 'redmarrow'),
+      ...tag(ellipsoid(0, 1, 0, 1.8, 0.8, 1.8), 'redmarrow'),
+      ...tag(ellipsoid(0, -2, 0, 1.8, 0.8, 1.8), 'redmarrow'),
+      ...tag(ellipsoid(0, -5, 0, 1.8, 0.8, 1.8), 'redmarrow'),
+      // Pedicle connections
+      ...tag(cylinder(0, 0, 5.5, 7.5, 0.7), 'trabecular'),
+      ...tag(cylinder(0, 0, 2.5, 4.5, 0.7), 'trabecular'),
+      ...tag(cylinder(0, 0, -0.5, 2.5, 0.7), 'trabecular'),
+      ...tag(cylinder(0, 0, -3.5, -0.5, 0.7), 'trabecular'),
+      // Iliac crests (high marrow content)
+      ...tag(noisyEllipsoid(-5, -1, 0, 3.6, 2.1, 2.1, 0.10, 0.7), 'bone'),
+      ...tag(noisyEllipsoid(5, -1, 0, 3.6, 2.1, 2.1, 0.10, 0.7), 'bone'),
+      ...tag(ellipsoid(-5, -1, 0, 2.5, 1.4, 1.4), 'redmarrow'),
+      ...tag(ellipsoid(5, -1, 0, 2.5, 1.4, 1.4), 'redmarrow'),
+      // Sternum
+      ...tag(ellipsoid(0, 3, 3.8, 0.8, 5.2, 0.5), 'bone'),
+      ...tag(ellipsoid(0, 3, 3.8, 0.4, 4.5, 0.3), 'redmarrow'),
+      // Femoral heads
+      ...tag(sphere(-4, -7, 0, 2.1), 'bone'),
+      ...tag(sphere(4, -7, 0, 2.1), 'bone'),
+      ...tag(sphere(-4, -7, 0, 1.3), 'femoral'),
+      ...tag(sphere(4, -7, 0, 1.3), 'femoral'),
     ]),
   },
 
@@ -512,36 +663,41 @@ const ORGANS = {
     label: 'Lymph Nodes',
     system: 'Hematological',
     icon: '⬡',
-    color: '#8aaa80',
+    color: '#b8a8a0',
+    zones: { cortex: '#b8a8a0', medulla: '#987878', capsule: '#c8b8b0' },
     description: 'Hodgkin & Non-Hodgkin lymphoma, nodal metastases',
     voxels: unique([
-      // cervical chain bilateral
-      ...sphere(0, 8, 0, 1.5),
-      ...sphere(-2, 7, 0, 1.2),
-      ...sphere(2, 7, 0, 1.2),
-      ...sphere(-2.5, 5.5, 0, 1),
-      ...sphere(2.5, 5.5, 0, 1),
-      // supraclavicular
-      ...sphere(-4, 4, 0, 1.2),
-      ...sphere(4, 4, 0, 1.2),
-      // axillary bilateral
-      ...sphere(-6, 2, 0, 1.5),
-      ...sphere(-5.5, 0, 0, 1.2),
-      ...sphere(6, 2, 0, 1.5),
-      ...sphere(5.5, 0, 0, 1.2),
-      // mediastinal
-      ...sphere(-1.5, 1, 0, 1.2),
-      ...sphere(1.5, 1, 0, 1.2),
-      ...sphere(0, -0.5, 0, 1.2),
-      ...sphere(0, -2, 0, 1),
-      // para-aortic
-      ...sphere(-1, -4, 0, 1.2),
-      ...sphere(1, -4, 0, 1.2),
-      // inguinal bilateral
-      ...sphere(-5, -6, 0, 1.5),
-      ...sphere(-4, -7.5, 0, 1.2),
-      ...sphere(5, -6, 0, 1.5),
-      ...sphere(4, -7.5, 0, 1.2),
+      // Cervical chain
+      ...tag(sphere(0, 8, 0, 1.5), 'cortex'),
+      ...tag(sphere(-2, 7, 0, 1.2), 'cortex'),
+      ...tag(sphere(2, 7, 0, 1.2), 'cortex'),
+      ...tag(sphere(-2.5, 5.5, 0, 1.0), 'cortex'),
+      ...tag(sphere(2.5, 5.5, 0, 1.0), 'cortex'),
+      // Supraclavicular
+      ...tag(sphere(-4, 4, 0, 1.2), 'cortex'),
+      ...tag(sphere(4, 4, 0, 1.2), 'cortex'),
+      // Axillary
+      ...tag(sphere(-6, 2, 0, 1.5), 'cortex'),
+      ...tag(sphere(-5.5, 0, 0, 1.2), 'cortex'),
+      ...tag(sphere(6, 2, 0, 1.5), 'cortex'),
+      ...tag(sphere(5.5, 0, 0, 1.2), 'cortex'),
+      // Mediastinal
+      ...tag(sphere(-1.5, 1, 0, 1.2), 'medulla'),
+      ...tag(sphere(1.5, 1, 0, 1.2), 'medulla'),
+      ...tag(sphere(0, -0.5, 0, 1.2), 'medulla'),
+      ...tag(sphere(0, -2, 0, 1.0), 'medulla'),
+      // Para-aortic
+      ...tag(sphere(-1, -4, 0, 1.2), 'medulla'),
+      ...tag(sphere(1, -4, 0, 1.2), 'medulla'),
+      // Inguinal
+      ...tag(sphere(-5, -6, 0, 1.5), 'cortex'),
+      ...tag(sphere(-4, -7.5, 0, 1.2), 'cortex'),
+      ...tag(sphere(5, -6, 0, 1.5), 'cortex'),
+      ...tag(sphere(4, -7.5, 0, 1.2), 'cortex'),
+      // Inner medullary sinuses
+      ...tag(sphere(0, 8, 0, 0.7), 'capsule'),
+      ...tag(sphere(-6, 2, 0, 0.8), 'capsule'),
+      ...tag(sphere(6, 2, 0, 0.8), 'capsule'),
     ]),
   },
 
@@ -552,14 +708,20 @@ const ORGANS = {
     system: 'Endocrine',
     icon: '△',
     color: '#e0a020',
+    zones: { cortex: '#e0a020', medulla: '#c06818', vessel: '#f0c040' },
     description: 'Adrenocortical carcinoma & pheochromocytoma',
     voxels: unique([
-      // right (triangular)
-      ...ellipsoid(-5, 3, 0, 1.8, 1.2, 1),
-      ...ellipsoid(-5.5, 4, 0, 1, 0.8, 0.8),
-      // left (crescentic)
-      ...ellipsoid(5, 3, 0, 1.5, 1.5, 1),
-      ...ellipsoid(5.5, 2, 0, 1, 1, 0.8),
+      // Right (pyramidal/triangular)
+      ...tag(ellipsoid(-5, 3.5, 0, 1.9, 1.3, 1.1), 'cortex'),
+      ...tag(ellipsoid(-5.5, 4.3, 0, 1.1, 0.9, 0.9), 'cortex'),
+      ...tag(sphere(-5, 3.5, 0, 0.8), 'medulla'),
+      // Left (crescentic)
+      ...tag(ellipsoid(5, 3.5, 0, 1.6, 1.6, 1.1), 'cortex'),
+      ...tag(ellipsoid(5.5, 2.2, 0, 1.1, 1.1, 0.9), 'cortex'),
+      ...tag(sphere(5, 3.5, 0, 0.8), 'medulla'),
+      // Central veins
+      ...tag(tube([[-5,3.5,0],[-4.5,2,0]], 0.35), 'vessel'),
+      ...tag(tube([[5,3.5,0],[4.5,2,0]], 0.35), 'vessel'),
     ]),
   },
 
@@ -570,6 +732,7 @@ const ORGANS = {
     system: 'Dermatological',
     icon: '□',
     color: '#d49060',
+    zones: { epidermis: '#d49060', dermis: '#b87040', hypodermis: '#c89878' },
     description: 'Melanoma, basal cell & squamous cell carcinoma',
     voxels: (() => {
       const v = []
@@ -578,10 +741,12 @@ const ORGANS = {
           const d = x*x + z*z
           if (d <= 81) {
             const y = Math.round(-d / 50)
-            // epidermis layer
-            v.push({ x, y: y+1, z })
-            // dermis layer
-            v.push({ x, y, z })
+            // Hypodermis (deepest)
+            v.push({ x, y: y-1, z, zone: 'hypodermis' })
+            // Dermis
+            v.push({ x, y, z, zone: 'dermis' })
+            // Epidermis (surface)
+            v.push({ x, y: y+1, z, zone: 'epidermis' })
           }
         }
       return unique(v)
@@ -595,16 +760,21 @@ const ORGANS = {
     system: 'Musculoskeletal',
     icon: '✚',
     color: '#ece8d0',
+    zones: { cortical: '#ece8d0', cancellous: '#d4ccb0', marrow: '#c01010', periosteum: '#f0ece0' },
     description: 'Osteosarcoma, chondrosarcoma & Ewing sarcoma',
     voxels: unique([
-      // femur
-      ...hollowCylinder(0, 0, -8, 8, 2.2, 1.2),
-      // femoral head
-      ...sphere(0, 8.5, 0, 2.5),
-      // epiphysis bottom
-      ...ellipsoid(0, -8, 0, 2.5, 1.5, 2.5),
-      // medullary canal (marrow space)
-      ...cylinder(0, 0, -6, 6, 1),
+      // Cortical shell (compact bone)
+      ...tag(hollowCylinder(0, 0, -8, 8, 2.3, 1.3), 'cortical'),
+      // Periosteum (outer surface detail)
+      ...tag(hollowCylinder(0, 0, -8, 8, 2.5, 2.2), 'periosteum'),
+      // Cancellous bone at epiphyses
+      ...tag(sphere(0, 9.0, 0, 2.6), 'cancellous'),
+      ...tag(ellipsoid(0, -8.5, 0, 2.6, 1.6, 2.6), 'cancellous'),
+      // Medullary canal (marrow space)
+      ...tag(cylinder(0, 0, -6.5, 6.5, 1.2), 'marrow'),
+      // Metaphyseal flare
+      ...tag(hollowCylinder(0, 0, 6.5, 8.5, 2.2, 0.1), 'cortical'),
+      ...tag(hollowCylinder(0, 0, -8.5, -6.5, 2.2, 0.1), 'cortical'),
     ]),
   },
 
@@ -613,13 +783,17 @@ const ORGANS = {
     system: 'Musculoskeletal',
     icon: '◻',
     color: '#c06858',
+    zones: { muscle: '#c06858', fascia: '#a84838', fat: '#e0b870' },
     description: 'Sarcomas: liposarcoma, leiomyosarcoma, GIST',
     voxels: unique([
-      // thigh muscle mass
-      ...ellipsoid(0, 0, 0, 4, 6, 4),
-      // fascial planes (subtract to show layers)
-      ...ellipsoid(-2, 0, 0, 3.5, 5.5, 3.5),
-      ...ellipsoid(2, 0, 0, 3.5, 5.5, 3.5),
+      // Muscle bulk
+      ...tag(noisyEllipsoid(0, 0, 0, 4.1, 6.2, 4.1, 0.12, 0.6), 'muscle'),
+      // Fascial compartments
+      ...tag(ellipsoid(-1.5, 0, 0, 3.2, 5.5, 3.2), 'fascia'),
+      ...tag(ellipsoid(1.5, 0, 0, 3.2, 5.5, 3.2), 'fascia'),
+      // Intermuscular fat septa
+      ...tag(ellipsoid(0, 0, 0, 0.6, 5.5, 0.6), 'fat'),
+      ...tag(ellipsoid(0, 0, 0, 0.6, 5.5, 0.6).map(v => ({...v, x: v.x + 1.5})), 'fat'),
     ]),
   },
 }

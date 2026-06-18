@@ -21,7 +21,7 @@ function voxelHash(x, y, z) {
   return h - Math.floor(h)
 }
 
-export default function OrganModel({ voxels, baseColor, stage, highlights, onVoxelClick }) {
+export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick }) {
   const meshRef = useRef()
   const count = voxels.length
 
@@ -34,11 +34,19 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
   const purple = PURPLE[stage]
   const dummy = useMemo(() => new THREE.Object3D(), [])
 
+  // Pre-parse zone colors into THREE.Color objects
+  const zoneColors = useMemo(() => {
+    if (!zones) return null
+    const map = {}
+    for (const [k, hex] of Object.entries(zones)) map[k] = new THREE.Color(hex)
+    return map
+  }, [zones])
+
   // Create material explicitly — vertexColors MUST be true for setColorAt to show
   const material = useMemo(() => new THREE.MeshStandardMaterial({
     vertexColors: true,
-    roughness: 0.68,
-    metalness: 0.08,
+    roughness: 0.65,
+    metalness: 0.06,
   }), [])
 
   const highlightedSet = useMemo(() => {
@@ -68,7 +76,8 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
     return set
   }, [highlights, positions, stage])
 
-  // Bake per-voxel base color with depth + noise variation
+  // Bake per-voxel base color with depth + noise variation.
+  // Uses zone color if voxel has a zone tag, otherwise falls back to baseColor.
   const baseColors = useMemo(() => {
     let minY = Infinity, maxY = -Infinity
     positions.forEach(p => {
@@ -77,14 +86,19 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
     })
     const yRange = maxY - minY || 1
 
-    return positions.map(pos => {
-      const depth = (pos.y - minY) / yRange          // 0 bottom → 1 top
-      const noise = voxelHash(pos.x, pos.y, pos.z)   // 0–1 per voxel
-      // Lighter at top, ±10% noise for surface texture
+    return voxels.map((voxel, i) => {
+      const pos = positions[i]
+      const depth = (pos.y - minY) / yRange
+      const noise = voxelHash(pos.x, pos.y, pos.z)
+
+      const srcColor = (zoneColors && voxel.zone && zoneColors[voxel.zone])
+        ? zoneColors[voxel.zone]
+        : base
+
       const brightness = (0.82 + depth * 0.22) * (0.90 + noise * 0.20)
-      return base.clone().multiplyScalar(brightness)
+      return srcColor.clone().multiplyScalar(brightness)
     })
-  }, [positions, base])
+  }, [voxels, positions, base, zoneColors])
 
   // Set matrices + colors together (fixes the black-on-first-render bug)
   useEffect(() => {
