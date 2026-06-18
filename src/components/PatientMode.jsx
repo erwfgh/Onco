@@ -1,5 +1,6 @@
 import CLINICAL from '../data/clinicalData'
 import ORGANS from '../data/organs'
+import ChatBot from './ChatBot'
 
 const STAGE_PLAIN = {
   1: { label: 'Stage I — Early', color: 'text-emerald-400', summary: 'The cancer is small and has not spread beyond where it started. This is the most treatable stage.' },
@@ -108,6 +109,12 @@ export default function PatientMode({ organKey, stage }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* AI Chatbot */}
+      <div>
+        <p className="text-slate-500 uppercase tracking-wider text-[10px] font-semibold mb-2">Ask the AI Assistant</p>
+        <ChatBot organKey={organKey} stage={stage} />
       </div>
 
       <p className="text-[9px] text-slate-700 text-center pb-2">
