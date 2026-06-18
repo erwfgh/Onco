@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react'
 import * as THREE from 'three'
 
-const VOXEL_SIZE = 0.80
+const VOXEL_SIZE = 1.0
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
 const STAGE_SCATTER = { 1: 0, 2: 0, 3: 0.04, 4: 0.18 }

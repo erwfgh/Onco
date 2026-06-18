@@ -40,30 +40,30 @@ export default function PatientMode({ organKey, stage }) {
     <div className="space-y-4 text-xs">
 
       {/* What is this cancer */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/40">
-        <p className="text-slate-500 uppercase tracking-wider text-[10px] font-semibold mb-2">What is this cancer?</p>
-        <p className="text-slate-200 font-semibold mb-1">{data.fullName}</p>
-        <p className="text-slate-400 leading-relaxed">
+      <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+        <p className="text-slate-400 uppercase tracking-wider text-[10px] font-semibold mb-2">What is this cancer?</p>
+        <p className="text-slate-800 font-semibold mb-1">{data.fullName}</p>
+        <p className="text-slate-600 leading-relaxed">
           {organ.description}. There are {data.subtypes?.length || 'several'} main types: {data.subtypes?.slice(0, 3).join(', ')}.
         </p>
       </div>
 
       {/* What does your stage mean */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/40">
-        <p className="text-slate-500 uppercase tracking-wider text-[10px] font-semibold mb-2">What does your stage mean?</p>
+      <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+        <p className="text-slate-400 uppercase tracking-wider text-[10px] font-semibold mb-2">What does your stage mean?</p>
         <p className={`font-bold mb-2 ${stageInfo.color}`}>{stageInfo.label}</p>
-        <p className="text-slate-400 leading-relaxed">{stageInfo.summary}</p>
+        <p className="text-slate-600 leading-relaxed">{stageInfo.summary}</p>
         {tnm.desc && (
-          <div className="mt-3 bg-slate-900/40 rounded-lg p-3">
-            <p className="text-slate-500 text-[10px] mb-1">In medical terms:</p>
+          <div className="mt-3 bg-white rounded-lg p-3">
+            <p className="text-slate-400 text-[10px] mb-1">In medical terms:</p>
             <p className="text-slate-400">{tnm.desc}</p>
           </div>
         )}
       </div>
 
       {/* Survival */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/40">
-        <p className="text-slate-500 uppercase tracking-wider text-[10px] font-semibold mb-2">Survival outlook</p>
+      <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+        <p className="text-slate-400 uppercase tracking-wider text-[10px] font-semibold mb-2">Survival outlook</p>
         <div className="flex items-baseline gap-2 mb-2">
           <span className="text-2xl font-black text-slate-100">{survival}</span>
           <span className="text-slate-500 text-[10px]">of people are alive 5 years after diagnosis</span>
@@ -74,7 +74,7 @@ export default function PatientMode({ organKey, stage }) {
       </div>
 
       {/* Treatment options */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/40">
+      <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
         <p className="text-slate-500 uppercase tracking-wider text-[10px] font-semibold mb-3">Your treatment options</p>
         <div className="space-y-2">
           {treatments.slice(0, 5).map((t, i) => {
@@ -83,7 +83,7 @@ export default function PatientMode({ organKey, stage }) {
               <div key={i} className="flex gap-2.5 items-start">
                 <span className="text-base flex-shrink-0">{plain.icon}</span>
                 <div>
-                  <p className="text-slate-300 leading-relaxed">{plain.desc}</p>
+                  <p className="text-slate-700 leading-relaxed">{plain.desc}</p>
                   <p className="text-slate-600 text-[10px] mt-0.5 italic">{t}</p>
                 </div>
               </div>
@@ -93,8 +93,8 @@ export default function PatientMode({ organKey, stage }) {
       </div>
 
       {/* Questions to ask your doctor */}
-      <div className="bg-violet-900/20 rounded-xl p-4 border border-violet-700/30">
-        <p className="text-violet-400 uppercase tracking-wider text-[10px] font-semibold mb-3">Questions to ask your doctor</p>
+      <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+        <p className="text-blue-600 uppercase tracking-wider text-[10px] font-semibold mb-3">Questions to ask your doctor</p>
         <div className="space-y-2">
           {[
             `What are my treatment options for ${organ.label} cancer at Stage ${['I','II','III','IV'][stage-1]}?`,
@@ -104,8 +104,8 @@ export default function PatientMode({ organKey, stage }) {
             'What support resources do you recommend?',
           ].map((q, i) => (
             <div key={i} className="flex gap-2 items-start">
-              <span className="text-violet-600 flex-shrink-0 mt-0.5">?</span>
-              <p className="text-slate-300 leading-relaxed">{q}</p>
+              <span className="text-blue-500 flex-shrink-0 mt-0.5">?</span>
+              <p className="text-slate-700 leading-relaxed">{q}</p>
             </div>
           ))}
         </div>
@@ -113,11 +113,11 @@ export default function PatientMode({ organKey, stage }) {
 
       {/* AI Chatbot */}
       <div>
-        <p className="text-slate-500 uppercase tracking-wider text-[10px] font-semibold mb-2">Ask the AI Assistant</p>
+        <p className="text-slate-400 uppercase tracking-wider text-[10px] font-semibold mb-2">Ask the AI Assistant</p>
         <ChatBot organKey={organKey} stage={stage} />
       </div>
 
-      <p className="text-[9px] text-slate-700 text-center pb-2">
+      <p className="text-[9px] text-slate-400 text-center pb-2">
         This information is for education only. Always discuss your specific situation with your oncologist.
       </p>
     </div>

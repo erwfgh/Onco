@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Grid, Environment, ContactShadows } from '@react-three/drei'
+import { OrbitControls, Grid, ContactShadows } from '@react-three/drei'
 import OrganModel from './OrganModel'
 
 export default function OrganViewer({ organ, stage, highlights, onVoxelClick }) {
@@ -7,15 +7,15 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick }) 
 
   return (
     <Canvas
-      camera={{ position: [0, 5, 28], fov: 45 }}
+      camera={{ position: [0, 5, 36], fov: 42 }}
       shadows
       style={{ background: 'transparent' }}
       gl={{ antialias: true }}
     >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[15, 25, 10]} intensity={1.4} castShadow shadow-mapSize={[2048, 2048]} />
-      <directionalLight position={[-10, 5, -10]} intensity={0.4} color="#8080ff" />
-      <pointLight position={[0, -10, 0]} intensity={0.3} color="#ff8060" />
+      <ambientLight intensity={1.1} color="#e8f0ff" />
+      <directionalLight position={[15, 25, 10]} intensity={1.6} castShadow shadow-mapSize={[2048, 2048]} color="#ffffff" />
+      <directionalLight position={[-12, 8, -8]} intensity={0.5} color="#c0d8ff" />
+      <directionalLight position={[0, -10, 5]} intensity={0.3} color="#ffe8e0" />
 
       <OrganModel
         voxels={organ.voxels}
@@ -26,18 +26,18 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick }) 
         onVoxelClick={onVoxelClick}
       />
 
-      <ContactShadows position={[0, -12, 0]} opacity={0.4} scale={40} blur={2} far={20} />
+      <ContactShadows position={[0, -14, 0]} opacity={0.25} scale={50} blur={2.5} far={22} color="#3060a0" />
 
       <Grid
-        args={[80, 80]}
+        args={[100, 100]}
         cellSize={2}
         cellThickness={0.2}
-        cellColor="#1a3050"
+        cellColor="#c8d8f0"
         sectionSize={10}
         sectionThickness={0.5}
-        sectionColor="#1e3a5f"
-        fadeDistance={70}
-        position={[0, -12, 0]}
+        sectionColor="#a0b8e0"
+        fadeDistance={80}
+        position={[0, -14, 0]}
         infiniteGrid
       />
 
@@ -45,11 +45,11 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick }) 
         enablePan
         enableZoom
         enableRotate
-        minDistance={4}
-        maxDistance={100}
+        minDistance={5}
+        maxDistance={120}
         makeDefault
         autoRotate={highlights.length === 0}
-        autoRotateSpeed={0.8}
+        autoRotateSpeed={0.7}
       />
     </Canvas>
   )
