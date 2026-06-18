@@ -44,7 +44,6 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
 
   // Create material explicitly — vertexColors MUST be true for setColorAt to show
   const material = useMemo(() => new THREE.MeshStandardMaterial({
-    vertexColors: true,
     roughness: 0.65,
     metalness: 0.06,
   }), [])
