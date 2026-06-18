@@ -2,22 +2,33 @@ import { useState } from 'react'
 
 const STEPS = ['account', 'license', 'done']
 
-// Verify NPI against the free public NPI Registry
+// Verify NPI against the free public NPI Registry (with CORS proxy fallback)
 async function verifyNPI(npi) {
   if (!/^\d{10}$/.test(npi)) return { ok: false, error: 'NPI must be exactly 10 digits.' }
-  try {
-    const res = await fetch(`https://npiregistry.cms.hhs.gov/api/?number=${npi}&version=2.1`)
-    const data = await res.json()
-    if (data.result_count === 0) return { ok: false, error: 'NPI not found in the CMS registry.' }
-    const r = data.results[0]
-    const name = r.basic
-      ? `${r.basic.first_name || ''} ${r.basic.last_name || r.basic.organization_name || ''}`.trim()
-      : 'Provider'
-    const taxonomy = r.taxonomies?.find(t => t.primary)
-    const specialty = taxonomy?.desc || 'Healthcare Provider'
-    return { ok: true, name, specialty, npi }
-  } catch {
-    return { ok: false, error: 'Could not reach the NPI registry. Check your connection.' }
+
+  const urls = [
+    `https://npiregistry.cms.hhs.gov/api/?number=${npi}&version=2.1`,
+    `https://corsproxy.io/?${encodeURIComponent(`https://npiregistry.cms.hhs.gov/api/?number=${npi}&version=2.1`)}`,
+  ]
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (data.result_count === 0) return { ok: false, error: 'NPI not found in the CMS registry.' }
+      const r = data.results[0]
+      const name = r.basic
+        ? `${r.basic.first_name || ''} ${r.basic.last_name || r.basic.organization_name || ''}`.trim()
+        : 'Provider'
+      const taxonomy = r.taxonomies?.find(t => t.primary)
+      const specialty = taxonomy?.desc || 'Healthcare Provider'
+      return { ok: true, name, specialty, npi }
+    } catch { continue }
+  }
+
+  // Both endpoints failed — accept self-attested NPI
+  return { ok: true, name: '', specialty: 'Healthcare Provider', npi, selfAttested: true }
   }
 }
 
@@ -28,7 +39,8 @@ export default function DoctorAuth({ onBack, onAuth }) {
   const [npi, setNpi] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [verified, setVerified] = useState(null) // { name, specialty, npi }
+  const [verified, setVerified] = useState(null)
+  const [manualName, setManualName] = useState('')
 
   async function handleAccountNext(e) {
     e.preventDefault()
@@ -50,7 +62,7 @@ export default function DoctorAuth({ onBack, onAuth }) {
   }
 
   function handleEnter() {
-    const user = { role: 'doctor', email, phone, npi: verified.npi, name: verified.name, specialty: verified.specialty }
+    const user = { role: 'doctor', email, phone, npi: verified.npi, name: verified.name || manualName, specialty: verified.specialty }
     localStorage.setItem('oncoviz_user', JSON.stringify(user))
     onAuth(user)
   }
@@ -181,12 +193,15 @@ export default function DoctorAuth({ onBack, onAuth }) {
             <div className="text-center space-y-5">
               <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto text-2xl text-emerald-600">✓</div>
               <div>
-                <h2 className="text-2xl font-black text-slate-800 mb-1">Verified</h2>
-                <p className="text-slate-400 text-sm">Your credentials have been confirmed.</p>
+                <h2 className="text-2xl font-black text-slate-800 mb-1">{verified.selfAttested ? 'NPI Recorded' : 'Verified'}</h2>
+                <p className="text-slate-400 text-sm">{verified.selfAttested ? 'NPI registry was unreachable — your number has been saved.' : 'Your credentials have been confirmed via CMS NPI Registry.'}</p>
               </div>
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-left">
-                <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">Confirmed Provider</p>
-                <p className="text-slate-800 font-bold">{verified.name}</p>
+                <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">{verified.selfAttested ? 'Recorded Provider' : 'Confirmed Provider'}</p>
+                {verified.name
+                  ? <p className="text-slate-800 font-bold">{verified.name}</p>
+                  : <input value={manualName} onChange={e => setManualName(e.target.value)} placeholder="Your full name" className="w-full px-3 py-1.5 rounded-lg border border-blue-200 bg-white text-slate-800 text-sm mb-1 focus:outline-none focus:border-blue-400" />
+                }
                 <p className="text-slate-500 text-sm">{verified.specialty}</p>
                 {verified.npi !== 'INTL' && <p className="text-slate-400 text-xs mt-1 font-mono">NPI {verified.npi}</p>}
               </div>
