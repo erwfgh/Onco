@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react'
 import * as THREE from 'three'
 
-const VOXEL_SIZE = 0.86
+const VOXEL_SIZE = 0.80
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
 const STAGE_SCATTER = { 1: 0, 2: 0, 3: 0.04, 4: 0.18 }
@@ -14,7 +14,12 @@ const PURPLE = {
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
-const MAT = new THREE.MeshStandardMaterial()
+
+// Per-voxel brightness noise so each cube has a slightly different shade
+function voxelHash(x, y, z) {
+  const h = Math.sin(x * 13.7 + y * 47.3 + z * 89.1) * 43758.5453
+  return h - Math.floor(h)
+}
 
 export default function OrganModel({ voxels, baseColor, stage, highlights, onVoxelClick }) {
   const meshRef = useRef()
@@ -29,12 +34,18 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
   const purple = PURPLE[stage]
   const dummy = useMemo(() => new THREE.Object3D(), [])
 
+  // Create material explicitly — vertexColors MUST be true for setColorAt to show
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.68,
+    metalness: 0.08,
+  }), [])
+
   const highlightedSet = useMemo(() => {
     const radius = STAGE_RADIUS[stage]
     const scatterChance = STAGE_SCATTER[stage]
     const set = new Set()
 
-    // Deterministic scatter (seeded by position hash)
     const scatterSet = new Set()
     if (scatterChance > 0) {
       for (let i = 0; i < positions.length; i++) {
@@ -57,7 +68,25 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
     return set
   }, [highlights, positions, stage])
 
-  // Set matrices once per organ
+  // Bake per-voxel base color with depth + noise variation
+  const baseColors = useMemo(() => {
+    let minY = Infinity, maxY = -Infinity
+    positions.forEach(p => {
+      if (p.y < minY) minY = p.y
+      if (p.y > maxY) maxY = p.y
+    })
+    const yRange = maxY - minY || 1
+
+    return positions.map(pos => {
+      const depth = (pos.y - minY) / yRange          // 0 bottom → 1 top
+      const noise = voxelHash(pos.x, pos.y, pos.z)   // 0–1 per voxel
+      // Lighter at top, ±10% noise for surface texture
+      const brightness = (0.82 + depth * 0.22) * (0.90 + noise * 0.20)
+      return base.clone().multiplyScalar(brightness)
+    })
+  }, [positions, base])
+
+  // Set matrices + colors together (fixes the black-on-first-render bug)
   useEffect(() => {
     const mesh = meshRef.current
     if (!mesh) return
@@ -65,19 +94,21 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
       dummy.position.copy(pos)
       dummy.updateMatrix()
       mesh.setMatrixAt(i, dummy.matrix)
+      mesh.setColorAt(i, baseColors[i])
     })
     mesh.instanceMatrix.needsUpdate = true
-  }, [positions, dummy])
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+  }, [positions, dummy, baseColors])
 
   // Update colors on highlight/stage change
   useEffect(() => {
     const mesh = meshRef.current
     if (!mesh) return
     positions.forEach((_, i) => {
-      mesh.setColorAt(i, highlightedSet.has(i) ? purple : base)
+      mesh.setColorAt(i, highlightedSet.has(i) ? purple : baseColors[i])
     })
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
-  }, [highlightedSet, base, purple, positions])
+  }, [highlightedSet, baseColors, purple, positions])
 
   const handleClick = useCallback(e => {
     e.stopPropagation()
@@ -87,12 +118,10 @@ export default function OrganModel({ voxels, baseColor, stage, highlights, onVox
   return (
     <instancedMesh
       ref={meshRef}
-      args={[GEO, MAT, count]}
+      args={[GEO, material, count]}
       onClick={handleClick}
       castShadow
       receiveShadow
-    >
-      <meshStandardMaterial vertexColors roughness={0.6} metalness={0.1} />
-    </instancedMesh>
+    />
   )
 }
