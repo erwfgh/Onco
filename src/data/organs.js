@@ -74,8 +74,8 @@ const ORGANS = {
   lungs: {
     label: 'Lungs',
     system: 'Thoracic',
-    icon: '🫁',
-    color: '#f4a4b0',
+    icon: 'Ψ',
+    color: '#e87a7a',
     description: 'Non-small cell & small cell lung carcinoma',
     voxels: unique([
       // right lung — 3 lobes
@@ -94,8 +94,8 @@ const ORGANS = {
   heart: {
     label: 'Heart',
     system: 'Thoracic',
-    icon: '❤️',
-    color: '#cc2233',
+    icon: '♡',
+    color: '#9e1818',
     description: 'Cardiac tumors & pericardial mesothelioma',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 3.5, 4, 3),
@@ -111,8 +111,8 @@ const ORGANS = {
   esophagus: {
     label: 'Esophagus',
     system: 'Thoracic',
-    icon: '🔗',
-    color: '#d4947a',
+    icon: '⌇',
+    color: '#c07060',
     description: 'Adenocarcinoma & squamous cell carcinoma',
     voxels: unique(tube([
       [0, 10, 0], [0, 8, 0], [0, 5, 0],
@@ -124,8 +124,8 @@ const ORGANS = {
   thymus: {
     label: 'Thymus',
     system: 'Thoracic',
-    icon: '🫐',
-    color: '#c8b0d8',
+    icon: '✦',
+    color: '#b898c0',
     description: 'Thymoma & thymic carcinoma',
     voxels: unique([
       ...ellipsoid(-1.2, 0, 0, 1.5, 2.5, 1),
@@ -138,8 +138,8 @@ const ORGANS = {
   liver: {
     label: 'Liver',
     system: 'Abdominal',
-    icon: '🟤',
-    color: '#8B2500',
+    icon: '◈',
+    color: '#7a2200',
     description: 'Hepatocellular carcinoma & cholangiocarcinoma',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 6, 3.5, 3.5),
@@ -152,8 +152,8 @@ const ORGANS = {
   gallbladder: {
     label: 'Gallbladder',
     system: 'Abdominal',
-    icon: '🫒',
-    color: '#6b8e3a',
+    icon: '◉',
+    color: '#3d6b1a',
     description: 'Gallbladder carcinoma & biliary tract cancer',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 1.2, 2.5, 1.2),
@@ -164,8 +164,8 @@ const ORGANS = {
   pancreas: {
     label: 'Pancreas',
     system: 'Abdominal',
-    icon: '🌿',
-    color: '#e8c87a',
+    icon: '∿',
+    color: '#e0b870',
     description: 'Pancreatic ductal adenocarcinoma (PDAC)',
     voxels: unique([
       // head
@@ -180,8 +180,8 @@ const ORGANS = {
   stomach: {
     label: 'Stomach',
     system: 'Abdominal',
-    icon: '🫃',
-    color: '#d4b483',
+    icon: '∪',
+    color: '#c89060',
     description: 'Gastric adenocarcinoma & GIST',
     voxels: unique([
       ...ellipsoid(1, 0, 0, 3.5, 3, 2.5),
@@ -196,8 +196,8 @@ const ORGANS = {
   smallintestine: {
     label: 'Small Intestine',
     system: 'Abdominal',
-    icon: '〰️',
-    color: '#f0c060',
+    icon: '≋',
+    color: '#d4a048',
     description: 'Carcinoid tumors & small bowel adenocarcinoma',
     voxels: unique(tube([
       [3,-1,0],[2,1,0],[0,2,0],[-2,1,0],[-3,-1,0],
@@ -211,8 +211,8 @@ const ORGANS = {
   colon: {
     label: 'Colon',
     system: 'Abdominal',
-    icon: '🌀',
-    color: '#c8a06e',
+    icon: '⊏',
+    color: '#a87040',
     description: 'Colorectal adenocarcinoma',
     voxels: unique(tube([
       [-5,-5,0],[-5,5,0],  // ascending
@@ -229,8 +229,8 @@ const ORGANS = {
   spleen: {
     label: 'Spleen',
     system: 'Abdominal',
-    icon: '🟣',
-    color: '#9b4f7a',
+    icon: '◑',
+    color: '#7a2858',
     description: 'Splenic lymphoma & metastases',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 3, 2.5, 2),
@@ -243,8 +243,8 @@ const ORGANS = {
   kidney: {
     label: 'Kidneys',
     system: 'Urological',
-    icon: '🫘',
-    color: '#c05a3a',
+    icon: '⊕',
+    color: '#aa3818',
     description: 'Renal cell carcinoma (clear cell, papillary)',
     voxels: unique([
       // right kidney
@@ -263,8 +263,8 @@ const ORGANS = {
   bladder: {
     label: 'Bladder',
     system: 'Urological',
-    icon: '💧',
-    color: '#7ab8d8',
+    icon: '▽',
+    color: '#c0b830',
     description: 'Urothelial (transitional cell) carcinoma',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 3.5, 3, 3),
@@ -276,8 +276,8 @@ const ORGANS = {
   prostate: {
     label: 'Prostate',
     system: 'Urological',
-    icon: '⚙️',
-    color: '#e8a857',
+    icon: '⊓',
+    color: '#c08038',
     description: 'Prostate adenocarcinoma (Gleason scoring)',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 2.8, 2.2, 2.5),
@@ -290,8 +290,8 @@ const ORGANS = {
   testes: {
     label: 'Testes',
     system: 'Urological',
-    icon: '⚪',
-    color: '#f0e0c0',
+    icon: '◎',
+    color: '#e0c898',
     description: 'Testicular germ cell tumors (seminoma, NSGCT)',
     voxels: unique([
       ...ellipsoid(-2.5, 0, 0, 1.8, 2.2, 1.8),
@@ -307,8 +307,8 @@ const ORGANS = {
   ovaries: {
     label: 'Ovaries',
     system: 'Gynecological',
-    icon: '🔮',
-    color: '#d4a0c8',
+    icon: '◌',
+    color: '#cc88a8',
     description: 'Epithelial ovarian carcinoma (high-grade serous)',
     voxels: unique([
       ...ellipsoid(-3.5, 0, 0, 2, 2.5, 1.8),
@@ -322,8 +322,8 @@ const ORGANS = {
   uterus: {
     label: 'Uterus',
     system: 'Gynecological',
-    icon: '🫀',
-    color: '#e87a9a',
+    icon: '∩',
+    color: '#c05068',
     description: 'Endometrial carcinoma & uterine sarcoma',
     voxels: unique([
       // corpus
@@ -338,8 +338,8 @@ const ORGANS = {
   cervix: {
     label: 'Cervix',
     system: 'Gynecological',
-    icon: '🔴',
-    color: '#cc4466',
+    icon: '⌣',
+    color: '#a83050',
     description: 'Cervical squamous cell carcinoma & adenocarcinoma',
     voxels: unique([
       ...cylinder(0, 0, -2, 1, 1.8),
@@ -354,8 +354,8 @@ const ORGANS = {
   brain: {
     label: 'Brain',
     system: 'Head & Neck',
-    icon: '🧠',
-    color: '#f0c0b0',
+    icon: 'Ω',
+    color: '#e8a888',
     description: 'Glioblastoma, meningioma, brain metastases',
     voxels: unique([
       // cerebrum
@@ -375,8 +375,8 @@ const ORGANS = {
   thyroid: {
     label: 'Thyroid',
     system: 'Head & Neck',
-    icon: '🦋',
-    color: '#90c8a0',
+    icon: '∞',
+    color: '#cc4444',
     description: 'Papillary, follicular, medullary & anaplastic carcinoma',
     voxels: unique([
       ...ellipsoid(-2, 0, 0, 2, 2.5, 1.2),
@@ -389,8 +389,8 @@ const ORGANS = {
   larynx: {
     label: 'Larynx',
     system: 'Head & Neck',
-    icon: '🎙️',
-    color: '#c8d8a0',
+    icon: '≡',
+    color: '#a8b868',
     description: 'Laryngeal squamous cell carcinoma',
     voxels: unique([
       ...hollowCylinder(0, 0, -1, 4, 2.5, 1.5),
@@ -404,8 +404,8 @@ const ORGANS = {
   oralCavity: {
     label: 'Oral Cavity',
     system: 'Head & Neck',
-    icon: '👄',
-    color: '#f08080',
+    icon: '⌢',
+    color: '#cc4040',
     description: 'Oral squamous cell carcinoma (tongue, floor, buccal)',
     voxels: unique([
       // tongue
@@ -423,8 +423,8 @@ const ORGANS = {
   salivaryGland: {
     label: 'Salivary Glands',
     system: 'Head & Neck',
-    icon: '💦',
-    color: '#a8d4e8',
+    icon: '◐',
+    color: '#7898b8',
     description: 'Mucoepidermoid carcinoma & adenoid cystic carcinoma',
     voxels: unique([
       // parotid (largest)
@@ -442,8 +442,8 @@ const ORGANS = {
   nasopharynx: {
     label: 'Nasopharynx',
     system: 'Head & Neck',
-    icon: '👃',
-    color: '#f0b0a0',
+    icon: '⌐',
+    color: '#d09080',
     description: 'Nasopharyngeal carcinoma (EBV-associated)',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 3, 2, 3),
@@ -460,8 +460,8 @@ const ORGANS = {
   breast: {
     label: 'Breast',
     system: 'Breast',
-    icon: '⭕',
-    color: '#f5c2c7',
+    icon: '⌒',
+    color: '#f0a0b0',
     description: 'Invasive ductal & lobular carcinoma, HER2+, TNBC',
     voxels: unique([
       // right breast parenchyma
@@ -482,8 +482,8 @@ const ORGANS = {
   bonemarrow: {
     label: 'Bone Marrow',
     system: 'Hematological',
-    icon: '🦴',
-    color: '#e8d5a0',
+    icon: '❖',
+    color: '#c01010',
     description: 'AML, ALL, MDS, multiple myeloma',
     voxels: unique([
       // vertebral column
@@ -511,8 +511,8 @@ const ORGANS = {
   lymphNodes: {
     label: 'Lymph Nodes',
     system: 'Hematological',
-    icon: '🔵',
-    color: '#a0c4e8',
+    icon: '⬡',
+    color: '#8aaa80',
     description: 'Hodgkin & Non-Hodgkin lymphoma, nodal metastases',
     voxels: unique([
       // cervical chain bilateral
@@ -550,8 +550,8 @@ const ORGANS = {
   adrenal: {
     label: 'Adrenal Glands',
     system: 'Endocrine',
-    icon: '🫐',
-    color: '#f0d080',
+    icon: '△',
+    color: '#e0a020',
     description: 'Adrenocortical carcinoma & pheochromocytoma',
     voxels: unique([
       // right (triangular)
@@ -568,8 +568,8 @@ const ORGANS = {
   skin: {
     label: 'Skin',
     system: 'Dermatological',
-    icon: '🔲',
-    color: '#f5cba7',
+    icon: '□',
+    color: '#d49060',
     description: 'Melanoma, basal cell & squamous cell carcinoma',
     voxels: (() => {
       const v = []
@@ -593,8 +593,8 @@ const ORGANS = {
   bone: {
     label: 'Bone',
     system: 'Musculoskeletal',
-    icon: '💀',
-    color: '#f0f0e0',
+    icon: '✚',
+    color: '#ece8d0',
     description: 'Osteosarcoma, chondrosarcoma & Ewing sarcoma',
     voxels: unique([
       // femur
@@ -611,8 +611,8 @@ const ORGANS = {
   softTissue: {
     label: 'Soft Tissue',
     system: 'Musculoskeletal',
-    icon: '💪',
-    color: '#e89080',
+    icon: '◻',
+    color: '#c06858',
     description: 'Sarcomas: liposarcoma, leiomyosarcoma, GIST',
     voxels: unique([
       // thigh muscle mass

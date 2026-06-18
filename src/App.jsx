@@ -171,8 +171,8 @@ export default function App() {
             {!organ && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <div className="text-center">
-                  <div className="flex gap-4 justify-center text-5xl mb-6 opacity-15">
-                    🧠🫁❤️🦴🫘
+                  <div className="flex gap-6 justify-center text-4xl mb-6 opacity-20 font-light tracking-widest">
+                    <span>Ω</span><span>Ψ</span><span>♡</span><span>✚</span><span>⊕</span>
                   </div>
                   <p className="text-slate-400 text-xl font-light mb-2">Select an organ to begin</p>
                   <p className="text-slate-600 text-sm">

@@ -8,16 +8,16 @@ const SYSTEM_ORDER = [
 ]
 
 const SYSTEM_ICONS = {
-  'Thoracic': '🫁',
-  'Abdominal': '🫃',
-  'Urological': '💧',
-  'Gynecological': '🔮',
-  'Head & Neck': '🧠',
-  'Breast': '⭕',
-  'Hematological': '🩸',
-  'Endocrine': '⚡',
-  'Dermatological': '🔲',
-  'Musculoskeletal': '💀',
+  'Thoracic': 'Ψ',
+  'Abdominal': '◈',
+  'Urological': '▽',
+  'Gynecological': '∩',
+  'Head & Neck': 'Ω',
+  'Breast': '⌒',
+  'Hematological': '❖',
+  'Endocrine': '△',
+  'Dermatological': '□',
+  'Musculoskeletal': '✚',
 }
 
 export default function OrganSelector({ selected, onSelect }) {
