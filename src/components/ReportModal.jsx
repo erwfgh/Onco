@@ -1,182 +1,251 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import CLINICAL from '../data/clinicalData'
 import ORGANS from '../data/organs'
-import REGIMENS from '../data/regimens'
 
 const STAGE_LABEL = ['I', 'II', 'III', 'IV']
-const DATE = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem('oncoviz_user')) } catch { return null }
+}
 
 export default function ReportModal({ organKey, stage, highlights, caseId, notes, onClose }) {
   const printRef = useRef()
   const organ = ORGANS[organKey]
   const data = CLINICAL[organKey]
+  const user = loadUser()
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+
+  const [patientName, setPatientName] = useState('')
+  const [dob, setDob] = useState('')
+  const [followUp, setFollowUp] = useState('')
+  const [prescribedPlan, setPrescribedPlan] = useState('')
+  const [additionalNotes, setAdditionalNotes] = useState(notes || '')
 
   if (!organ || !data) return null
 
   const tnm = data.tnm?.[stage] || {}
   const survival = data.survival5yr?.[stage] || '—'
-  const treatments = data.treatments?.[stage] || []
-  const regimens = REGIMENS[organKey]?.[stage] || []
   const stageLabel = STAGE_LABEL[stage - 1]
 
   const handlePrint = () => {
-    const content = printRef.current.innerHTML
     const w = window.open('', '_blank')
-    w.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>OncoViz Clinical Report — ${organ.label}</title>
-          <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: 'Georgia', serif; color: #111; background: #fff; padding: 40px; font-size: 13px; }
-            h1 { font-size: 22px; margin-bottom: 4px; }
-            h2 { font-size: 14px; font-weight: 700; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin: 20px 0 10px; text-transform: uppercase; letter-spacing: .05em; color: #444; }
-            h3 { font-size: 12px; color: #777; margin-bottom: 6px; }
-            .header { border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 20px; }
-            .brand { font-size: 11px; text-transform: uppercase; letter-spacing: .15em; color: #888; margin-bottom: 8px; }
-            .meta { display: flex; gap: 40px; font-size: 11px; color: #666; margin-top: 8px; }
-            .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .box { border: 1px solid #ddd; border-radius: 6px; padding: 12px; }
-            .tnm { display: flex; gap: 12px; }
-            .tnm-cell { flex: 1; text-align: center; background: #f5f5f5; border-radius: 4px; padding: 8px; }
-            .tnm-cell .val { font-size: 18px; font-weight: 900; }
-            .tnm-cell .lbl { font-size: 10px; color: #888; }
-            .survival { font-size: 32px; font-weight: 900; }
-            ul { list-style: none; }
-            ul li { padding: 4px 0; border-bottom: 1px solid #f0f0f0; font-size: 12px; }
-            ul li:before { content: "▸ "; color: #888; }
-            .tag { display: inline-block; background: #f0f0f0; border-radius: 3px; padding: 2px 6px; font-size: 10px; margin: 2px; }
-            .pearl { border-left: 3px solid #7c3aed; padding-left: 10px; margin: 6px 0; font-size: 11px; color: #444; }
-            .disclaimer { margin-top: 30px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #999; }
-            .notes-box { background: #fafafa; border: 1px solid #ddd; border-radius: 6px; padding: 12px; min-height: 60px; white-space: pre-wrap; font-size: 12px; }
-            @media print { body { padding: 20px; } }
-          </style>
-        </head>
-        <body>${content}</body>
-      </html>
-    `)
+    w.document.write(`<!DOCTYPE html><html><head>
+      <title>OncoViz Report — ${organ.label} Stage ${stageLabel}</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; background: #fff; padding: 48px; font-size: 12px; line-height: 1.5; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1d4ed8; padding-bottom: 16px; margin-bottom: 24px; }
+        .brand { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+        .brand span { color: #1d4ed8; }
+        .brand .sub { font-size: 10px; font-weight: 400; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+        .report-title { font-size: 22px; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
+        .report-sub { font-size: 13px; color: #1d4ed8; font-weight: 600; }
+        .meta-row { display: flex; gap: 24px; margin-top: 8px; }
+        .meta-item { font-size: 10px; color: #64748b; }
+        .meta-item strong { color: #334155; }
+        .section { margin-bottom: 22px; }
+        .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #3b82f6; border-bottom: 1px solid #dbeafe; padding-bottom: 5px; margin-bottom: 12px; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #f8fafc; }
+        .big-number { font-size: 38px; font-weight: 900; color: #0f172a; line-height: 1; }
+        .big-label { font-size: 10px; color: #64748b; margin-top: 4px; }
+        .tnm-row { display: flex; gap: 10px; margin-bottom: 8px; }
+        .tnm-cell { flex: 1; text-align: center; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 6px; }
+        .tnm-val { font-size: 20px; font-weight: 900; color: #1d4ed8; }
+        .tnm-lbl { font-size: 9px; color: #64748b; margin-top: 2px; }
+        .tnm-desc { font-size: 10px; color: #475569; margin-top: 6px; line-height: 1.4; }
+        .biomarker-list { display: flex; flex-wrap: wrap; gap: 5px; }
+        .biomarker { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 3px 8px; font-size: 10px; color: #1d4ed8; font-weight: 500; }
+        .text-box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; min-height: 72px; white-space: pre-wrap; font-size: 11px; color: #334155; background: #fff; line-height: 1.6; }
+        .text-box.prescribed { border-color: #bfdbfe; background: #f0f7ff; }
+        .empty-box { border: 1px dashed #cbd5e1; border-radius: 6px; padding: 12px; min-height: 72px; background: #f8fafc; }
+        .patient-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 4px; }
+        .field { }
+        .field-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 3px; }
+        .field-value { font-size: 12px; color: #1e293b; font-weight: 500; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; min-height: 20px; }
+        .sites-badge { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 12px; font-size: 11px; color: #1d4ed8; font-weight: 600; }
+        .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-end; }
+        .footer-brand { font-size: 12px; font-weight: 900; color: #1d4ed8; }
+        .disclaimer { font-size: 9px; color: #94a3b8; max-width: 480px; line-height: 1.4; }
+        .sig-block { text-align: right; }
+        .sig-line { border-bottom: 1px solid #334155; width: 200px; margin-bottom: 3px; height: 28px; }
+        .sig-label { font-size: 9px; color: #64748b; }
+        @media print { body { padding: 28px; } }
+      </style>
+    </head><body>
+      <div class="header">
+        <div>
+          <div class="brand">ONCO<span>VIZ</span><div class="sub">3D Clinical Oncology Platform</div></div>
+        </div>
+        <div style="text-align:right">
+          <div class="report-title">Clinical Staging Report</div>
+          <div class="report-sub">${data.fullName} &mdash; Stage ${stageLabel}</div>
+          <div class="meta-row" style="justify-content:flex-end">
+            <div class="meta-item">ICD-10 <strong>${data.icd10}</strong></div>
+            ${caseId ? `<div class="meta-item">Case <strong>${caseId}</strong></div>` : ''}
+            <div class="meta-item">Date <strong>${date}</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Patient Information</div>
+        <div class="patient-grid">
+          <div class="field"><div class="field-label">Patient Name</div><div class="field-value">${patientName || ''}</div></div>
+          <div class="field"><div class="field-label">Date of Birth</div><div class="field-value">${dob || ''}</div></div>
+          <div class="field"><div class="field-label">Follow-Up Date</div><div class="field-value">${followUp || ''}</div></div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="field-label" style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:4px">Tumor Sites Marked</div>
+          <div class="sites-badge">${highlights.length} site${highlights.length !== 1 ? 's' : ''} marked on 3D model</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="section">
+          <div class="section-title">5-Year Survival (NCI SEER)</div>
+          <div class="card">
+            <div class="big-number">${survival}</div>
+            <div class="big-label">Stage ${stageLabel} &mdash; ${data.fullName}</div>
+            <div style="font-size:10px;color:#64748b;margin-top:6px">Population-level statistic. Individual prognosis depends on performance status, comorbidities, and treatment response.</div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">TNM Classification (AJCC 8th Ed.)</div>
+          <div class="card">
+            <div class="tnm-row">
+              ${['T','N','M'].map(k => `<div class="tnm-cell"><div class="tnm-val">${tnm[k] || '—'}</div><div class="tnm-lbl">${k === 'T' ? 'Tumor' : k === 'N' ? 'Node' : 'Metastasis'}</div></div>`).join('')}
+            </div>
+            ${tnm.desc ? `<div class="tnm-desc">${tnm.desc}</div>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Actionable Biomarkers</div>
+        <div class="biomarker-list">
+          ${(data.biomarkers || []).map(b => `<span class="biomarker">${b}</span>`).join('')}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Prescribed Treatment Plan</div>
+        ${prescribedPlan ? `<div class="text-box prescribed">${prescribedPlan}</div>` : '<div class="empty-box"></div>'}
+      </div>
+
+      <div class="section">
+        <div class="section-title">Additional Notes</div>
+        ${additionalNotes ? `<div class="text-box">${additionalNotes}</div>` : '<div class="empty-box"></div>'}
+      </div>
+
+      <div class="footer">
+        <div>
+          <div class="footer-brand">ONCOVIZ</div>
+          <div class="disclaimer">For clinical reference only. Not a substitute for professional judgment. Treatment decisions must be individualized per current NCCN guidelines and patient-specific factors.</div>
+        </div>
+        <div class="sig-block">
+          ${user?.name ? `<div style="font-size:11px;font-weight:600;color:#334155;margin-bottom:4px">${user.name}</div>` : ''}
+          ${user?.specialty ? `<div style="font-size:10px;color:#64748b;margin-bottom:8px">${user.specialty}</div>` : ''}
+          <div class="sig-line"></div>
+          <div class="sig-label">Physician Signature</div>
+        </div>
+      </div>
+    </body></html>`)
     w.document.close()
     w.focus()
-    setTimeout(() => { w.print(); w.close() }, 500)
+    setTimeout(() => { w.print(); w.close() }, 400)
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-[#0d1b2e] border border-slate-700/60 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white border border-blue-100 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl" onClick={e => e.stopPropagation()}>
 
-        {/* Modal header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/60 flex-shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-blue-100 flex-shrink-0 bg-blue-50 rounded-t-2xl">
           <div>
-            <h2 className="text-slate-100 font-bold text-base">Clinical Staging Report</h2>
-            <p className="text-slate-500 text-xs mt-0.5">{organ.label} · Stage {stageLabel} · {highlights.length} site{highlights.length !== 1 ? 's' : ''} marked</p>
+            <h2 className="text-slate-800 font-bold text-base">Clinical Staging Report</h2>
+            <p className="text-slate-500 text-xs mt-0.5">{data.fullName} · Stage {stageLabel} · {highlights.length} site{highlights.length !== 1 ? 's' : ''} marked</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={handlePrint} className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors">
-              🖨️ Print / Save PDF
+            <button onClick={handlePrint} className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors shadow-sm">
+              ▤ Print / Save PDF
             </button>
-            <button onClick={onClose} className="px-3 py-2 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200 text-sm transition-colors">✕</button>
+            <button onClick={onClose} className="px-3 py-2 rounded-lg border border-blue-200 text-slate-500 hover:text-slate-700 text-sm transition-colors">✕</button>
           </div>
         </div>
 
-        {/* Printable content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div ref={printRef}>
+        {/* Form */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-            {/* Report header */}
-            <div style={{ borderBottom: '2px solid #111', paddingBottom: '12px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.15em', color: '#888', marginBottom: '8px' }}>OncoViz · 3D Clinical Oncology Platform</div>
-              <h1 style={{ fontSize: '22px', marginBottom: '4px', color: '#111' }}>Clinical Staging Report</h1>
-              <div style={{ fontSize: '20px', fontWeight: '900', color: '#7c3aed' }}>{organ.label} — Stage {stageLabel}</div>
-              <div style={{ display: 'flex', gap: '30px', fontSize: '11px', color: '#666', marginTop: '8px' }}>
-                <span>ICD-10: <strong>{data.icd10}</strong></span>
-                {caseId && <span>Case ID: <strong>{caseId}</strong></span>}
-                <span>Date: <strong>{DATE}</strong></span>
-                <span>Sites marked: <strong>{highlights.length}</strong></span>
-              </div>
-            </div>
-
-            {/* Grid: survival + TNM */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-              <div style={{ border: '1px solid #ddd', borderRadius: '6px', padding: '14px' }}>
-                <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>5-Year Survival (SEER)</h2>
-                <div style={{ fontSize: '36px', fontWeight: '900', color: '#111' }}>{survival}</div>
-                <div style={{ fontSize: '11px', color: '#777', marginTop: '4px' }}>{data.fullName} — Stage {stageLabel}</div>
-              </div>
-              <div style={{ border: '1px solid #ddd', borderRadius: '6px', padding: '14px' }}>
-                <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>TNM Classification</h2>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  {['T', 'N', 'M'].map(k => (
-                    <div key={k} style={{ flex: 1, textAlign: 'center', background: '#f5f5f5', borderRadius: '4px', padding: '8px' }}>
-                      <div style={{ fontSize: '20px', fontWeight: '900' }}>{tnm[k]}</div>
-                      <div style={{ fontSize: '10px', color: '#888' }}>{k === 'T' ? 'Tumor' : k === 'N' ? 'Node' : 'Metastasis'}</div>
-                    </div>
-                  ))}
+          {/* Patient info */}
+          <div>
+            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Patient Information</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[['Patient Name', patientName, setPatientName, 'Jane Smith'], ['Date of Birth', dob, setDob, 'MM/DD/YYYY'], ['Follow-Up Date', followUp, setFollowUp, 'MM/DD/YYYY']].map(([label, val, set, ph]) => (
+                <div key={label}>
+                  <label className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block mb-1">{label}</label>
+                  <input value={val} onChange={e => set(e.target.value)} placeholder={ph}
+                    className="w-full px-3 py-2 rounded-lg border border-blue-100 bg-blue-50 text-slate-700 text-xs focus:outline-none focus:border-blue-400 placeholder-slate-300" />
                 </div>
-                {tnm.desc && <p style={{ marginTop: '8px', fontSize: '11px', color: '#555' }}>{tnm.desc}</p>}
-              </div>
+              ))}
             </div>
+          </div>
 
-            {/* Treatments */}
-            <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>Stage {stageLabel} Treatment Protocols</h2>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {treatments.map((t, i) => (
-                  <li key={i} style={{ padding: '5px 0', borderBottom: '1px solid #f0f0f0', fontSize: '12px' }}>▸ {t}</li>
-                ))}
-              </ul>
+          {/* Fixed clinical data */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">5-Year Survival (SEER)</p>
+              <p className="text-3xl font-black text-slate-800">{survival}</p>
+              <p className="text-[10px] text-slate-400 mt-1">Stage {stageLabel} · {data.fullName}</p>
             </div>
-
-            {/* Named Regimens */}
-            {regimens.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>Named Regimens — Stage {stageLabel}</h2>
-                {regimens.map((r, i) => (
-                  <div key={i} style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px solid #f0f0f0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong style={{ fontSize: '12px' }}>{r.name}</strong>
-                      <span style={{ fontSize: '10px', background: '#f0f0f0', borderRadius: '3px', padding: '2px 6px' }}>{r.category}</span>
-                    </div>
-                    <div style={{ fontSize: '10px', color: '#777', marginTop: '2px' }}>{r.drugs.join(' + ')}</div>
-                    <div style={{ fontSize: '10px', color: '#888', marginTop: '1px' }}>⏱ {r.cycle}</div>
-                    <div style={{ fontSize: '10px', color: '#555', marginTop: '2px' }}>{r.notes}</div>
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">TNM (AJCC 8th Ed.)</p>
+              <div className="flex gap-2 mb-2">
+                {['T','N','M'].map(k => (
+                  <div key={k} className="flex-1 text-center bg-white border border-blue-200 rounded-lg py-1.5">
+                    <div className="text-blue-700 font-black text-sm">{tnm[k] || '—'}</div>
+                    <div className="text-[9px] text-slate-400">{k === 'T' ? 'Tumor' : k === 'N' ? 'Node' : 'Meta'}</div>
                   </div>
                 ))}
               </div>
-            )}
-
-            {/* Biomarkers */}
-            <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>Actionable Biomarkers</h2>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                {(data.biomarkers || []).map(b => (
-                  <span key={b} style={{ background: '#f0f0f0', borderRadius: '3px', padding: '3px 8px', fontSize: '11px' }}>{b}</span>
-                ))}
-              </div>
+              {tnm.desc && <p className="text-[10px] text-slate-500 leading-relaxed">{tnm.desc}</p>}
             </div>
+          </div>
 
-            {/* Key pearls */}
-            <div style={{ marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>Clinical Pearls</h2>
-              {(data.keyPearls || []).map((p, i) => (
-                <div key={i} style={{ borderLeft: '3px solid #7c3aed', paddingLeft: '10px', margin: '8px 0', fontSize: '11px', color: '#444' }}>{p}</div>
+          {/* Biomarkers */}
+          <div>
+            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Actionable Biomarkers</p>
+            <div className="flex flex-wrap gap-1.5">
+              {(data.biomarkers || []).map(b => (
+                <span key={b} className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-medium">{b}</span>
               ))}
             </div>
-
-            {/* Notes */}
-            {notes && (
-              <div style={{ marginBottom: '20px' }}>
-                <h2 style={{ fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', color: '#444', borderBottom: '1px solid #ddd', paddingBottom: '4px', marginBottom: '10px' }}>Clinical Notes</h2>
-                <div style={{ background: '#fafafa', border: '1px solid #ddd', borderRadius: '6px', padding: '12px', whiteSpace: 'pre-wrap', fontSize: '12px' }}>{notes}</div>
-              </div>
-            )}
-
-            {/* Disclaimer */}
-            <div style={{ marginTop: '30px', paddingTop: '12px', borderTop: '1px solid #ddd', fontSize: '10px', color: '#999' }}>
-              This report was generated by OncoViz for educational and clinical reference purposes only. It is not a substitute for professional medical judgment. Treatment decisions should follow current NCCN guidelines and be tailored to individual patient factors. Survival statistics from NCI SEER database; TNM per AJCC 8th Edition.
-            </div>
-
           </div>
+
+          {/* Doctor-prescribed treatment plan */}
+          <div>
+            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Prescribed Treatment Plan</p>
+            <textarea
+              value={prescribedPlan}
+              onChange={e => setPrescribedPlan(e.target.value)}
+              placeholder="Enter your prescribed treatment plan, dosages, schedule, and rationale..."
+              rows={4}
+              className="w-full px-3 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-slate-700 text-xs focus:outline-none focus:border-blue-400 placeholder-slate-300 resize-none"
+            />
+          </div>
+
+          {/* Additional notes */}
+          <div>
+            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Additional Notes</p>
+            <textarea
+              value={additionalNotes}
+              onChange={e => setAdditionalNotes(e.target.value)}
+              placeholder="Clinical observations, patient concerns, referrals, follow-up instructions..."
+              rows={3}
+              className="w-full px-3 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-slate-700 text-xs focus:outline-none focus:border-blue-400 placeholder-slate-300 resize-none"
+            />
+          </div>
+
         </div>
       </div>
     </div>
