@@ -218,7 +218,7 @@ export default {
     ],
     2: [
       R('RP + Adjuvant RT if high-risk features', ['Radical prostatectomy', 'Adjuvant EBRT 64–66 Gy', 'Short-course ADT'], 'Surgery then RT + 6 months ADT', 'Combination', 'SWS/ARO: adjuvant RT for pT3/positive margins improves bPFS.'),
-      R('EBRT + Short-course ADT', ['IMRT 78 Gy', 'LHRH agonist × 6 months'], '6 months total', 'Combination', 'D'Amico high-risk: RT + 6-month ADT; superior OS vs RT alone.'),
+      R('EBRT + Short-course ADT', ['IMRT 78 Gy', 'LHRH agonist × 6 months'], '6 months total', 'Combination', 'D`Amico high-risk: RT + 6-month ADT; superior OS vs RT alone.'),
     ],
     3: [
       R('ADT + Docetaxel', ['LHRH agonist continuous', 'Docetaxel 75 mg/m²'], 'ADT + 6 cycles chemo', 'Combination', 'CHAARTED/STAMPEDE: for high-volume metastatic hormone-sensitive PCa.'),
