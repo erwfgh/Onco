@@ -11,7 +11,11 @@ import ORGANS from './data/organs'
 import CLINICAL from './data/clinicalData'
 
 function loadUser() {
-  try { return JSON.parse(localStorage.getItem('oncoviz_user')) } catch { return null }
+  try {
+    const u = JSON.parse(localStorage.getItem('oncoviz_user'))
+    // Require a role field — clears any stale/old sessions
+    return (u && u.role) ? u : null
+  } catch { return null }
 }
 
 export default function App() {
@@ -143,16 +147,15 @@ export default function App() {
             </button>
           )}
 
-          <div className="flex items-center gap-2 pl-1">
-            <span className="text-xs text-slate-400 hidden md:block">
+          <div className="flex items-center gap-2 pl-1 border-l border-blue-100 ml-1">
+            <span className="text-xs text-slate-500 font-medium hidden md:block">
               {isPatient ? `♡ ${user.name}` : `✚ ${user.name || user.email}`}
             </span>
             <button
               onClick={() => { localStorage.removeItem('oncoviz_user'); setUser(null) }}
-              className="text-xs px-2.5 py-1.5 rounded-md border border-blue-100 text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors"
-              title="Sign out"
+              className="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors font-medium"
             >
-              ⇥
+              Sign Out
             </button>
           </div>
         </div>
