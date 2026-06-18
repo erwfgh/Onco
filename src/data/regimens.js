@@ -540,7 +540,7 @@ export default {
       R('RT + Surgery (large, deep, high-grade)', ['Preoperative EBRT 50 Gy + surgery', 'OR surgery + adjuvant RT 60–66 Gy'], 'RT then surgery or surgery then RT', 'Combination', 'NCI sarcoma trial: limb-salvage with RT; equivalent LC to amputation.'),
     ],
     2: [
-      R('Preoperative RT → R0 Resection', ['EBRT 50 Gy', 'Wide excision ≥6 weeks post-RT'], 'RT then surgery', 'Combination', 'O'Sullivan 2002: preop RT better wound toxicity profile vs postop for extremity STS.'),
+      R('Preoperative RT → R0 Resection', ['EBRT 50 Gy', 'Wide excision ≥6 weeks post-RT'], 'RT then surgery', 'Combination', 'O’Sullivan 2002: preop RT better wound toxicity profile vs postop for extremity STS.'),
       R('Doxorubicin + Ifosfamide (high-grade)', ['Doxorubicin 75 mg/m²', 'Ifosfamide 10 g/m²'], 'Every 3 weeks × 3 cycles neoadjuvant', 'Chemotherapy', 'For high-risk Stage II where response assessment guides surgery.'),
     ],
     3: [
