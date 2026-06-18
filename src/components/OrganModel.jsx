@@ -2,6 +2,8 @@ import { useRef, useMemo, useEffect, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
+const CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
+
 const VOXEL_SIZE = 1.0
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
@@ -41,7 +43,7 @@ function applyColors(mesh, positions, dummy, baseColors, highlightedSet, purple,
   mesh.instanceColor.needsUpdate = true
 }
 
-export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick }) {
+export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection }) {
   const meshRef = useRef()
   const colorsApplied = useRef(false)
   const count = voxels.length
@@ -66,6 +68,13 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     roughness: 0.65,
     metalness: 0.06,
   }), [])
+
+  useEffect(() => {
+    material.clippingPlanes = crossSection ? [CLIP_PLANE] : []
+    material.side = crossSection ? THREE.DoubleSide : THREE.FrontSide
+    material.clipShadows = true
+    material.needsUpdate = true
+  }, [material, crossSection])
 
   const baseColors = useMemo(() => {
     let minY = Infinity, maxY = -Infinity
