@@ -25,9 +25,9 @@ const CATEGORY_COLOR = {
   'Combination': 'bg-slate-50 border-slate-200 text-slate-600',
 }
 
-export default function InfoPanel({ organKey, stage }) {
+export default function InfoPanel({ organKey, stage, patientDefault = false }) {
   const [tab, setTab] = useState('Overview')
-  const [patientMode, setPatientMode] = useState(false)
+  const [patientMode, setPatientMode] = useState(patientDefault)
 
   const data = organKey ? CLINICAL[organKey] : null
   const organ = organKey ? ORGANS[organKey] : null

@@ -6,10 +6,16 @@ import InfoPanel from './components/InfoPanel'
 import LandingPage from './components/LandingPage'
 import ReportModal from './components/ReportModal'
 import CaseBar from './components/CaseBar'
+import RoleSelector from './components/RoleSelector'
 import ORGANS from './data/organs'
 import CLINICAL from './data/clinicalData'
 
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem('oncoviz_user')) } catch { return null }
+}
+
 export default function App() {
+  const [user, setUser] = useState(loadUser)
   const [selectedOrgan, setSelectedOrgan] = useState(null)
   const [stage, setStage] = useState(1)
   const [highlights, setHighlights] = useState([])
@@ -40,9 +46,13 @@ export default function App() {
   const clinical = selectedOrgan ? CLINICAL[selectedOrgan] : null
   const survival = clinical?.survival5yr?.[stage]
 
+  const isPatient = user?.role === 'patient'
+
+  if (!user) return <RoleSelector onAuth={u => { setUser(u); setShowLanding(false) }} />
+
   return (
     <div className="flex flex-col h-full bg-[#f0f6ff] text-slate-800 select-none relative">
-      {showLanding && <LandingPage onEnter={() => setShowLanding(false)} />}
+      {showLanding && !isPatient && <LandingPage onEnter={() => setShowLanding(false)} />}
 
       {showReport && selectedOrgan && (
         <ReportModal
@@ -124,12 +134,27 @@ export default function App() {
             </button>
           )}
 
-          <button
-            onClick={() => setShowLanding(true)}
-            className="text-xs px-3 py-1.5 rounded-md border border-blue-200 text-slate-500 hover:text-blue-600 hover:border-blue-400 transition-colors hidden md:block"
-          >
-            Why OncoViz?
-          </button>
+          {!isPatient && (
+            <button
+              onClick={() => setShowLanding(true)}
+              className="text-xs px-3 py-1.5 rounded-md border border-blue-200 text-slate-500 hover:text-blue-600 hover:border-blue-400 transition-colors hidden md:block"
+            >
+              Why OncoViz?
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 pl-1">
+            <span className="text-xs text-slate-400 hidden md:block">
+              {isPatient ? `♡ ${user.name}` : `✚ ${user.name || user.email}`}
+            </span>
+            <button
+              onClick={() => { localStorage.removeItem('oncoviz_user'); setUser(null) }}
+              className="text-xs px-2.5 py-1.5 rounded-md border border-blue-100 text-slate-400 hover:text-red-500 hover:border-red-200 transition-colors"
+              title="Sign out"
+            >
+              ⇥
+            </button>
+          </div>
         </div>
       </header>
 
@@ -207,7 +232,7 @@ export default function App() {
           </div>
         </div>
 
-        <InfoPanel organKey={selectedOrgan} stage={stage} />
+        <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} />
       </div>
     </div>
   )
