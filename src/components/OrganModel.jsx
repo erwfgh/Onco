@@ -15,10 +15,7 @@ const PURPLE = {
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
-
-// Distance thresholds for auto-dissect
-const AUTO_CLIP_START = 18  // camera distance at which clipping begins
-const AUTO_CLIP_FULL  = 8   // camera distance at which clip is deepest
+const MANUAL_CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
 
 function voxelHash(x, y, z) {
   const h = Math.sin(x * 13.7 + y * 47.3 + z * 89.1) * 43758.5453
@@ -40,18 +37,12 @@ function applyColors(mesh, positions, dummy, baseColors, highlightedSet, purple,
   mesh.instanceColor.needsUpdate = true
 }
 
-export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection }) {
+export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode }) {
   const meshRef = useRef()
   const colorsApplied = useRef(false)
+  const prevMode = useRef(null)
   const count = voxels.length
   const dummy = useMemo(() => new THREE.Object3D(), [])
-
-  // Dynamic clip plane that tracks camera direction for auto-zoom reveal
-  const autoCamPlane = useMemo(() => new THREE.Plane(), [])
-  // Manual cross-section plane (fixed Z-axis cut)
-  const manualPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, -1), 0), [])
-
-  const prevClipState = useRef(null) // track last applied state to avoid redundant needsUpdate
 
   const positions = useMemo(
     () => voxels.map(v => new THREE.Vector3(v.x, v.y, v.z)),
@@ -88,10 +79,24 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
       const srcColor = (zoneColors && voxel.zone && zoneColors[voxel.zone])
         ? zoneColors[voxel.zone]
         : base
-      const brightness = (0.82 + depth * 0.22) * (0.90 + noise * 0.20)
-      return srcColor.clone().multiplyScalar(brightness)
+
+      let brightness
+      if (insideMode) {
+        // Boost significantly — interior zone colors like vessels (#6b0000) are very dark
+        // and need amplification to be vivid from inside
+        brightness = (2.2 + depth * 0.4) * (1.1 + noise * 0.25)
+      } else {
+        brightness = (0.88 + depth * 0.18) * (0.92 + noise * 0.16)
+      }
+
+      const c = srcColor.clone().multiplyScalar(brightness)
+      // Clamp to valid range
+      c.r = Math.min(1, c.r)
+      c.g = Math.min(1, c.g)
+      c.b = Math.min(1, c.b)
+      return c
     })
-  }, [voxels, positions, base, zoneColors])
+  }, [voxels, positions, base, zoneColors, insideMode])
 
   const highlightedSet = useMemo(() => {
     const radius = STAGE_RADIUS[stage]
@@ -119,60 +124,44 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
 
   useEffect(() => {
     colorsApplied.current = false
-  }, [positions, baseColors, highlightedSet, purple])
+  }, [positions, baseColors, highlightedSet, purple, insideMode])
 
-  useFrame(({ camera }) => {
-    // Apply instance colors on first frame after change
+  // Update material mode when insideMode or crossSection changes
+  useEffect(() => {
+    const modeKey = `${insideMode}:${crossSection}`
+    if (prevMode.current === modeKey) return
+    prevMode.current = modeKey
+
+    if (insideMode) {
+      material.clippingPlanes = []
+      material.side = THREE.DoubleSide
+      material.roughness = 0.35
+      material.metalness = 0.15
+      material.emissive = new THREE.Color('#220000')
+      material.emissiveIntensity = 0.25
+    } else if (crossSection) {
+      material.clippingPlanes = [MANUAL_CLIP_PLANE]
+      material.side = THREE.DoubleSide
+      material.roughness = 0.55
+      material.metalness = 0.08
+      material.emissive = new THREE.Color('#000000')
+      material.emissiveIntensity = 0
+    } else {
+      material.clippingPlanes = []
+      material.side = THREE.FrontSide
+      material.roughness = 0.55
+      material.metalness = 0.08
+      material.emissive = new THREE.Color('#000000')
+      material.emissiveIntensity = 0
+    }
+    material.clipShadows = true
+    material.needsUpdate = true
+  }, [insideMode, crossSection, material])
+
+  useFrame(() => {
     if (!colorsApplied.current && meshRef.current) {
       applyColors(meshRef.current, positions, dummy, baseColors, highlightedSet, purple, count)
       colorsApplied.current = true
-    }
-
-    if (!meshRef.current) return
-
-    // Determine clip state
-    let clipState, planes, side
-
-    if (crossSection) {
-      // Manual dissect: fixed front-facing slice
-      clipState = 'manual'
-      planes = [manualPlane]
-      side = THREE.DoubleSide
-    } else {
-      const dist = camera.position.length()
-
-      if (dist < AUTO_CLIP_START) {
-        // Auto zoom-in reveal: clip plane faces the camera
-        clipState = 'auto:' + dist.toFixed(1)
-
-        // Normal = direction from organ toward camera (clips the camera-side half)
-        const camDir = camera.position.clone().normalize()
-
-        // As camera gets closer, push the plane further into the organ
-        const t = Math.max(0, Math.min(1, (AUTO_CLIP_START - dist) / (AUTO_CLIP_START - AUTO_CLIP_FULL)))
-        const depth = -t * 4.0  // max 4 units deep into organ center
-
-        autoCamPlane.set(camDir, depth)
-        planes = [autoCamPlane]
-        side = THREE.DoubleSide
-      } else {
-        clipState = 'none'
-        planes = []
-        side = THREE.FrontSide
-      }
-    }
-
-    // Only update material when state actually changes
-    if (prevClipState.current !== clipState) {
-      prevClipState.current = clipState
-      material.clippingPlanes = planes
-      material.side = side
-      material.clipShadows = true
-      material.needsUpdate = true
-    } else if (clipState.startsWith('auto:')) {
-      // Update plane every frame (camera moves), but don't flag needsUpdate
-      // unless side changed (already set above)
-      material.clippingPlanes = planes
     }
   })
 
