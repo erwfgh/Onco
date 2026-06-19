@@ -4,12 +4,14 @@ import OrganViewer from './components/OrganViewer'
 import OrganSelector from './components/OrganSelector'
 import StageSelector from './components/StageSelector'
 import Paywall from './components/Paywall'
+import AiAssistant from './components/AiAssistant'
 import ORGANS from './data/organs'
 
 export default function App() {
   const [selectedOrgan, setSelectedOrgan] = useState(null)
   const [stage, setStage] = useState(1)
   const [highlights, setHighlights] = useState([])
+  const [crossSection, setCrossSection] = useState(false)
 
   const handleOrganSelect = useCallback(key => {
     setSelectedOrgan(key)
@@ -124,6 +126,7 @@ export default function App() {
         </div>
       </div>
     </div>
+    <AiAssistant organ={organ} stage={stage} highlights={highlights} />
     </Paywall>
   )
 }

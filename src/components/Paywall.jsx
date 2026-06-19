@@ -1,7 +1,10 @@
-import { SignIn, useUser } from '@clerk/clerk-react'
+import { useState } from 'react'
+import { SignIn, useUser, useAuth } from '@clerk/clerk-react'
 
 export default function Paywall({ children }) {
   const { isLoaded, isSignedIn, user } = useUser()
+  const { getToken } = useAuth()
+  const [loading, setLoading] = useState(false)
 
   if (!isLoaded) {
     return (
@@ -25,13 +28,30 @@ export default function Paywall({ children }) {
     )
   }
 
-  // Check subscription via Clerk public metadata
   const isSubscribed = user?.publicMetadata?.subscribed === true
   const trialEnd = user?.publicMetadata?.trialEnd
-
   const inTrial = trialEnd && new Date(trialEnd) > new Date()
 
   if (!isSubscribed && !inTrial) {
+    const handleCheckout = async () => {
+      setLoading(true)
+      try {
+        const token = await getToken()
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            clerkUserId: user.id,
+            email: user.primaryEmailAddress?.emailAddress,
+          }),
+        })
+        const { url } = await res.json()
+        window.location.href = url
+      } catch {
+        setLoading(false)
+      }
+    }
+
     return (
       <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
         <div className="max-w-md w-full bg-[#0a1525] border border-slate-700/60 rounded-2xl p-8 text-center shadow-2xl">
@@ -49,16 +69,18 @@ export default function Paywall({ children }) {
           <ul className="text-slate-400 text-sm text-left space-y-2 mb-6">
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> All organs & tumor stages</li>
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Interactive 3D voxel models</li>
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Click-to-stage annotation</li>
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Explore organ interiors in 3D</li>
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> AI oncology assistant</li>
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Cancel anytime</li>
           </ul>
 
-          <a
-            href="/api/checkout"
-            className="block w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-colors"
+          <button
+            onClick={handleCheckout}
+            disabled={loading}
+            className="block w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-semibold transition-colors"
           >
-            Start Free Trial
-          </a>
+            {loading ? 'Redirecting...' : 'Start Free Trial'}
+          </button>
 
           <p className="text-slate-600 text-xs mt-4">
             Signed in as {user?.primaryEmailAddress?.emailAddress}

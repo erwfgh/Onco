@@ -89,6 +89,27 @@ const ORGANS = {
       ...tube([[0,2,0],[-2,1,0]], 0.5),
       ...tube([[0,2,0],[2,1,0]], 0.5),
     ]),
+    interior: [
+      { color: '#c0392b', voxels: unique(cylinder(0, 0, -2, 8, 0.7)) },       // trachea
+      { color: '#e74c3c', voxels: unique([                                      // main bronchi
+        ...tube([[0,6,0],[-2,4,0],[-3.5,2,0]], 0.5),
+        ...tube([[0,6,0],[2,4,0],[3.2,2,0]], 0.5),
+      ])},
+      { color: '#e74c3c', voxels: unique([                                      // lobar bronchi
+        ...tube([[-3.5,2,0],[-3.5,0,0],[-3.5,-2,0]], 0.35),
+        ...tube([[-3.5,2,0],[-2.5,3,0.5]], 0.3),
+        ...tube([[3.2,2,0],[3.2,0,0],[3.2,-2,0]], 0.35),
+        ...tube([[3.2,2,0],[2.5,3,0.5]], 0.3),
+      ])},
+      { color: '#2980b9', voxels: unique([                                      // pulmonary veins (blue)
+        ...tube([[-3,1,0.5],[-1,3,0.5],[0,4,0]], 0.4),
+        ...tube([[3,1,0.5],[1,3,0.5],[0,4,0]], 0.4),
+      ])},
+      { color: '#fadbd8', voxels: unique([                                      // alveolar tissue
+        ...sphere(-3.5, -1, 0, 1.8), ...sphere(-3.5, 2, 0, 1.5),
+        ...sphere(3.2, -1, 0, 1.5), ...sphere(3, 3, 0, 1.2),
+      ])},
+    ],
   },
 
   heart: {
@@ -106,6 +127,17 @@ const ORGANS = {
       // pulmonary artery
       ...cylinder(1.5, 0, 3, 5, 0.8),
     ]),
+    interior: [
+      { color: '#7b241c', voxels: unique(ellipsoid(-1.2, -1, 0, 1.6, 2.2, 1.3)) },  // left ventricle
+      { color: '#a93226', voxels: unique(ellipsoid(1.2, -0.5, 0, 1.3, 1.8, 1.1)) }, // right ventricle
+      { color: '#922b21', voxels: unique(ellipsoid(-1, 2, 0, 1.3, 1, 1)) },          // left atrium
+      { color: '#b03a2e', voxels: unique(ellipsoid(1.2, 2, 0, 1.1, 1, 1)) },         // right atrium
+      { color: '#641e16', voxels: unique(ellipsoid(0, 0, 0, 0.35, 2.8, 1.3)) },      // interventricular septum
+      { color: '#f0e0d0', voxels: unique([                                             // valves (fibrous)
+        ...ellipsoid(-1, 0.5, 0, 0.9, 0.25, 0.9),
+        ...ellipsoid(1, 0.5, 0, 0.9, 0.25, 0.9),
+      ])},
+    ],
   },
 
   esophagus: {
@@ -119,6 +151,10 @@ const ORGANS = {
       [-0.5, 2, 0], [-0.5, -1, 0],
       [-0.5, -4, 0], [-0.5, -7, 0],
     ], 1.2)),
+    interior: [
+      { color: '#c0392b', voxels: unique(tube([[0,10,0],[0,5,0],[-0.5,-7,0]], 0.5)) }, // mucosa lumen
+      { color: '#e8a090', voxels: unique(tube([[0,10,0],[0,5,0],[-0.5,-7,0]], 0.8)) }, // submucosa
+    ],
   },
 
   thymus: {
@@ -131,6 +167,10 @@ const ORGANS = {
       ...ellipsoid(-1.2, 0, 0, 1.5, 2.5, 1),
       ...ellipsoid(1.2, 0, 0, 1.5, 2.5, 1),
     ]),
+    interior: [
+      { color: '#d4b8e0', voxels: unique([...ellipsoid(-1.2,0,0,1,1.8,0.7), ...ellipsoid(1.2,0,0,1,1.8,0.7)]) }, // cortex
+      { color: '#f5eef8', voxels: unique([...ellipsoid(-1.2,0,0,0.5,1.2,0.4), ...ellipsoid(1.2,0,0,0.5,1.2,0.4)]) }, // medulla (Hassall's corpuscles)
+    ],
   },
 
   // ══ ABDOMINAL ═══════════════════════════════════════════════════════════
@@ -145,8 +185,15 @@ const ORGANS = {
       ...ellipsoid(0, 0, 0, 6, 3.5, 3.5),
       ...ellipsoid(-2, 0.5, 0, 5, 3, 3),
       ...ellipsoid(2.5, -0.5, 0, 3.5, 2.5, 2.5),
-      ...ellipsoid(-4, -1, 0, 2, 1.5, 2),  // left lobe tail
+      ...ellipsoid(-4, -1, 0, 2, 1.5, 2),
     ]),
+    interior: [
+      { color: '#7b241c', voxels: unique([...ellipsoid(2,0,0,3.5,2.8,2.8), ...ellipsoid(-3,0,0,2.2,2.2,2.2)]) }, // parenchyma
+      { color: '#6c3483', voxels: unique(tube([[0,-1,0],[0,1,0],[1,2,0],[2,1,0]], 0.6)) },  // portal vein
+      { color: '#1a5276', voxels: unique([...tube([[0,1,0],[0,3,0]], 0.4), ...tube([[1,1,0],[1,3,0]], 0.4)]) }, // hepatic veins
+      { color: '#d4ac0d', voxels: unique(tube([[0,0,0],[1,1,0],[2,0,0]], 0.3)) },           // bile ducts
+      { color: '#1e8449', voxels: unique(sphere(3,-1,0.5,0.7)) },                           // gallbladder fossa
+    ],
   },
 
   gallbladder: {
@@ -157,8 +204,12 @@ const ORGANS = {
     description: 'Gallbladder carcinoma & biliary tract cancer',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 1.2, 2.5, 1.2),
-      ...cylinder(0, 0, 2, 3, 0.6),   // cystic duct
+      ...cylinder(0, 0, 2, 3, 0.6),
     ]),
+    interior: [
+      { color: '#f9e79f', voxels: unique(ellipsoid(0,0,0,0.7,2,0.7)) },   // bile (yellow)
+      { color: '#1e8449', voxels: unique(ellipsoid(0,0,0,1,2.2,1)) },      // mucosa (green)
+    ],
   },
 
   pancreas: {
@@ -168,13 +219,15 @@ const ORGANS = {
     color: '#e8c87a',
     description: 'Pancreatic ductal adenocarcinoma (PDAC)',
     voxels: unique([
-      // head
       ...ellipsoid(-3, 0, 0, 2, 2, 1.5),
-      // body
       ...ellipsoid(0, 0.5, 0, 2, 1.5, 1.2),
-      // tail
       ...ellipsoid(3.5, 1, 0, 2, 1.2, 1),
     ]),
+    interior: [
+      { color: '#f9e79f', voxels: unique(tube([[-3,0,0],[0,0.5,0],[3.5,1,0]], 0.35)) },   // main duct
+      { color: '#f0b27a', voxels: unique([...ellipsoid(-3,0,0,1.5,1.5,1), ...ellipsoid(0,0.5,0,1.5,1,0.8)]) }, // acinar cells
+      { color: '#a9cce3', voxels: unique([...sphere(-2,0,0,0.4), ...sphere(0,0.5,0,0.4), ...sphere(2.5,1,0,0.4)]) }, // islets of Langerhans
+    ],
   },
 
   stomach: {
@@ -186,11 +239,16 @@ const ORGANS = {
     voxels: unique([
       ...ellipsoid(1, 0, 0, 3.5, 3, 2.5),
       ...ellipsoid(-1, 1, 0, 2, 2.5, 2),
-      // pylorus
       ...cylinder(3.5, 0, -1, 1, 0.8),
-      // cardia
       ...cylinder(-2, 0, 2, 4, 0.8),
     ]),
+    interior: [
+      { color: '#f1948a', voxels: unique([...ellipsoid(1,0,0,2.8,2.3,1.8), ...ellipsoid(-1,1,0,1.3,1.8,1.3)]) }, // mucosa
+      { color: '#e74c3c', voxels: unique([                                                                          // rugae folds
+        ...ellipsoid(0,0,0,0.3,2,0.3), ...ellipsoid(1,0,0,0.3,2,0.3), ...ellipsoid(-1,0,0,0.3,1.5,0.3),
+      ])},
+      { color: '#c0392b', voxels: unique(cylinder(3.5,0,-1,1,0.5)) }, // pyloric sphincter
+    ],
   },
 
   smallintestine: {
@@ -206,6 +264,10 @@ const ORGANS = {
       [-2,-3,1],[0,-4,1],[2,-3,1],[3,-1,2],
       [2,1,2],[0,2,2],[-2,1,2],
     ], 0.9)),
+    interior: [
+      { color: '#f5cba7', voxels: unique(tube([[3,-1,0],[0,2,0],[-3,-1,0],[0,-4,0],[3,-1,1],[0,2,1],[-3,-1,1],[0,-4,1],[0,2,2]], 0.4)) }, // lumen
+      { color: '#e8a87a', voxels: unique([...sphere(0,0,0,0.6), ...sphere(2,1,0,0.6), ...sphere(-2,1,0,0.6), ...sphere(0,-3,0,0.6)]) },  // villi
+    ],
   },
 
   colon: {
@@ -215,15 +277,19 @@ const ORGANS = {
     color: '#c8a06e',
     description: 'Colorectal adenocarcinoma',
     voxels: unique(tube([
-      [-5,-5,0],[-5,5,0],  // ascending
-      [-5,6,0],[0,7,0],     // hepatic flexure
-      [0,7,0],[5,6,0],      // transverse
-      [5,6,0],[5,-4,0],     // descending
-      [5,-4,0],[3,-6,0],    // sigmoid
+      [-5,-5,0],[-5,5,0],
+      [-5,6,0],[0,7,0],
+      [0,7,0],[5,6,0],
+      [5,6,0],[5,-4,0],
+      [5,-4,0],[3,-6,0],
       [3,-6,0],[0,-7,0],
-      [0,-7,0],[-1,-5,0],   // rectum
+      [0,-7,0],[-1,-5,0],
       [-1,-5,0],[0,-8,0],
     ], 1.4)),
+    interior: [
+      { color: '#d5a07a', voxels: unique(tube([[-5,-5,0],[-5,5,0],[0,7,0],[5,6,0],[5,-4,0],[3,-6,0],[0,-7,0],[0,-8,0]], 0.6)) }, // mucosa
+      { color: '#f0d0b0', voxels: unique(tube([[-5,-5,0],[-5,5,0],[0,7,0],[5,6,0],[5,-4,0],[0,-8,0]], 0.3)) }, // lumen
+    ],
   },
 
   spleen: {
@@ -236,6 +302,11 @@ const ORGANS = {
       ...ellipsoid(0, 0, 0, 3, 2.5, 2),
       ...ellipsoid(0.5, 0, 0.5, 2.5, 2, 1.5),
     ]),
+    interior: [
+      { color: '#7d3c98', voxels: unique(ellipsoid(0,0,0,2.2,1.8,1.4)) },   // red pulp
+      { color: '#c39bd3', voxels: unique([...sphere(-1,0,0,0.6), ...sphere(1,0,0,0.6), ...sphere(0,1,0,0.5)]) }, // white pulp nodules
+      { color: '#1a5276', voxels: unique(tube([[0,0,0],[0,2,0]], 0.4)) },     // splenic vein
+    ],
   },
 
   // ══ UROLOGICAL ══════════════════════════════════════════════════════════
@@ -247,17 +318,25 @@ const ORGANS = {
     color: '#c05a3a',
     description: 'Renal cell carcinoma (clear cell, papillary)',
     voxels: unique([
-      // right kidney
       ...ellipsoid(-5.5, 0, 0, 2, 3.8, 1.8),
       ...ellipsoid(-5.5, 0, 0, 1.4, 3.2, 1.3),
-      // renal pelvis right
       ...sphere(-4.5, 0, 0, 0.8),
-      // left kidney
       ...ellipsoid(5.5, 0, 0, 2, 3.8, 1.8),
       ...ellipsoid(5.5, 0, 0, 1.4, 3.2, 1.3),
-      // renal pelvis left
       ...sphere(4.5, 0, 0, 0.8),
     ]),
+    interior: [
+      { color: '#c0392b', voxels: unique([...ellipsoid(-5.5,0,0,1.6,3.2,1.4), ...ellipsoid(5.5,0,0,1.6,3.2,1.4)]) }, // cortex
+      { color: '#922b21', voxels: unique([                                                                              // medulla pyramids
+        ...ellipsoid(-5.5,1.5,0,0.8,1,0.8), ...ellipsoid(-5.5,-1.5,0,0.8,1,0.8),
+        ...ellipsoid(5.5,1.5,0,0.8,1,0.8),  ...ellipsoid(5.5,-1.5,0,0.8,1,0.8),
+      ])},
+      { color: '#f9e79f', voxels: unique([...sphere(-4.8,0,0,0.7), ...sphere(4.8,0,0,0.7)]) },  // renal pelvis
+      { color: '#fdebd0', voxels: unique([                                                         // minor calyces
+        ...sphere(-4.5,1,0,0.4), ...sphere(-4.5,-1,0,0.4), ...sphere(-4.5,0,0.8,0.4),
+        ...sphere(4.5,1,0,0.4),  ...sphere(4.5,-1,0,0.4),  ...sphere(4.5,0,0.8,0.4),
+      ])},
+    ],
   },
 
   bladder: {
@@ -268,9 +347,13 @@ const ORGANS = {
     description: 'Urothelial (transitional cell) carcinoma',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 3.5, 3, 3),
-      // trigone & neck
       ...cylinder(0, 0, -3.5, -2, 0.8),
     ]),
+    interior: [
+      { color: '#aed6f1', voxels: unique(ellipsoid(0,0,0,2.8,2.3,2.3)) },  // urine (pale blue)
+      { color: '#7fb3d3', voxels: unique(ellipsoid(0,0,0,3.2,2.7,2.7)) },  // detrusor muscle
+      { color: '#5dade2', voxels: unique(ellipsoid(0,-1,0,0.8,0.5,0.8)) }, // trigone
+    ],
   },
 
   prostate: {
@@ -281,10 +364,14 @@ const ORGANS = {
     description: 'Prostate adenocarcinoma (Gleason scoring)',
     voxels: unique([
       ...ellipsoid(0, 0, 0, 2.8, 2.2, 2.5),
-      // seminal vesicles
       ...ellipsoid(-2, 1.5, 0, 1.5, 1, 1),
       ...ellipsoid(2, 1.5, 0, 1.5, 1, 1),
     ]),
+    interior: [
+      { color: '#f5cba7', voxels: unique(ellipsoid(0,0,0,1.5,1.5,1.5)) },   // peripheral zone
+      { color: '#f0b27a', voxels: unique(ellipsoid(0,0.5,0,0.8,0.8,0.8)) }, // central zone
+      { color: '#d4e6f1', voxels: unique(cylinder(0,0,-2.5,2.5,0.35)) },    // urethra
+    ],
   },
 
   testes: {
@@ -296,10 +383,13 @@ const ORGANS = {
     voxels: unique([
       ...ellipsoid(-2.5, 0, 0, 1.8, 2.2, 1.8),
       ...ellipsoid(2.5, 0, 0, 1.8, 2.2, 1.8),
-      // epididymis
       ...sphere(-3, 2, 0, 0.8),
       ...sphere(3, 2, 0, 0.8),
     ]),
+    interior: [
+      { color: '#fdfefe', voxels: unique([...ellipsoid(-2.5,0,0,1.3,1.7,1.3), ...ellipsoid(2.5,0,0,1.3,1.7,1.3)]) }, // seminiferous tubules
+      { color: '#f9e79f', voxels: unique([...sphere(-2.5,0,0,0.5), ...sphere(2.5,0,0,0.5)]) },                        // Leydig cells (interstitial)
+    ],
   },
 
   // ══ GYNECOLOGICAL ═══════════════════════════════════════════════════════
@@ -317,7 +407,12 @@ const ORGANS = {
       ...tube([[-3.5,2,0],[-1.5,3,0],[0,3,0]], 0.5),
       ...tube([[3.5,2,0],[1.5,3,0],[0,3,0]], 0.5),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(-2, 0, 0, 1.2, 1, 1), color: '#c0392b' },
+      { voxels: ellipsoid(2, 0, 0, 1.2, 1, 1), color: '#c0392b' },
+    ],
+},
 
   uterus: {
     label: 'Uterus',
@@ -333,7 +428,12 @@ const ORGANS = {
       // fundus dome
       ...ellipsoid(0, 4, 0, 2.5, 1.5, 2),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 2, 3, 1.5), color: '#922b21' },
+      { voxels: ellipsoid(0, 0, 0, 1, 2, 0.8), color: '#c0392b' },
+    ],
+},
 
   cervix: {
     label: 'Cervix',
@@ -347,7 +447,12 @@ const ORGANS = {
       // ectocervix
       ...ellipsoid(0, 1, 0, 2, 0.8, 1.8),
     ]),
-  },
+  
+    interior: [
+      { voxels: cylinder(0, 0, -2, 2, 1), color: '#c0392b' },
+      { voxels: cylinder(0, 0, -2, 2, 0.4), color: '#f5f0e8' },
+    ],
+},
 
   // ══ HEAD & NECK ══════════════════════════════════════════════════════════
 
@@ -370,7 +475,15 @@ const ORGANS = {
       // brain stem
       ...cylinder(0, 0, -6, -4, 1.2),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 3.5, 4, 3.5), color: '#f5f0e8' },
+      { voxels: ellipsoid(0, -2, 0, 1.5, 1.5, 1.5), color: '#aed6f1' },
+      { voxels: ellipsoid(0, -3, -1, 0.8, 0.8, 0.8), color: '#aed6f1' },
+      { voxels: cylinder(0, 0, -5, -3, 0.5), color: '#aed6f1' },
+      { voxels: ellipsoid(0, -5, -1, 2, 1, 2), color: '#d4e6f1' },
+    ],
+},
 
   thyroid: {
     label: 'Thyroid',
@@ -384,7 +497,12 @@ const ORGANS = {
       // isthmus
       ...cylinder(0, 0, -0.5, 0.5, 0.8),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(-1.5, 0, 0, 1.2, 2, 0.8), color: '#c0392b' },
+      { voxels: ellipsoid(1.5, 0, 0, 1.2, 2, 0.8), color: '#c0392b' },
+    ],
+},
 
   larynx: {
     label: 'Larynx',
@@ -399,7 +517,12 @@ const ORGANS = {
       // vocal cords
       ...ellipsoid(0, 1, 0, 2, 0.4, 1.4),
     ]),
-  },
+  
+    interior: [
+      { voxels: hollowCylinder(0, 0, -2, 2, 1.5, 0.8), color: '#c0392b' },
+      { voxels: cylinder(0, 0, -1, 1, 0.6), color: '#f5f0e8' },
+    ],
+},
 
   oralCavity: {
     label: 'Oral Cavity',
@@ -418,7 +541,12 @@ const ORGANS = {
       ...ellipsoid(-3.5, 0, 0, 0.8, 2, 2),
       ...ellipsoid(3.5, 0, 0, 0.8, 2, 2),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 2.5, 1.5, 2), color: '#c0392b' },
+      { voxels: ellipsoid(0, -0.5, 0.5, 2, 1, 1.5), color: '#e8d5b0' },
+    ],
+},
 
   salivaryGland: {
     label: 'Salivary Glands',
@@ -437,7 +565,11 @@ const ORGANS = {
       ...ellipsoid(-1.5, -2, 0, 1, 1, 0.8),
       ...ellipsoid(1.5, -2, 0, 1, 1, 0.8),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 1.5, 1.2, 1), color: '#f5f0e8' },
+    ],
+},
 
   nasopharynx: {
     label: 'Nasopharynx',
@@ -453,7 +585,12 @@ const ORGANS = {
       ...ellipsoid(-1, 2, 0.5, 0.8, 1.2, 0.5),
       ...ellipsoid(1, 2, 0.5, 0.8, 1.2, 0.5),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 2, 1.5, 1.5), color: '#c0392b' },
+      { voxels: cylinder(0, 0, -2, 2, 0.7), color: '#f5f0e8' },
+    ],
+},
 
   // ══ BREAST ══════════════════════════════════════════════════════════════
 
@@ -475,7 +612,12 @@ const ORGANS = {
       ...sphere(-5, 0, 4.8, 0.8),
       ...sphere(5, 0, 4.8, 0.8),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 3, 3, 2), color: '#f5cba7' },
+      { voxels: tube([[0,0,0],[0,2,1],[0,3,2]], 0.3), color: '#922b21' },
+    ],
+},
 
   // ══ HEMATOLOGICAL ═══════════════════════════════════════════════════════
 
@@ -506,7 +648,12 @@ const ORGANS = {
       ...sphere(-4, -7, 0, 2),
       ...sphere(4, -7, 0, 2),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 3, 5, 3), color: '#c0392b' },
+      { voxels: ellipsoid(0, 0, 0, 2, 4, 2), color: '#f5cba7' },
+    ],
+},
 
   lymphNodes: {
     label: 'Lymph Nodes',
@@ -543,7 +690,12 @@ const ORGANS = {
       ...sphere(5, -6, 0, 1.5),
       ...sphere(4, -7.5, 0, 1.2),
     ]),
-  },
+  
+    interior: [
+      { voxels: sphere(0, 0, 0, 1.5), color: '#c0392b' },
+      { voxels: sphere(0, 0, 0, 0.8), color: '#f5f0e8' },
+    ],
+},
 
   // ══ ENDOCRINE ═══════════════════════════════════════════════════════════
 
@@ -561,7 +713,12 @@ const ORGANS = {
       ...ellipsoid(5, 3, 0, 1.5, 1.5, 1),
       ...ellipsoid(5.5, 2, 0, 1, 1, 0.8),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 1.5, 1, 1), color: '#f5cba7' },
+      { voxels: ellipsoid(0, 0, 0, 0.7, 0.5, 0.5), color: '#d4ac0d' },
+    ],
+},
 
   // ══ DERMATOLOGICAL ══════════════════════════════════════════════════════
 
@@ -586,7 +743,12 @@ const ORGANS = {
         }
       return unique(v)
     })(),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 4, 5, 3), color: '#f5cba7' },
+      { voxels: ellipsoid(0, 0, 0, 3.5, 4.5, 2.5), color: '#c0392b' },
+    ],
+},
 
   // ══ MUSCULOSKELETAL ══════════════════════════════════════════════════════
 
@@ -606,7 +768,14 @@ const ORGANS = {
       // medullary canal (marrow space)
       ...cylinder(0, 0, -6, 6, 1),
     ]),
-  },
+  
+    interior: [
+      { voxels: cylinder(0, 0, -8, 8, 1.5), color: '#c0392b' },
+      { voxels: hollowCylinder(0, 0, -8, 8, 3.5, 2.5), color: '#fef9e7' },
+      { voxels: ellipsoid(0, 8, 0, 2, 2, 2), color: '#f5cba7' },
+      { voxels: ellipsoid(0, -8, 0, 2, 2, 2), color: '#f5cba7' },
+    ],
+},
 
   softTissue: {
     label: 'Soft Tissue',
@@ -621,7 +790,12 @@ const ORGANS = {
       ...ellipsoid(-2, 0, 0, 3.5, 5.5, 3.5),
       ...ellipsoid(2, 0, 0, 3.5, 5.5, 3.5),
     ]),
-  },
+  
+    interior: [
+      { voxels: ellipsoid(0, 0, 0, 3.5, 5, 3.5), color: '#c0392b' },
+      { voxels: ellipsoid(0, 0, 0, 2, 4, 2), color: '#7b241c' },
+    ],
+},
 }
 
 export default ORGANS
