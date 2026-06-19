@@ -4,7 +4,7 @@ import OrganViewer from './components/OrganViewer'
 import OrganSelector from './components/OrganSelector'
 import StageSelector from './components/StageSelector'
 import Paywall from './components/Paywall'
-import AiAssistant from './components/AiAssistant'
+import InfoPanel from './components/InfoPanel'
 import PatientChat from './components/PatientChat'
 import PatientOrganViewer from './components/PatientOrganViewer'
 import ORGANS from './data/organs'
@@ -148,9 +148,9 @@ function DoctorApp() {
               <StageSelector stage={stage} onStageChange={handleStageChange} />
             </div>
           </div>
+          <InfoPanel organKey={selectedOrgan} stage={stage} />
         </div>
       </div>
-      <AiAssistant organ={selectedOrgan} organLabel={organ?.label} stage={stage} highlights={highlights} />
     </Paywall>
   )
 }

@@ -27,7 +27,7 @@ const CATEGORY_COLOR = {
 }
 
 export default function InfoPanel({ organKey, stage, patientDefault = false }) {
-  const [tab, setTab] = useState('Overview')
+  const [tab, setTab] = useState('Consult')
   const [patientMode, setPatientMode] = useState(patientDefault)
 
   const data = organKey ? CLINICAL[organKey] : null
