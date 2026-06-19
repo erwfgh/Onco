@@ -92,6 +92,8 @@ export default function App() {
               stage={stage}
               highlights={highlights}
               onVoxelClick={handleVoxelClick}
+              crossSection={crossSection}
+              onCrossSection={setCrossSection}
             />
 
             {/* Empty state */}
@@ -126,7 +128,7 @@ export default function App() {
         </div>
       </div>
     </div>
-    <AiAssistant organ={organ} stage={stage} highlights={highlights} />
+    <AiAssistant organ={selectedOrgan} organLabel={organ?.label} stage={stage} highlights={highlights} />
     </Paywall>
   )
 }
