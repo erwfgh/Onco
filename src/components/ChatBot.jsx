@@ -40,11 +40,14 @@ export default function ChatBot({ organKey, stage }) {
           patientMode: true,
         }),
       })
-      if (!res.ok) throw new Error('Server error')
-      const { reply } = await res.json()
-      setMessages([...newMessages, { role: 'assistant', content: reply }])
-    } catch {
-      setMessages([...newMessages, { role: 'assistant', content: 'The AI assistant is temporarily unavailable. Please try again in a moment.' }])
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Server error')
+      setMessages([...newMessages, { role: 'assistant', content: data.reply }])
+    } catch (err) {
+      const msg = err.message?.includes('GROQ_API_KEY')
+        ? 'The AI is not yet activated on this site. The site owner needs to add a GROQ_API_KEY in Vercel settings.'
+        : 'Something went wrong. Please try again in a moment.'
+      setMessages([...newMessages, { role: 'assistant', content: msg }])
     }
     setLoading(false)
   }

@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function InteriorStructure({ group, clippingPlanes }) {
+function InteriorStructure({ group }) {
   const meshRef = useRef()
   const applied = useRef(false)
   const count = group.voxels.length
@@ -10,12 +10,11 @@ function InteriorStructure({ group, clippingPlanes }) {
   const positions = useMemo(() => group.voxels.map(v => new THREE.Vector3(v.x, v.y, v.z)), [group.voxels])
   const color = useMemo(() => new THREE.Color(group.color), [group.color])
   const material = useMemo(() => new THREE.MeshStandardMaterial({
-    roughness: 0.35,
+    roughness: 0.25,
     metalness: 0.05,
-    side: THREE.DoubleSide,
-    clippingPlanes,
-    clipShadows: true,
-  }), [clippingPlanes])
+    emissive: new THREE.Color(group.color),
+    emissiveIntensity: 0.4,
+  }), [])
 
   useEffect(() => { material.color.set(color) }, [color, material])
 
@@ -54,10 +53,8 @@ const PURPLE = {
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
-// Normal dissect: cut front face off (Z-axis)
+// Cross-section: cut front face off (Z-axis)
 const CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
-// Interior view: lateral cut (X-axis) reveals airways/vessels running top-to-bottom
-const CLIP_PLANE_INTERIOR = new THREE.Plane(new THREE.Vector3(1, 0, 0), 1)
 
 function voxelHash(x, y, z) {
   const h = Math.sin(x * 13.7 + y * 47.3 + z * 89.1) * 43758.5453
@@ -175,15 +172,21 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     prevMode.current = modeKey
 
     if (insideMode) {
-      // Lateral X-axis cut: reveals airways/vessels running top-to-bottom
-      material.clippingPlanes = [CLIP_PLANE_INTERIOR]
-      material.side = THREE.DoubleSide
-      material.roughness = 0.30
-      material.metalness = 0.12
-      material.emissive = new THREE.Color('#180808')
-      material.emissiveIntensity = 0.3
+      // Ghost the organ wall so interior airways/structures show through
+      material.clippingPlanes = []
+      material.side = THREE.FrontSide
+      material.transparent = true
+      material.opacity = 0.12
+      material.depthWrite = false
+      material.roughness = 0.55
+      material.metalness = 0.08
+      material.emissive = new THREE.Color('#000000')
+      material.emissiveIntensity = 0
     } else if (crossSection) {
       material.clippingPlanes = [CLIP_PLANE]
+      material.transparent = false
+      material.opacity = 1
+      material.depthWrite = true
       material.side = THREE.DoubleSide
       material.roughness = 0.55
       material.metalness = 0.08
@@ -191,6 +194,9 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
       material.emissiveIntensity = 0
     } else {
       material.clippingPlanes = []
+      material.transparent = false
+      material.opacity = 1
+      material.depthWrite = true
       material.side = THREE.FrontSide
       material.roughness = 0.55
       material.metalness = 0.08
@@ -224,8 +230,6 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     if (e.instanceId != null) onVoxelClick(e.instanceId)
   }, [onVoxelClick])
 
-  const interiorClipPlanes = useMemo(() => [CLIP_PLANE_INTERIOR], [])
-
   return (
     <>
       <instancedMesh
@@ -237,7 +241,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
         receiveShadow
       />
       {insideMode && interior?.map((group, i) => (
-        <InteriorStructure key={i} group={group} clippingPlanes={interiorClipPlanes} />
+        <InteriorStructure key={i} group={group} />
       ))}
     </>
   )

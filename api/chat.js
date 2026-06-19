@@ -1,11 +1,17 @@
 import Groq from 'groq-sdk'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(503).json({ error: 'GROQ_API_KEY not configured' })
+  }
+
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+
   const { organ, stage, message, history = [], patientMode = false } = req.body
+
+  if (!message) return res.status(400).json({ error: 'No message provided' })
 
   const systemPrompt = patientMode
     ? `You are a compassionate oncology assistant helping patients understand cancer. Explain medical terms in plain, simple English. Be warm, clear, and reassuring. Cover topics like: what cancer is, types, treatments (chemotherapy, immunotherapy, radiation, surgery), side effects, and questions to ask doctors. Always remind users to consult their own doctor for personal medical advice.`
@@ -13,7 +19,7 @@ export default async function handler(req, res) {
 
   const messages = [
     { role: 'system', content: systemPrompt },
-    ...history,
+    ...history.slice(-10),
     { role: 'user', content: message },
   ]
 
