@@ -91,26 +91,26 @@ export default function ChatBot({ organKey, stage }) {
   ]
 
   return (
-    <div className="rounded-xl border border-blue-200 bg-white overflow-hidden shadow-sm">
+    <div className="rounded-2xl border border-blue-200 bg-white overflow-hidden shadow-md">
       {/* Header */}
-      <div className="px-4 py-2.5 border-b border-blue-100 bg-blue-50 flex items-center justify-between">
+      <div className="px-4 py-3 bg-blue-600 flex items-center justify-between">
         <div>
-          <div className="text-xs font-semibold text-slate-700">AI Assistant</div>
-          <div className="text-[10px] text-slate-400">{organ.label} · Stage {['I','II','III','IV'][stage-1]} · Plain-language answers</div>
+          <div className="text-sm font-bold text-white">AI Assistant</div>
+          <div className="text-[10px] text-blue-200">{organ.label} · Stage {['I','II','III','IV'][stage-1]} · Plain-language answers</div>
         </div>
-        <span className="text-lg">🤖</span>
+        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-base">🤖</div>
       </div>
 
       {/* Messages */}
-      <div className="px-4 py-3 space-y-2.5 max-h-72 overflow-y-auto bg-white">
+      <div className="px-4 py-4 space-y-3 max-h-80 overflow-y-auto bg-[#f0f6ff]">
         {messages.length === 0 && (
-          <div className="space-y-1.5">
-            <p className="text-[10px] text-slate-400 mb-2">Suggested questions:</p>
+          <div className="space-y-2">
+            <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider mb-2">Suggested questions</p>
             {starters.map(q => (
               <button
                 key={q}
                 onClick={() => sendMessage(q)}
-                className="w-full text-left text-[11px] text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg px-3 py-2 border border-blue-200 transition-colors leading-snug"
+                className="w-full text-left text-xs text-blue-700 bg-white hover:bg-blue-50 rounded-xl px-3 py-2.5 border border-blue-200 shadow-sm transition-colors leading-snug font-medium"
               >
                 {q}
               </button>
@@ -120,10 +120,10 @@ export default function ChatBot({ organKey, stage }) {
 
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[11px] leading-relaxed ${
+            <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-sm ${
               m.role === 'user'
-                ? 'bg-blue-600 text-white'
-                : 'bg-blue-50 border border-blue-100 text-slate-700'
+                ? 'bg-blue-600 text-white rounded-br-sm'
+                : 'bg-white border border-blue-100 text-slate-700 rounded-bl-sm'
             }`}>
               {m.content}
             </div>
@@ -132,10 +132,10 @@ export default function ChatBot({ organKey, stage }) {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 flex gap-1">
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="bg-white border border-blue-100 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1.5 shadow-sm">
+              <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
@@ -143,19 +143,19 @@ export default function ChatBot({ organKey, stage }) {
       </div>
 
       {/* Input */}
-      <div className="px-4 py-3 border-t border-blue-100 bg-blue-50">
+      <div className="px-4 py-3 border-t border-blue-100 bg-white">
         <form onSubmit={e => { e.preventDefault(); sendMessage() }} className="flex gap-2">
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Ask anything about your diagnosis..."
             disabled={loading}
-            className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-[11px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+            className="flex-1 bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-colors disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-[11px] font-semibold transition-colors"
+            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-xs font-bold transition-colors shadow-sm"
           >
             Send
           </button>
