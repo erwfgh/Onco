@@ -33,46 +33,48 @@ export default function ReportModal({ organKey, stage, highlights, caseId, notes
       <title>OncoViz Report — ${organ.label} Stage ${stageLabel}</title>
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; background: #fff; padding: 48px; font-size: 12px; line-height: 1.5; }
-        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1d4ed8; padding-bottom: 16px; margin-bottom: 24px; }
-        .brand { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
-        .brand span { color: #1d4ed8; }
-        .brand .sub { font-size: 10px; font-weight: 400; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
-        .report-title { font-size: 22px; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
-        .report-sub { font-size: 13px; color: #1d4ed8; font-weight: 600; }
-        .meta-row { display: flex; gap: 24px; margin-top: 8px; }
-        .meta-item { font-size: 10px; color: #64748b; }
-        .meta-item strong { color: #334155; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; background: #f0f6ff; padding: 0; font-size: 12px; line-height: 1.5; }
+        .page { background: #fff; max-width: 820px; margin: 0 auto; padding: 48px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; background: #1d4ed8; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px; }
+        .brand { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; color: #fff; }
+        .brand span { color: #93c5fd; }
+        .brand .sub { font-size: 10px; font-weight: 400; color: #93c5fd; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 2px; }
+        .report-title { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 4px; text-align: right; }
+        .report-sub { font-size: 12px; color: #bfdbfe; font-weight: 600; text-align: right; }
+        .meta-row { display: flex; gap: 16px; margin-top: 6px; justify-content: flex-end; }
+        .meta-item { font-size: 10px; color: #bfdbfe; }
+        .meta-item strong { color: #fff; }
         .section { margin-bottom: 22px; }
-        .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #3b82f6; border-bottom: 1px solid #dbeafe; padding-bottom: 5px; margin-bottom: 12px; }
+        .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #1d4ed8; border-bottom: 2px solid #dbeafe; padding-bottom: 5px; margin-bottom: 12px; }
         .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #f8fafc; }
-        .big-number { font-size: 38px; font-weight: 900; color: #0f172a; line-height: 1; }
-        .big-label { font-size: 10px; color: #64748b; margin-top: 4px; }
+        .card { border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px; background: #eff6ff; }
+        .big-number { font-size: 40px; font-weight: 900; color: #1d4ed8; line-height: 1; }
+        .big-label { font-size: 10px; color: #3b82f6; margin-top: 4px; font-weight: 600; }
+        .big-sub { font-size: 10px; color: #64748b; margin-top: 6px; line-height: 1.4; }
         .tnm-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .tnm-cell { flex: 1; text-align: center; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 6px; }
-        .tnm-val { font-size: 20px; font-weight: 900; color: #1d4ed8; }
+        .tnm-cell { flex: 1; text-align: center; background: #fff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 6px; }
+        .tnm-val { font-size: 22px; font-weight: 900; color: #1d4ed8; }
         .tnm-lbl { font-size: 9px; color: #64748b; margin-top: 2px; }
         .tnm-desc { font-size: 10px; color: #475569; margin-top: 6px; line-height: 1.4; }
         .biomarker-list { display: flex; flex-wrap: wrap; gap: 5px; }
-        .biomarker { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 3px 8px; font-size: 10px; color: #1d4ed8; font-weight: 500; }
-        .text-box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; min-height: 72px; white-space: pre-wrap; font-size: 11px; color: #334155; background: #fff; line-height: 1.6; }
-        .text-box.prescribed { border-color: #bfdbfe; background: #f0f7ff; }
-        .empty-box { border: 1px dashed #cbd5e1; border-radius: 6px; padding: 12px; min-height: 72px; background: #f8fafc; }
+        .biomarker { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 3px 8px; font-size: 10px; color: #1d4ed8; font-weight: 600; }
+        .text-box { border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; min-height: 80px; white-space: pre-wrap; font-size: 11px; color: #334155; background: #eff6ff; line-height: 1.6; }
+        .text-box.prescribed { border-color: #1d4ed8; border-width: 2px; background: #dbeafe; }
+        .empty-box { border: 1px dashed #bfdbfe; border-radius: 8px; padding: 14px; min-height: 80px; background: #f8fbff; }
         .patient-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 4px; }
-        .field { }
-        .field-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 3px; }
-        .field-value { font-size: 12px; color: #1e293b; font-weight: 500; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; min-height: 20px; }
-        .sites-badge { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 12px; font-size: 11px; color: #1d4ed8; font-weight: 600; }
-        .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-end; }
-        .footer-brand { font-size: 12px; font-weight: 900; color: #1d4ed8; }
-        .disclaimer { font-size: 9px; color: #94a3b8; max-width: 480px; line-height: 1.4; }
+        .field-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #3b82f6; margin-bottom: 4px; }
+        .field-value { font-size: 12px; color: #1e293b; font-weight: 500; border-bottom: 2px solid #bfdbfe; padding-bottom: 4px; min-height: 22px; }
+        .sites-badge { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 14px; font-size: 11px; color: #1d4ed8; font-weight: 600; }
+        .footer { margin-top: 32px; padding-top: 14px; border-top: 2px solid #dbeafe; display: flex; justify-content: space-between; align-items: flex-end; }
+        .footer-brand { font-size: 14px; font-weight: 900; color: #1d4ed8; letter-spacing: -0.3px; }
+        .disclaimer { font-size: 9px; color: #94a3b8; max-width: 480px; line-height: 1.4; margin-top: 3px; }
         .sig-block { text-align: right; }
-        .sig-line { border-bottom: 1px solid #334155; width: 200px; margin-bottom: 3px; height: 28px; }
-        .sig-label { font-size: 9px; color: #64748b; }
-        @media print { body { padding: 28px; } }
+        .sig-line { border-bottom: 2px solid #1d4ed8; width: 200px; margin-bottom: 4px; height: 28px; }
+        .sig-label { font-size: 9px; color: #3b82f6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        @media print { body { background: #fff; } .page { padding: 28px; } }
       </style>
-    </head><body>
+    </head><body><div class="page">
       <div class="header">
         <div>
           <div class="brand">ONCO<span>VIZ</span><div class="sub">3D Clinical Oncology Platform</div></div>
@@ -107,7 +109,7 @@ export default function ReportModal({ organKey, stage, highlights, caseId, notes
           <div class="card">
             <div class="big-number">${survival}</div>
             <div class="big-label">Stage ${stageLabel} &mdash; ${data.fullName}</div>
-            <div style="font-size:10px;color:#64748b;margin-top:6px">Population-level statistic. Individual prognosis depends on performance status, comorbidities, and treatment response.</div>
+            <div class="big-sub">Population-level statistic. Individual prognosis depends on performance status, comorbidities, and treatment response.</div>
           </div>
         </div>
         <div class="section">
@@ -150,7 +152,7 @@ export default function ReportModal({ organKey, stage, highlights, caseId, notes
           <div class="sig-label">Physician Signature</div>
         </div>
       </div>
-    </body></html>`)
+    </div></body></html>`)
     w.document.close()
     w.focus()
     setTimeout(() => { w.print(); w.close() }, 400)
