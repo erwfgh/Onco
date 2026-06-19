@@ -58,20 +58,18 @@ function FirstPersonController({ active, onExit }) {
 }
 
 export default function OrganViewer({ organ, stage, highlights, onVoxelClick, crossSection, onCrossSection }) {
-  const [insideMode, setInsideMode] = useState(false)
+  const [xrayMode, setXrayMode] = useState(false)
   const [exploreMode, setExploreMode] = useState(false)
   const controlsRef = useRef()
 
   // Reset modes when organ changes
   useEffect(() => {
-    setInsideMode(false)
+    setXrayMode(false)
     setExploreMode(false)
   }, [organ])
 
-  function handleInsideToggle() {
-    const next = !insideMode
-    setInsideMode(next)
-    onCrossSection(next)
+  function handleXrayToggle() {
+    setXrayMode(x => !x)
   }
 
   function handleEnterExplore() {
@@ -114,11 +112,11 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
           </>
         )}
 
-        {insideMode && !exploreMode && (
+        {xrayMode && !exploreMode && (
           <>
-            <pointLight position={[10, 0, 0]} intensity={5.0} color="#fff5f0" distance={40} decay={0.7} />
-            <pointLight position={[5, 8, 0]}  intensity={3.0} color="#ffd0c0" distance={30} decay={0.9} />
-            <pointLight position={[5,-8, 0]}  intensity={3.0} color="#ffc8b0" distance={30} decay={0.9} />
+            <pointLight position={[0, 0, 0]}  intensity={3.5} color="#ffffff" distance={35} decay={0.6} />
+            <pointLight position={[8, 0, 0]}  intensity={2.0} color="#fff5f0" distance={30} decay={0.8} />
+            <pointLight position={[-8, 0, 0]} intensity={2.0} color="#fff5f0" distance={30} decay={0.8} />
           </>
         )}
 
@@ -131,13 +129,14 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
           stage={stage}
           highlights={highlights}
           onVoxelClick={onVoxelClick}
-          crossSection={insideMode || crossSection}
-          insideMode={insideMode}
+          crossSection={crossSection}
+          insideMode={false}
           exploreMode={exploreMode}
+          xrayMode={xrayMode}
           interior={organ.interior}
         />
 
-        {!insideMode && !exploreMode && (
+        {!xrayMode && !exploreMode && (
           <>
             <ContactShadows position={[0, -14, 0]} opacity={0.25} scale={50} blur={2.5} far={22} color="#3060a0" />
             <Grid
@@ -161,7 +160,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
           enableZoom={!exploreMode}
           enableRotate={!exploreMode}
           minDistance={3}
-          maxDistance={insideMode ? 22 : 120}
+          maxDistance={120}
           makeDefault
           autoRotate={false}
         />
@@ -182,10 +181,10 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
         </>
       )}
 
-      {/* Interior cross-section label */}
-      {insideMode && !exploreMode && (
+      {/* X-Ray mode label */}
+      {xrayMode && !exploreMode && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full pointer-events-none backdrop-blur-sm">
-          Interior view — drag to orbit
+          X-Ray view — interior anatomy visible
         </div>
       )}
 
@@ -193,20 +192,20 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
       {!exploreMode && (
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
           <button
-            onClick={handleInsideToggle}
+            onClick={handleXrayToggle}
             className={`text-xs px-3 py-1.5 rounded-md shadow font-medium transition-all ${
-              insideMode
+              xrayMode
                 ? 'bg-blue-600 text-white border border-blue-400'
                 : 'bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50'
             }`}
           >
-            {insideMode ? '← Exit Interior' : '⊙ View Interior'}
+            {xrayMode ? '◎ Exit X-Ray' : '◎ X-Ray View'}
           </button>
         </div>
       )}
 
       {/* Controls hint */}
-      {!exploreMode && !insideMode && highlights.length === 0 && (
+      {!exploreMode && !xrayMode && highlights.length === 0 && (
         <div className="absolute bottom-16 right-3 text-xs text-slate-600 space-y-0.5 pointer-events-none text-right">
           <div>🖱️ Drag to rotate</div>
           <div>⚙️ Scroll to zoom</div>
