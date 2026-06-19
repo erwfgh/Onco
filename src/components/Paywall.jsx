@@ -39,13 +39,13 @@ export default function Paywall({ children }) {
 
   if (!isSignedIn) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-white to-blue-50 px-4">
+      <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
         <div className="mb-8 text-center">
           <div className="text-4xl mb-3">🔬</div>
-          <h1 className="text-3xl font-black tracking-tight mb-2 text-slate-800">
-            ONCO<span className="text-blue-600">VIZ</span>
+          <h1 className="text-3xl font-black tracking-tight mb-2">
+            <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
           </h1>
-          <p className="text-slate-500 text-sm">3D Voxel Tumor Staging for Clinicians</p>
+          <p className="text-slate-400 text-sm">3D Voxel Tumor Staging for Clinicians</p>
         </div>
         <SignIn routing="hash" />
       </div>
@@ -72,10 +72,12 @@ export default function Paywall({ children }) {
           </div>
 
           <ul className="text-slate-600 text-sm text-left space-y-2 mb-6">
-            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> All organs & tumor stages</li>
-            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Interactive 3D voxel models</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Interactive 3D voxel models of all organs & stages</li>
             <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Explore organ interiors in 3D</li>
-            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> AI patient communication assistant</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> AI assistant to explain diagnoses to patients in plain English</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Clinical data: TNM staging, regimens, biomarkers & survival stats</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Patient-facing view with plain-language explanations</li>
+            <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">✓</span> <span>More than just 3D images — unlike PatientPoint, OncoViz combines imaging, clinical data, and AI in one tool</span></li>
             <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Cancel anytime</li>
           </ul>
 
