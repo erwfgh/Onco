@@ -83,9 +83,9 @@ export default function InfoPanel({ organKey, stage, patientDefault = false }) {
         </div>
       </div>
 
-      {/* Patient mode — full height AI, no clinical noise */}
+      {/* Patient mode — scrollable content + AI at bottom */}
       {patientMode ? (
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto px-4 py-3">
           <PatientMode organKey={organKey} stage={stage} />
         </div>
       ) : (
