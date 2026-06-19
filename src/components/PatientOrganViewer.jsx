@@ -31,7 +31,7 @@ export default function PatientOrganViewer() {
             <div className="text-center">
               <div className="flex gap-4 justify-center text-5xl mb-6 opacity-15">🧠🫁❤️🦴🫘</div>
               <p className="text-slate-400 text-xl font-light mb-2">Select an organ to explore</p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-slate-400 text-sm">
                 {Object.keys(ORGANS).length} structures · spin · zoom · explore interior
               </p>
             </div>

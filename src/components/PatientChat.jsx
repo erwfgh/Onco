@@ -29,18 +29,33 @@ function Chat({ onExit, embedded }) {
     setMessages(next)
     setLoading(true)
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organ: null,
-          stage: null,
-          message: text,
-          history: messages,
-          patientMode: true,
-        }),
-      })
-      const { reply } = await res.json()
+      const key = import.meta.env.VITE_GROQ_API_KEY
+      let reply
+      if (key) {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            max_tokens: 500,
+            messages: [
+              { role: 'system', content: 'You are a compassionate oncology assistant helping patients understand cancer, treatments, and what to expect. Use clear, plain language. Never diagnose. Always recommend consulting their doctor for personal medical decisions.' },
+              ...messages,
+              userMsg,
+            ],
+          }),
+        })
+        const data = await res.json()
+        reply = data.choices?.[0]?.message?.content || 'Sorry, I could not get a response.'
+      } else {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ organ: null, stage: null, message: text, history: messages, patientMode: true }),
+        })
+        const data = await res.json()
+        reply = data.reply
+      }
       setMessages([...next, { role: 'assistant', content: reply }])
     } catch {
       setMessages([...next, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }])
@@ -49,16 +64,15 @@ function Chat({ onExit, embedded }) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#060d1a] text-white">
-      {/* Header — only shown when not embedded inside PatientApp */}
+    <div className="flex flex-col h-full bg-white text-slate-800">
       {!embedded && (
-        <header className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 bg-[#0a1525]/90 backdrop-blur-sm flex-shrink-0">
+        <header className="flex items-center justify-between px-5 py-3 border-b border-blue-100 bg-white flex-shrink-0 shadow-sm">
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-lg font-black tracking-tight">
-                <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
+                <span className="text-slate-800">ONCO</span><span className="text-teal-500">VIZ</span>
               </h1>
-              <p className="text-xs text-slate-500 -mt-0.5">Patient Oncology Assistant</p>
+              <p className="text-xs text-slate-400 -mt-0.5">Patient Oncology Assistant</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -68,7 +82,7 @@ function Chat({ onExit, embedded }) {
             <UserButton afterSignOutUrl="/" />
             <button
               onClick={onExit}
-              className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-md bg-white hover:bg-blue-50 text-slate-600 border border-blue-200 transition-colors"
             >
               ← Back
             </button>
@@ -76,21 +90,20 @@ function Chat({ onExit, embedded }) {
         </header>
       )}
 
-      {/* Chat area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 max-w-3xl mx-auto w-full">
         {messages.length === 0 && (
           <div className="mt-8 space-y-4">
             <div className="text-center mb-6">
               <div className="text-4xl mb-3">🩺</div>
-              <h2 className="text-xl font-semibold text-white mb-1">How can I help you today?</h2>
-              <p className="text-slate-400 text-sm">Ask me anything about cancer, treatments, or what to expect.</p>
+              <h2 className="text-xl font-semibold text-slate-800 mb-1">How can I help you today?</h2>
+              <p className="text-slate-500 text-sm">Ask me anything about cancer, treatments, or what to expect.</p>
             </div>
             <div className="grid gap-2">
               {STARTERS.map(q => (
                 <button
                   key={q}
                   onClick={() => send(q)}
-                  className="text-left px-4 py-3 rounded-xl bg-slate-800/60 hover:bg-violet-900/30 border border-slate-700/40 hover:border-violet-500/40 text-slate-300 text-sm transition-colors"
+                  className="text-left px-4 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-slate-700 text-sm transition-colors"
                 >
                   {q}
                 </button>
@@ -102,12 +115,12 @@ function Chat({ onExit, embedded }) {
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             {m.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-full bg-violet-600 flex items-center justify-center text-sm mr-2 flex-shrink-0 mt-1">🤖</div>
+              <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs text-white mr-2 flex-shrink-0 mt-1">✦</div>
             )}
             <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
               m.role === 'user'
-                ? 'bg-violet-600 text-white rounded-br-sm'
-                : 'bg-[#0a1525] border border-slate-700/50 text-slate-200 rounded-bl-sm'
+                ? 'bg-blue-600 text-white rounded-br-sm'
+                : 'bg-blue-50 border border-blue-200 text-slate-700 rounded-bl-sm'
             }`}>
               {m.content}
             </div>
@@ -116,19 +129,18 @@ function Chat({ onExit, embedded }) {
 
         {loading && (
           <div className="flex justify-start">
-            <div className="w-7 h-7 rounded-full bg-violet-600 flex items-center justify-center text-sm mr-2 flex-shrink-0">🤖</div>
-            <div className="bg-[#0a1525] border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm flex gap-1 items-center">
-              <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <span className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs text-white mr-2 flex-shrink-0">✦</div>
+            <div className="bg-blue-50 border border-blue-200 px-4 py-3 rounded-2xl rounded-bl-sm flex gap-1 items-center">
+              <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="border-t border-slate-700/60 bg-[#0a1525]/80 px-4 py-4 flex-shrink-0">
+      <div className="border-t border-blue-100 bg-white px-4 py-4 flex-shrink-0">
         <form
           onSubmit={e => { e.preventDefault(); send() }}
           className="max-w-3xl mx-auto flex gap-3"
@@ -138,17 +150,17 @@ function Chat({ onExit, embedded }) {
             onChange={e => setInput(e.target.value)}
             placeholder="Ask about cancer, treatments, symptoms..."
             disabled={loading}
-            className="flex-1 bg-slate-800/60 border border-slate-700/40 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/60 disabled:opacity-50"
+            className="flex-1 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white disabled:opacity-50 transition-colors"
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-40 text-white text-sm font-medium transition-colors"
+            className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-medium transition-colors"
           >
             Send
           </button>
         </form>
-        <p className="text-center text-xs text-slate-600 mt-2">
+        <p className="text-center text-xs text-slate-400 mt-2">
           For informational purposes only. Always consult your doctor for medical advice.
         </p>
       </div>
@@ -159,34 +171,33 @@ function Chat({ onExit, embedded }) {
 export default function PatientChat({ onExit, embedded }) {
   const { isLoaded, isSignedIn } = useUser()
 
-  // When embedded, skip the auth gate — AI is free and immediate
   if (embedded) return <Chat onExit={onExit} embedded />
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#060d1a]">
-        <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-full bg-white">
+        <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   if (!isSignedIn) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
+      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-white to-blue-50 px-4">
         <div className="mb-8 text-center">
           <div className="text-4xl mb-3">🩺</div>
           <h1 className="text-2xl font-black tracking-tight mb-2">
-            <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
+            <span className="text-slate-800">ONCO</span><span className="text-teal-500">VIZ</span>
             <span className="text-slate-400 font-normal text-lg ml-2">for Patients</span>
           </h1>
-          <p className="text-slate-400 text-sm max-w-xs">
-            Sign in with your email and phone number to chat with our oncology AI — no subscription needed.
+          <p className="text-slate-500 text-sm max-w-xs">
+            Sign in with your email to chat with our oncology AI — no subscription needed.
           </p>
         </div>
         <SignIn routing="hash" />
         <button
           onClick={onExit}
-          className="mt-6 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+          className="mt-6 text-xs text-slate-400 hover:text-slate-600 transition-colors"
         >
           ← Back
         </button>
