@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react'
+import { UserButton } from '@clerk/clerk-react'
 import OrganViewer from './components/OrganViewer'
 import OrganSelector from './components/OrganSelector'
 import StageSelector from './components/StageSelector'
+import Paywall from './components/Paywall'
 import ORGANS from './data/organs'
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
   const organ = selectedOrgan ? ORGANS[selectedOrgan] : null
 
   return (
+    <Paywall>
     <div className="flex flex-col h-full bg-[#060d1a] text-white select-none">
 
       {/* Top bar */}
@@ -45,6 +48,7 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
+          <UserButton afterSignOutUrl="/" />
           {organ && (
             <>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-800/60 border border-slate-700/60 text-sm">
@@ -120,5 +124,6 @@ export default function App() {
         </div>
       </div>
     </div>
+    </Paywall>
   )
 }

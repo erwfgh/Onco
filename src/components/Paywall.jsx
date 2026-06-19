@@ -1,0 +1,72 @@
+import { SignIn, useUser } from '@clerk/clerk-react'
+
+export default function Paywall({ children }) {
+  const { isLoaded, isSignedIn, user } = useUser()
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-full bg-[#060d1a]">
+        <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-black tracking-tight mb-2">
+            <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
+          </h1>
+          <p className="text-slate-400 text-sm">3D Voxel Tumor Staging for Clinicians</p>
+        </div>
+        <SignIn routing="hash" />
+      </div>
+    )
+  }
+
+  // Check subscription via Clerk public metadata
+  const isSubscribed = user?.publicMetadata?.subscribed === true
+  const trialEnd = user?.publicMetadata?.trialEnd
+
+  const inTrial = trialEnd && new Date(trialEnd) > new Date()
+
+  if (!isSubscribed && !inTrial) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
+        <div className="max-w-md w-full bg-[#0a1525] border border-slate-700/60 rounded-2xl p-8 text-center shadow-2xl">
+          <div className="text-5xl mb-4">🔬</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Subscribe to OncViz</h2>
+          <p className="text-slate-400 text-sm mb-6">
+            Full access to 3D tumor staging for all organs. Start with a free 7-day trial — no charge until day 8.
+          </p>
+
+          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4 mb-6">
+            <div className="text-3xl font-black text-white">$19<span className="text-lg font-normal text-slate-400">/month</span></div>
+            <div className="text-violet-400 text-sm mt-1">7-day free trial included</div>
+          </div>
+
+          <ul className="text-slate-400 text-sm text-left space-y-2 mb-6">
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> All organs & tumor stages</li>
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Interactive 3D voxel models</li>
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Click-to-stage annotation</li>
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Cancel anytime</li>
+          </ul>
+
+          <a
+            href="/api/checkout"
+            className="block w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-colors"
+          >
+            Start Free Trial
+          </a>
+
+          <p className="text-slate-600 text-xs mt-4">
+            Signed in as {user?.primaryEmailAddress?.emailAddress}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return children
+}
