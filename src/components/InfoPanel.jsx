@@ -51,19 +51,19 @@ export default function InfoPanel({ organKey, stage, patientDefault = false }) {
   return (
     <div className="w-72 flex-shrink-0 bg-white border-l border-blue-100 flex flex-col overflow-hidden shadow-sm">
 
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-blue-100 flex-shrink-0 bg-blue-50">
-        <div className="flex items-center justify-between mb-0.5">
-          <span className="text-xs text-slate-400 font-mono">{data.icd10}</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
-            Stage {['I','II','III','IV'][stage-1]}
-          </span>
-        </div>
-        <h2 className="text-sm font-bold text-slate-800 leading-tight">{data.fullName}</h2>
-        <p className="text-xs text-slate-400 mt-0.5">Incidence: {data.incidence}</p>
-
-        {/* Patient/Clinician toggle */}
-        <div className="flex items-center gap-1.5 mt-2.5 bg-white rounded-lg p-0.5 border border-blue-100">
+      {/* Toggle — minimal, always visible */}
+      <div className="px-3 py-2 border-b border-blue-100 flex-shrink-0 bg-blue-50">
+        {!patientMode && (
+          <div className="flex items-center justify-between mb-1.5">
+            <div>
+              <span className="text-[10px] font-mono text-slate-400">{data.icd10}</span>
+              <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
+                Stage {['I','II','III','IV'][stage-1]}
+              </span>
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5 bg-white rounded-lg p-0.5 border border-blue-100">
           <button
             onClick={() => setPatientMode(false)}
             className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
@@ -78,14 +78,14 @@ export default function InfoPanel({ organKey, stage, patientDefault = false }) {
               patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
-            Patient View
+            Patient AI
           </button>
         </div>
       </div>
 
-      {/* Patient mode */}
+      {/* Patient mode — full height AI, no clinical noise */}
       {patientMode ? (
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        <div className="flex-1 overflow-hidden flex flex-col">
           <PatientMode organKey={organKey} stage={stage} />
         </div>
       ) : (
@@ -282,14 +282,14 @@ export default function InfoPanel({ organKey, stage, patientDefault = false }) {
         </>
       )}
 
-      {/* Footer */}
-      <div className="px-4 py-2 border-t border-blue-100 flex-shrink-0 bg-blue-50">
-        <p className="text-[9px] text-slate-400 leading-tight">
-          {patientMode
-            ? 'Patient education only. Discuss your specific situation with your oncologist.'
-            : 'Educational use only. Consult NCCN guidelines for treatment decisions.'}
-        </p>
-      </div>
+      {/* Footer — clinician only */}
+      {!patientMode && (
+        <div className="px-4 py-2 border-t border-blue-100 flex-shrink-0 bg-blue-50">
+          <p className="text-[9px] text-slate-400 leading-tight">
+            Educational use only. Consult NCCN guidelines for treatment decisions.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
