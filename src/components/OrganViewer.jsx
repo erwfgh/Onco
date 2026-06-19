@@ -65,8 +65,8 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick }) 
           minDistance={3}
           maxDistance={120}
           makeDefault
-          autoRotate={!dissect && highlights.length === 0}
-          autoRotateSpeed={0.7}
+          enableDamping
+          dampingFactor={0.08}
         />
       </Canvas>
 
