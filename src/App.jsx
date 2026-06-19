@@ -10,11 +10,16 @@ import RoleSelector from './components/RoleSelector'
 import ORGANS from './data/organs'
 import CLINICAL from './data/clinicalData'
 
+const SESSION_VERSION = 2
+
 function loadUser() {
   try {
     const u = JSON.parse(localStorage.getItem('oncoviz_user'))
-    // Require a role field — clears any stale/old sessions
-    return (u && u.role) ? u : null
+    if (!u || !u.role || u.v !== SESSION_VERSION) {
+      localStorage.removeItem('oncoviz_user')
+      return null
+    }
+    return u
   } catch { return null }
 }
 
