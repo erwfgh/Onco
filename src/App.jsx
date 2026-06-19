@@ -33,12 +33,9 @@ export default function App() {
   const [caseId, setCaseId] = useState('')
   const [notes, setNotes] = useState('')
   const [showNotes, setShowNotes] = useState(false)
-  const [crossSection, setCrossSection] = useState(false)
-
   const handleOrganSelect = useCallback(key => {
     setSelectedOrgan(key)
     setHighlights([])
-    setCrossSection(false)
   }, [])
 
   const handleVoxelClick = useCallback(instanceId => {
@@ -196,8 +193,6 @@ export default function App() {
               stage={stage}
               highlights={highlights}
               onVoxelClick={handleVoxelClick}
-              crossSection={crossSection}
-              onCrossSection={setCrossSection}
             />
 
             {/* Empty state */}
