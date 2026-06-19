@@ -249,52 +249,58 @@ const ORGANS = {
       ...tag(tube([[4.5,-6.5,0.3],[5.5,-7.0,-1.0],[5.0,-8.0,-1.5]], 0.30), 'vessel'),
     ]),
     interior: [
-      // Trachea — bright white airway tube, clearly visible
-      { color: '#ffffff', voxels: unique(cylinder(0, 0, 3, 12, 1.2)) },
-      // Main bronchi — white branching from trachea
-      { color: '#f0f8ff', voxels: unique([
+      // Trachea — pinkish-beige mucosa (anatomically correct: pale pink cartilaginous tube)
+      { color: '#f5ddd0', voxels: unique(cylinder(0, 0, 3, 12, 1.2)) },
+      // Main bronchi — warm pink-beige
+      { color: '#f0d0c0', voxels: unique([
         ...tube([[0,3,0],[-4.0,2.0,0]], 1.0),
         ...tube([[0,3,0],[4.0,2.0,0]], 1.0),
       ]) },
-      // Right lobar bronchi — light blue-white
-      { color: '#ddf0ff', voxels: unique([
+      // Right lobar bronchi — deeper salmon-pink
+      { color: '#e8c0b0', voxels: unique([
         ...tube([[-4.0,2.0,0],[-4.5,5.5,0.3],[-4.2,8.5,0.5]], 0.8),
         ...tube([[-4.0,2.0,0],[-5.0,2.0,1.5],[-5.2,1.0,2.0]], 0.7),
         ...tube([[-4.0,2.0,0],[-4.5,-1.5,0],[-4.8,-5.5,0]], 0.8),
       ]) },
-      // Left lobar bronchi — light blue-white
-      { color: '#ddf0ff', voxels: unique([
+      // Left lobar bronchi — salmon-pink
+      { color: '#e8c0b0', voxels: unique([
         ...tube([[4.0,2.0,0],[4.2,5.5,0.3],[3.8,8.5,0.5]], 0.8),
         ...tube([[4.0,2.0,0],[3.8,-1.5,0],[4.0,-5.5,0]], 0.8),
       ]) },
-      // Segmental bronchi right — smaller branches
-      { color: '#c8e8ff', voxels: unique([
+      // Segmental bronchi right — rose-pink (smaller)
+      { color: '#ddb0a0', voxels: unique([
         ...tube([[-4.2,8.5,0.5],[-5.5,8.0,1.5],[-7.0,7.0,2.0]], 0.55),
         ...tube([[-4.2,8.5,0.5],[-3.5,9.5,0.2],[-2.8,10.0,-0.5]], 0.50),
         ...tube([[-4.8,-5.5,0],[-6.0,-6.5,0.8],[-7.0,-8.0,0.5]], 0.55),
         ...tube([[-4.8,-5.5,0],[-4.0,-7.0,-0.5],[-3.5,-8.5,-0.8]], 0.50),
       ]) },
-      // Segmental bronchi left
-      { color: '#c8e8ff', voxels: unique([
+      // Segmental bronchi left — rose-pink
+      { color: '#ddb0a0', voxels: unique([
         ...tube([[3.8,8.5,0.5],[5.0,8.0,1.5],[6.0,7.0,2.0]], 0.55),
         ...tube([[3.8,8.5,0.5],[3.2,9.5,0.2],[2.5,10.0,-0.5]], 0.50),
         ...tube([[4.0,-5.5,0],[5.5,-6.5,0.8],[6.0,-8.0,0.5]], 0.55),
         ...tube([[4.0,-5.5,0],[3.5,-7.0,-0.5],[3.0,-8.5,-0.8]], 0.50),
       ]) },
-      // Pulmonary arteries — vivid blue
-      { color: '#5588ff', voxels: unique([
+      // Pulmonary arteries — deep blue (deoxygenated blood to lungs)
+      { color: '#2244cc', voxels: unique([
         ...sphere(-3.5, 1.5, 0.8, 1.4),
         ...tube([[-3.5,1.5,0.8],[-5.5,4.0,0.5],[-6.5,7.0,0.5]], 0.7),
         ...tube([[-3.5,1.5,0.8],[-4.5,-2.5,0.3],[-5.5,-6.5,0.3]], 0.65),
+        ...tube([[-5.5,4.0,0.5],[-7.0,5.5,1.0],[-7.5,7.0,0.8]], 0.5),
+        ...tube([[-5.5,-6.5,0.3],[-6.5,-7.5,0.8],[-7.0,-8.5,0.5]], 0.45),
         ...sphere(3.5, 1.5, 0.8, 1.4),
         ...tube([[3.5,1.5,0.8],[5.0,4.0,0.5],[6.0,7.0,0.5]], 0.7),
         ...tube([[3.5,1.5,0.8],[4.2,-2.5,0.3],[4.8,-6.5,0.3]], 0.65),
+        ...tube([[5.0,4.0,0.5],[6.5,5.5,1.0],[7.0,7.0,0.8]], 0.5),
+        ...tube([[4.8,-6.5,0.3],[5.5,-7.5,0.8],[6.0,-8.5,0.5]], 0.45),
       ]) },
-      // Pulmonary veins — warm red
-      { color: '#ff5555', voxels: unique([
+      // Pulmonary veins — bright red (oxygenated blood returning to heart)
+      { color: '#cc2222', voxels: unique([
         ...tube([[-7.5,7.0,0.8],[-5.5,3.5,-0.8],[-3.5,2.0,-1.0]], 0.6),
+        ...tube([[-7.0,7.0,0.8],[-5.5,5.0,-0.5],[-3.8,2.5,-1.2]], 0.5),
         ...tube([[-7.0,-7.5,0.8],[-5.0,-4.5,-0.5],[-3.5,0.5,-1.0]], 0.6),
         ...tube([[7.0,7.0,0.8],[5.5,3.5,-0.8],[3.5,2.0,-1.0]], 0.6),
+        ...tube([[7.0,7.0,0.8],[5.5,5.0,-0.5],[3.8,2.5,-1.2]], 0.5),
         ...tube([[6.0,-7.5,0.8],[4.5,-4.5,-0.5],[3.5,0.5,-1.0]], 0.6),
       ]) },
     ],

@@ -2,44 +2,6 @@ import { useRef, useMemo, useEffect, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function InteriorStructure({ group }) {
-  const meshRef = useRef()
-  const applied = useRef(false)
-  const count = group.voxels.length
-  const dummy = useMemo(() => new THREE.Object3D(), [])
-  const positions = useMemo(() => group.voxels.map(v => new THREE.Vector3(v.x, v.y, v.z)), [group.voxels])
-  const color = useMemo(() => new THREE.Color(group.color), [group.color])
-  const material = useMemo(() => new THREE.MeshStandardMaterial({
-    roughness: 0.25,
-    metalness: 0.05,
-    emissive: new THREE.Color(group.color),
-    emissiveIntensity: 0.4,
-  }), [])
-
-  useEffect(() => { material.color.set(color) }, [color, material])
-
-  useEffect(() => { applied.current = false }, [positions])
-
-  useFrame(() => {
-    if (!applied.current && meshRef.current) {
-      for (let i = 0; i < positions.length; i++) {
-        dummy.position.copy(positions[i])
-        dummy.updateMatrix()
-        meshRef.current.setMatrixAt(i, dummy.matrix)
-        if (meshRef.current.instanceColor) {
-          meshRef.current.setColorAt(i, color)
-        }
-      }
-      meshRef.current.instanceMatrix.needsUpdate = true
-      if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true
-      applied.current = true
-    }
-  })
-
-  if (!count) return null
-  return <instancedMesh ref={meshRef} args={[GEO, material, count]} />
-}
-
 const VOXEL_SIZE = 1.0
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
@@ -53,8 +15,8 @@ const PURPLE = {
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
-// Cross-section: cut front face off (Z-axis)
 const CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
+const CLIP_PLANE_INTERIOR = new THREE.Plane(new THREE.Vector3(1, 0, 0), 1)
 
 function voxelHash(x, y, z) {
   const h = Math.sin(x * 13.7 + y * 47.3 + z * 89.1) * 43758.5453
@@ -76,7 +38,54 @@ function applyColors(mesh, positions, dummy, baseColors, highlightedSet, purple,
   mesh.instanceColor.needsUpdate = true
 }
 
-export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode, interior }) {
+function InteriorStructure({ voxels, color }) {
+  const meshRef = useRef()
+  const colorsApplied = useRef(false)
+  const count = voxels.length
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+
+  const positions = useMemo(
+    () => voxels.map(v => new THREE.Vector3(v.x, v.y, v.z)),
+    [voxels]
+  )
+
+  const baseColor = useMemo(() => new THREE.Color(color), [color])
+
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
+    color: baseColor,
+    roughness: 0.45,
+    metalness: 0.1,
+  }), [baseColor])
+
+  const baseColors = useMemo(() => {
+    return positions.map((pos) => {
+      const noise = voxelHash(pos.x, pos.y, pos.z)
+      const brightness = (0.9 + noise * 0.2)
+      return baseColor.clone().multiplyScalar(brightness)
+    })
+  }, [positions, baseColor])
+
+  useFrame(() => {
+    if (!colorsApplied.current && meshRef.current) {
+      const emptySet = new Set()
+      applyColors(meshRef.current, positions, dummy, baseColors, emptySet, baseColor, count)
+      colorsApplied.current = true
+    }
+  })
+
+  if (count === 0) return null
+
+  return (
+    <instancedMesh
+      ref={meshRef}
+      args={[GEO, material, count]}
+      castShadow
+      receiveShadow
+    />
+  )
+}
+
+export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode, exploreMode, interior }) {
   const meshRef = useRef()
   const colorsApplied = useRef(false)
   const prevMode = useRef(null)
@@ -121,15 +130,12 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
 
       let brightness
       if (insideMode) {
-        // Boost significantly — interior zone colors like vessels (#6b0000) are very dark
-        // and need amplification to be vivid from inside
         brightness = (2.2 + depth * 0.4) * (1.1 + noise * 0.25)
       } else {
         brightness = (0.88 + depth * 0.18) * (0.92 + noise * 0.16)
       }
 
       const c = srcColor.clone().multiplyScalar(brightness)
-      // Clamp to valid range
       c.r = Math.min(1, c.r)
       c.g = Math.min(1, c.g)
       c.b = Math.min(1, c.b)
@@ -165,16 +171,14 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     colorsApplied.current = false
   }, [positions, baseColors, highlightedSet, purple, insideMode])
 
-  // Update material mode when insideMode or crossSection changes
   useEffect(() => {
-    const modeKey = `${insideMode}:${crossSection}`
+    const modeKey = `${insideMode}:${crossSection}:${exploreMode}`
     if (prevMode.current === modeKey) return
     prevMode.current = modeKey
 
-    if (insideMode) {
-      // Ghost the organ wall so interior airways/structures show through
+    if (exploreMode) {
       material.clippingPlanes = []
-      material.side = THREE.FrontSide
+      material.side = THREE.BackSide
       material.transparent = true
       material.opacity = 0.12
       material.depthWrite = false
@@ -182,22 +186,32 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
       material.metalness = 0.08
       material.emissive = new THREE.Color('#000000')
       material.emissiveIntensity = 0
+    } else if (insideMode) {
+      material.clippingPlanes = [CLIP_PLANE_INTERIOR]
+      material.side = THREE.DoubleSide
+      material.transparent = false
+      material.opacity = 1.0
+      material.depthWrite = true
+      material.roughness = 0.30
+      material.metalness = 0.12
+      material.emissive = new THREE.Color('#180808')
+      material.emissiveIntensity = 0.3
     } else if (crossSection) {
       material.clippingPlanes = [CLIP_PLANE]
-      material.transparent = false
-      material.opacity = 1
-      material.depthWrite = true
       material.side = THREE.DoubleSide
+      material.transparent = false
+      material.opacity = 1.0
+      material.depthWrite = true
       material.roughness = 0.55
       material.metalness = 0.08
       material.emissive = new THREE.Color('#000000')
       material.emissiveIntensity = 0
     } else {
       material.clippingPlanes = []
-      material.transparent = false
-      material.opacity = 1
-      material.depthWrite = true
       material.side = THREE.FrontSide
+      material.transparent = false
+      material.opacity = 1.0
+      material.depthWrite = true
       material.roughness = 0.55
       material.metalness = 0.08
       material.emissive = new THREE.Color('#000000')
@@ -205,7 +219,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     }
     material.clipShadows = true
     material.needsUpdate = true
-  }, [insideMode, crossSection, material])
+  }, [insideMode, crossSection, exploreMode, material])
 
   useFrame(() => {
     if (!colorsApplied.current && meshRef.current) {
@@ -225,7 +239,6 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     if (!pointerDownPos.current) return
     const dx = e.clientX - pointerDownPos.current.x
     const dy = e.clientY - pointerDownPos.current.y
-    // Ignore if pointer moved more than 4px — that was a drag, not a click
     if (dx * dx + dy * dy > 16) return
     if (e.instanceId != null) onVoxelClick(e.instanceId)
   }, [onVoxelClick])
@@ -240,8 +253,8 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
         castShadow
         receiveShadow
       />
-      {insideMode && interior?.map((group, i) => (
-        <InteriorStructure key={i} group={group} />
+      {exploreMode && interior && interior.map((struct, i) => (
+        <InteriorStructure key={i} voxels={struct.voxels} color={struct.color} />
       ))}
     </>
   )
