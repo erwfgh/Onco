@@ -72,7 +72,8 @@ export default function Paywall({ children }) {
           </div>
 
           <ul className="text-slate-600 text-sm text-left space-y-2 mb-6">
-            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Interactive 3D voxel models of all organs & stages</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> All organs & tumor stages</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Interactive 3D voxel models</li>
             <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Explore organ interiors in 3D</li>
             <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> AI assistant to explain diagnoses to patients in plain English</li>
             <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Clinical data: TNM staging, regimens, biomarkers & survival stats</li>
