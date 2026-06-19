@@ -5,6 +5,29 @@ export default function Paywall({ children }) {
   const { isLoaded, isSignedIn, user } = useUser()
   const { getToken } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [checkoutError, setCheckoutError] = useState(null)
+
+  const handleCheckout = async () => {
+    setLoading(true)
+    setCheckoutError(null)
+    try {
+      const token = await getToken()
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          clerkUserId: user.id,
+          email: user.primaryEmailAddress?.emailAddress,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Checkout failed')
+      window.location.href = data.url
+    } catch (err) {
+      setCheckoutError(err.message)
+      setLoading(false)
+    }
+  }
 
   if (!isLoaded) {
     return (
@@ -33,30 +56,11 @@ export default function Paywall({ children }) {
   const inTrial = trialEnd && new Date(trialEnd) > new Date()
 
   if (!isSubscribed && !inTrial) {
-    const handleCheckout = async () => {
-      setLoading(true)
-      try {
-        const token = await getToken()
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({
-            clerkUserId: user.id,
-            email: user.primaryEmailAddress?.emailAddress,
-          }),
-        })
-        const { url } = await res.json()
-        window.location.href = url
-      } catch {
-        setLoading(false)
-      }
-    }
-
     return (
       <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
         <div className="max-w-md w-full bg-[#0a1525] border border-slate-700/60 rounded-2xl p-8 text-center shadow-2xl">
           <div className="text-5xl mb-4">🔬</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Subscribe to OncViz</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">Subscribe to OncoViz</h2>
           <p className="text-slate-400 text-sm mb-6">
             Full access to 3D tumor staging for all organs. Start with a free 7-day trial — no charge until day 8.
           </p>
@@ -70,7 +74,7 @@ export default function Paywall({ children }) {
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> All organs & tumor stages</li>
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Interactive 3D voxel models</li>
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Explore organ interiors in 3D</li>
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> AI oncology assistant</li>
+            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> AI patient communication assistant</li>
             <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Cancel anytime</li>
           </ul>
 
@@ -79,8 +83,14 @@ export default function Paywall({ children }) {
             disabled={loading}
             className="block w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-semibold transition-colors"
           >
-            {loading ? 'Redirecting...' : 'Start Free Trial'}
+            {loading ? 'Redirecting to checkout...' : 'Start Free Trial'}
           </button>
+
+          {checkoutError && (
+            <p className="text-red-400 text-xs mt-3 bg-red-900/20 border border-red-800/40 rounded-lg px-3 py-2">
+              {checkoutError}
+            </p>
+          )}
 
           <p className="text-slate-600 text-xs mt-4">
             Signed in as {user?.primaryEmailAddress?.emailAddress}
