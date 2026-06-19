@@ -491,6 +491,29 @@ const ORGANS = {
       ...tag(tube([[0,8,0.5],[0,5,0.5],[-0.5,2,0.5],[-0.5,-1,0.5],[-0.5,-4,0.5]], 0.35), 'vessel'),
       ...tag(tube([[0,8,-0.5],[0,5,-0.5],[-0.5,2,-0.5],[-0.5,-1,-0.5],[-0.5,-4,-0.5]], 0.35), 'vessel'),
     ]),
+    interior: [
+      // Mucosa lining (pinkish)
+      { color: '#f0b8a8', voxels: unique([...cylinder(0, 0, -10, 11, 0.7)]) },
+      // Submucosal plexus (pale yellow nerves)
+      { color: '#f5e8a0', voxels: unique([
+        ...tube([[0,8,0.6],[0,4,0.6],[-0.5,0,0.6],[-0.5,-5,0.6],[-0.5,-9,0.6]], 0.25),
+        ...tube([[0,8,-0.6],[0,4,-0.6],[-0.5,0,-0.6],[-0.5,-5,-0.6]], 0.25),
+      ]) },
+      // Aorta alongside (deep red)
+      { color: '#8b0000', voxels: unique([...tube([[0,11,-1.2],[0,6,-1.2],[0,0,-1.2],[-0.5,-5,-1.2],[-0.5,-10,-1.2]], 0.4)]) },
+      // Venous plexus (blue) on anterior wall
+      { color: '#2244cc', voxels: unique([
+        ...tube([[0,9,0.8],[0,5,0.8],[-0.5,1,0.8],[-0.5,-4,0.8],[-0.5,-8,0.8]], 0.3),
+        ...tube([[0.4,7,0.6],[0.4,3,0.6],[0.4,-2,0.6],[-0.1,-6,0.6]], 0.2),
+      ]) },
+      // Lymphatics (light green)
+      { color: '#90ee90', voxels: unique([
+        ...tube([[0,10,0.5],[0,6,0.5],[-0.5,2,0.5],[-0.5,-3,0.5]], 0.2),
+        ...tube([[0,8,-0.4],[0,4,-0.4],[-0.5,-1,-0.4],[-0.5,-6,-0.4]], 0.2),
+      ]) },
+      // Inner lumen air column (dark center)
+      { color: '#c06858', voxels: unique([...cylinder(0, 0, -9, 10, 0.4)]) },
+    ],
   },
 
   thymus: {
@@ -519,6 +542,39 @@ const ORGANS = {
       ...tag(ellipsoid(-1.0, 3.5, 0, 0.8, 1.2, 0.6), 'cortex'),
       ...tag(ellipsoid(1.0, 3.5, 0, 0.8, 1.2, 0.6), 'cortex'),
     ]),
+    interior: [
+      // Medullary cores right (pale pink)
+      { color: '#f5c8c0', voxels: unique([...ellipsoid(-1.5, 0.5, 0, 0.9, 2.0, 0.7)]) },
+      // Medullary cores left (pale pink)
+      { color: '#f5c8c0', voxels: unique([...ellipsoid(1.5, 0.5, 0, 0.9, 2.0, 0.7)]) },
+      // Hassal's corpuscles right (tiny white spheres)
+      { color: '#ffffff', voxels: unique([
+        ...sphere(-1.5, 0.5, 0, 0.3),
+        ...sphere(-1.2, -0.5, 0.2, 0.3),
+        ...sphere(-1.8, 1.2, -0.2, 0.3),
+      ]) },
+      // Hassal's corpuscles left
+      { color: '#ffffff', voxels: unique([
+        ...sphere(1.5, 0.5, 0, 0.3),
+        ...sphere(1.2, -0.5, 0.2, 0.3),
+        ...sphere(1.8, 1.2, -0.2, 0.3),
+      ]) },
+      // Lymphoid cortex (darker pink)
+      { color: '#d49898', voxels: unique([
+        ...ellipsoid(-1.5, 0.5, 0, 1.6, 2.8, 1.2),
+        ...ellipsoid(1.5, 0.5, 0, 1.6, 2.8, 1.2),
+      ]) },
+      // Blood supply arteries (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-1.5,3.5,0],[-1.5,1.5,0],[-1.5,-0.5,0]], 0.25),
+        ...tube([[1.5,3.5,0],[1.5,1.5,0],[1.5,-0.5,0]], 0.25),
+      ]) },
+      // Blood supply veins (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-1.5,0,0],[0,-0.5,0],[1.5,0,0]], 0.3),
+        ...tube([[-1.0,3.0,0.3],[0,2.5,0.3],[1.0,3.0,0.3]], 0.2),
+      ]) },
+    ],
   },
 
   // ══ ABDOMINAL ═══════════════════════════════════════════════════════════
@@ -605,6 +661,43 @@ const ORGANS = {
       ...tag(tube([[6.0,4.5,1.5],[5.5,3.0,1.0],[4.5,1.0,0.5]], 0.28), 'bile'),
       ...tag(tube([[-5.5,3.5,0.5],[-4.0,2.0,0.5],[-4.0,1.5,0.5]], 0.30), 'bile'),
     ]),
+    interior: [
+      // Portal vein main + branches (deep blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[0,-3.0,0],[0,-1.5,0],[1.5,0.5,0]], 1.0),
+        ...tube([[1.5,0.5,0],[4.0,1.0,0],[7.0,0.5,0]], 0.75),
+        ...tube([[1.5,0.5,0],[-1.0,1.0,0],[-4.0,1.5,0],[-7.0,1.0,0]], 0.70),
+        ...tube([[4.0,1.0,0],[4.5,3.5,1.0],[4.0,5.5,1.5]], 0.5),
+        ...tube([[-4.0,1.5,0],[-5.0,3.0,0],[-6.0,2.5,0]], 0.45),
+      ]) },
+      // Hepatic artery (bright red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[0,-2.5,-0.5],[1.5,0.5,-0.5]], 0.5),
+        ...tube([[1.5,0.5,-0.5],[4.0,1.0,-0.5],[6.5,0.5,-0.5]], 0.38),
+        ...tube([[1.5,0.5,-0.5],[-1.0,1.0,-0.5],[-4.0,1.5,-0.5]], 0.35),
+        ...tube([[4.0,1.0,-0.5],[4.5,3.5,0.5],[4.0,5.5,1.0]], 0.28),
+      ]) },
+      // Hepatic veins draining to IVC (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[7.5,2.5,0.5],[5.5,4.0,0.5],[3.0,5.5,0],[0.5,6.5,0]], 0.65),
+        ...tube([[-5.5,3.5,0.5],[-3.0,4.5,0.5],[0.5,6.5,0]], 0.55),
+        ...tube([[1.5,3.5,1.0],[1.0,5.0,0.5],[0.5,6.5,0]], 0.55),
+      ]) },
+      // Bile ducts (golden)
+      { color: '#d4a017', voxels: unique([
+        ...tube([[4.5,1.0,0.5],[2.5,0,0.5],[1.5,-1.5,0.5]], 0.4),
+        ...tube([[-4.0,1.5,0.5],[-2.0,0.5,0.5],[1.5,-1.5,0.5]], 0.4),
+        ...tube([[1.5,-1.5,0.5],[1.0,-3.0,0.5],[0,-6.0,0.5]], 0.42),
+        ...tube([[4.5,3.5,1.0],[4.0,2.5,0.8],[4.5,1.0,0.5]], 0.25),
+      ]) },
+      // Falciform ligament (fibrous tan)
+      { color: '#deb887', voxels: unique([...ellipsoid(0, 3.0, 2.5, 0.4, 4.0, 0.5)]) },
+      // Parenchymal sinusoids (warm red-brown)
+      { color: '#8b3010', voxels: unique([
+        ...ellipsoid(3.0, 0, 0, 5.0, 3.0, 3.0),
+        ...ellipsoid(-4.0, 1.0, 0, 3.0, 2.5, 2.5),
+      ]) },
+    ],
   },
 
   gallbladder: {
@@ -627,6 +720,24 @@ const ORGANS = {
       ...tag(cylinder(0, 0, 3.5, 5.5, 0.65), 'duct'),
       ...tag(noisyEllipsoid(0, 4.2, 0, 0.7, 1.0, 0.7, 0.20, 1.5), 'duct'),
     ]),
+    interior: [
+      // Bile lumen (dark green)
+      { color: '#3a6820', voxels: unique([...ellipsoid(0, 0, 0, 0.8, 2.5, 0.8)]) },
+      // Mucosal rugae (lighter green)
+      { color: '#6a9838', voxels: unique([
+        ...tube([[0,-2.5,0],[0,-1.0,0],[0,1.5,0],[0,2.5,0]], 0.35),
+        ...tube([[0.4,-2.0,0.2],[0.4,0,0.2],[0.4,2.0,0.2]], 0.28),
+        ...tube([[-0.4,-2.0,-0.2],[-0.4,0,-0.2],[-0.4,2.0,-0.2]], 0.28),
+      ]) },
+      // Cystic duct (golden)
+      { color: '#d4a017', voxels: unique([...cylinder(0, 0, 3.5, 5.5, 0.5)]) },
+      // Blood supply artery (red)
+      { color: '#cc2222', voxels: unique([...tube([[0.8,0,0.8],[0.8,2.0,0.8],[0.8,4.0,0.5]], 0.22)]) },
+      // Blood supply vein (blue)
+      { color: '#2244cc', voxels: unique([...tube([[-0.8,0,-0.8],[-0.8,2.0,-0.8],[-0.8,4.0,-0.5]], 0.22)]) },
+      // Gallbladder wall inner lining
+      { color: '#4a7820', voxels: unique([...sphere(0, -2.8, 0, 0.6)]) },
+    ],
   },
 
   pancreas: {
@@ -673,6 +784,29 @@ const ORGANS = {
       ...tag(tube([[2.5,2.5,0],[2.5,1.5,0],[2.5,0.5,0]], 0.28), 'vessel'),
       ...tag(tube([[4.5,2.5,0],[4.5,1.5,0],[4.5,0.8,0]], 0.26), 'vessel'),
     ]),
+    interior: [
+      // Main pancreatic duct (golden)
+      { color: '#d4a017', voxels: unique([...tube([[-4.5,0,0],[-2.0,0.4,0],[0,0.8,0],[2.0,1.0,0],[4.0,1.2,0],[6.5,1.6,0],[8.0,1.8,0]], 0.38)]) },
+      // Common bile duct at head (golden)
+      { color: '#d4a017', voxels: unique([...tube([[-3.5,0,0.5],[-3.5,-1.5,0.5],[-3.5,-3.0,0.3]], 0.3)]) },
+      // Superior mesenteric artery (red)
+      { color: '#cc2222', voxels: unique([...tube([[-3.5,3.0,1.8],[0,2.5,1.8],[3.0,2.5,1.8],[6.5,2.5,1.8]], 0.35)]) },
+      // Superior mesenteric vein (blue)
+      { color: '#2244cc', voxels: unique([...tube([[-3.5,2.5,1.5],[0,2.5,1.5],[3.0,2.5,1.5],[6.5,2.5,1.5]], 0.35)]) },
+      // Islets of Langerhans (tiny pink spheres)
+      { color: '#ffb6c1', voxels: unique([
+        ...sphere(-3.0, 0, 0, 0.4), ...sphere(-1.5, 0.5, 0.3, 0.4),
+        ...sphere(0.5, 1.0, -0.3, 0.4), ...sphere(2.0, 1.2, 0.4, 0.4),
+        ...sphere(4.0, 1.3, -0.4, 0.4), ...sphere(5.5, 1.5, 0.3, 0.4),
+        ...sphere(7.0, 1.8, 0, 0.4), ...sphere(3.0, 0.5, 0.5, 0.4),
+      ]) },
+      // Acinar tissue (salmon)
+      { color: '#e8a888', voxels: unique([
+        ...ellipsoid(-3.0, 0, 0, 2.0, 2.0, 1.5),
+        ...ellipsoid(0.5, 1.0, 0, 2.0, 1.5, 1.2),
+        ...ellipsoid(5.5, 1.8, 0, 2.0, 1.2, 1.0),
+      ]) },
+    ],
   },
 
   stomach: {
@@ -721,6 +855,33 @@ const ORGANS = {
       ...tag(tube([[-4.5,4.0,0],[-3.0,4.5,0],[-1.5,5.0,0]], 0.32), 'vessel'),
       ...tag(tube([[-4.5,3.5,0.5],[-3.0,4.0,0.5],[-1.5,4.5,0.5]], 0.30), 'vessel'),
     ]),
+    interior: [
+      // Rugae folds (pinkish)
+      { color: '#e8b890', voxels: unique([
+        ...tube([[-2.5,3.0,0.7],[0,1.0,0.7],[2.5,-0.5,0.7],[5.0,-1.5,0.7]], 0.4),
+        ...tube([[-2.5,3.0,-0.7],[0,1.0,-0.7],[2.5,-0.5,-0.7],[5.0,-1.5,-0.7]], 0.4),
+        ...tube([[-2.5,3.0,1.4],[0,1.0,1.4],[2.5,-0.5,1.4]], 0.35),
+        ...tube([[-2.5,3.0,-1.4],[0,1.0,-1.4],[2.5,-0.5,-1.4]], 0.35),
+      ]) },
+      // Gastric arteries lesser curvature (red)
+      { color: '#cc2222', voxels: unique([...tube([[-3.5,5.0,0],[-2.0,3.5,0],[-0.5,2.0,0],[1.5,0.5,0],[3.5,-1.5,0]], 0.35)]) },
+      // Gastric arteries greater curvature (red)
+      { color: '#cc2222', voxels: unique([...tube([[5.5,-2.5,0],[3.5,-3.8,0],[1.5,-4.5,0],[-0.5,-4.5,0],[-2.0,-3.5,0]], 0.32)]) },
+      // Gastric veins (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-3.5,4.5,0.5],[-2.0,3.0,0.5],[0,1.5,0.5],[2.0,-0.5,0.5]], 0.3),
+        ...tube([[5.0,-2.0,0.5],[2.5,-3.5,0.5],[0,-4.0,0.5]], 0.28),
+      ]) },
+      // Pyloric sphincter ring (muscle red)
+      { color: '#cc4444', voxels: unique([...hollowCylinder(7.5, 0, -0.5, 0.5, 1.5, 0.8)]) },
+      // Gastric mucosa inner surface (pink-tan)
+      { color: '#f0c8a0', voxels: unique([
+        ...ellipsoid(0, 0.5, 0, 3.0, 3.0, 2.5),
+        ...ellipsoid(-2.0, 3.5, 0, 2.2, 2.0, 2.0),
+      ]) },
+      // Myometrium / gastric muscle wall (deeper tan)
+      { color: '#c89060', voxels: unique([...ellipsoid(4.5, -1.5, 0, 1.8, 1.8, 1.5)]) },
+    ],
   },
 
   smallintestine: {
@@ -742,6 +903,37 @@ const ORGANS = {
       ...tag(tube([[0,-1,1.5],[0.8,0.5,1.5],[1.5,1.5,1.5]], 0.38), 'vessel'),
       ...tag(tube([[0,-1,1.5],[-0.8,0.5,1.5],[-1.5,1.5,1.5]], 0.38), 'vessel'),
     ]),
+    interior: [
+      // Intestinal lumen (cream)
+      { color: '#f5e8c0', voxels: unique([
+        ...tube([[3,-2,0],[2,0,0],[0,1.5,0],[-2,1,0],[-3,-1,0],[-2,-3,0],[0,-4,0],[2,-3,0]], 0.55),
+        ...tube([[3,-1,2],[2,1,2],[0,2,2],[-2,1,2],[-3,-1,2],[-2,-3,2],[0,-4,2],[2,-3,2]], 0.50),
+        ...tube([[3,-1,3],[2,1,3],[0,2,3],[-2,1,3],[-3,-1,3],[-2,-3,3],[0,-4,3],[2,-3,3]], 0.48),
+      ]) },
+      // Villi/plicae (pink)
+      { color: '#e8b890', voxels: unique([
+        ...tube([[3,-2,0],[0,1.5,0],[-3,-1,0],[0,-4,0]], 0.3),
+        ...tube([[3,-1,2],[0,2,2],[-3,-1,2],[0,-4,2]], 0.28),
+      ]) },
+      // Mesenteric arteries (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[0,-1,1.5],[0,0,0.5],[0,1,-0.5]], 0.45),
+        ...tube([[0,-1,1.5],[1.5,-2,1.5],[2.5,-3.5,1.5]], 0.32),
+        ...tube([[0,-1,1.5],[-1.5,-2,1.5],[-2.5,-3.5,1.5]], 0.32),
+      ]) },
+      // Mesenteric veins (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[0,-1,1.5],[0.8,0.5,1.5],[1.5,1.5,1.5]], 0.32),
+        ...tube([[0,-1,1.5],[-0.8,0.5,1.5],[-1.5,1.5,1.5]], 0.32),
+        ...tube([[1.5,-2,1.5],[2.0,-3,1.5]], 0.25),
+      ]) },
+      // Lymphatics/lacteals (light green)
+      { color: '#90ee90', voxels: unique([
+        ...tube([[0,-1,1.5],[0,0,1.5],[0,1.5,1.5]], 0.2),
+        ...tube([[1.5,-2,1.5],[1.0,-3,1.5]], 0.18),
+        ...tube([[-1.5,-2,1.5],[-1.0,-3,1.5]], 0.18),
+      ]) },
+    ],
   },
 
   colon: {
@@ -862,6 +1054,31 @@ const ORGANS = {
       ...tag(tube([[1.2,0,0.8],[0.5,-1.0,0.5],[-0.5,-1.5,0.2]], 0.35), 'hilum'),
       ...tag(tube([[1.2,0,0.8],[0,0.5,1.0],[-1.0,0,1.5]], 0.32), 'hilum'),
     ]),
+    interior: [
+      // Red pulp sinusoids (dark red)
+      { color: '#8b0000', voxels: unique([
+        ...ellipsoid(0, 0, 0, 2.5, 2.0, 1.8),
+        ...ellipsoid(0.5, 1.0, -0.5, 1.5, 1.2, 1.2),
+        ...ellipsoid(-0.5, -1.0, 0.5, 1.5, 1.2, 1.2),
+      ]) },
+      // White pulp nodules (pale lavender)
+      { color: '#c8a8d8', voxels: unique([
+        ...sphere(-1.0, 0.8, 0.5, 0.55), ...sphere(0.5, 0.5, -0.5, 0.55),
+        ...sphere(1.0, -0.5, 0.8, 0.50), ...sphere(-0.5, -1.0, -0.5, 0.50),
+        ...sphere(0.5, 1.2, 1.0, 0.48), ...sphere(-1.2, 0, -0.8, 0.48),
+      ]) },
+      // Splenic artery (red) entering at hilum
+      { color: '#cc2222', voxels: unique([...tube([[3.5,-0.5,0],[2.5,-0.2,0.4],[1.5,0,0.6],[0.5,0,0.5]], 0.35)]) },
+      // Splenic vein (blue) leaving at hilum
+      { color: '#2244cc', voxels: unique([...tube([[0.5,0.5,0.3],[1.5,0.5,0.2],[2.5,0.2,0],[3.5,-0.5,-0.2]], 0.38)]) },
+      // Trabecular framework (fibrous)
+      { color: '#deb887', voxels: unique([
+        ...tube([[0,2.5,0],[0,0,0],[0,-2.5,0]], 0.32),
+        ...tube([[-2.5,0,0],[0,0,0],[2.5,0,0]], 0.32),
+        ...tube([[0,0,-2.0],[0,0,0],[0,0,2.0]], 0.32),
+        ...tube([[-1.5,1.5,0],[0,0,0],[1.5,-1.5,0]], 0.28),
+      ]) },
+    ],
   },
 
   kidney: {
@@ -1045,6 +1262,38 @@ const ORGANS = {
       // Urethra stub
       ...tag(cylinder(0, 0, -5.0, -4.0, 0.7), 'neck'),
     ]),
+    interior: [
+      // Urine lumen (golden)
+      { color: '#ffd700', voxels: unique([...ellipsoid(0, 0, 0, 2.8, 2.5, 2.5)]) },
+      // Trigone (darker gold)
+      { color: '#d4a017', voxels: unique([
+        ...ellipsoid(0, -2.5, 0, 1.8, 1.0, 1.5),
+        ...tube([[-1.5,-2.0,0],[0,-3.0,0],[1.5,-2.0,0]], 0.4),
+      ]) },
+      // Ureteral orifices (tiny spheres)
+      { color: '#ffd700', voxels: unique([
+        ...sphere(-1.8, -1.8, 0.5, 0.45),
+        ...sphere(1.8, -1.8, 0.5, 0.45),
+      ]) },
+      // Detrusor muscle bundles (red)
+      { color: '#cc4444', voxels: unique([
+        ...tube([[-3.5,0,0],[0,3.5,0],[3.5,0,0],[0,-3.5,0]], 0.35),
+        ...tube([[0,0,-3.5],[0,3.5,0],[0,0,3.5]], 0.32),
+        ...tube([[-3.0,1.5,1.5],[0,3.0,0],[3.0,1.5,-1.5]], 0.3),
+      ]) },
+      // Urethra (gold)
+      { color: '#ffd700', voxels: unique([...cylinder(0, 0, -5.0, -4.0, 0.6)]) },
+      // Blood vessels in wall (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[0,3.5,0],[2.0,2.5,0],[3.5,0,0]], 0.25),
+        ...tube([[0,3.5,0],[-2.0,2.5,0],[-3.5,0,0]], 0.25),
+      ]) },
+      // Venous plexus (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[3.0,0,0.5],[0,-3.0,0.5],[-3.0,0,0.5]], 0.25),
+        ...tube([[0,-3.0,0.5],[0,-2.5,-1.0],[0,-2.0,-2.0]], 0.22),
+      ]) },
+    ],
   },
 
   prostate: {
@@ -1095,6 +1344,34 @@ const ORGANS = {
       // Base
       ...tag(noisyEllipsoid(0, 2.5, -0.5, 2.5, 1.2, 2.2, 0.10, 0.85), 'central'),
     ]),
+    interior: [
+      // Prostatic urethra (gold)
+      { color: '#ffd700', voxels: unique([...cylinder(0, 0, -3.5, 3.0, 0.4)]) },
+      // Peripheral zone (salmon)
+      { color: '#ffb6c1', voxels: unique([
+        ...ellipsoid(0, -0.5, -2.0, 2.5, 2.2, 1.3),
+        ...ellipsoid(-1.8, -0.5, 0, 1.5, 2.0, 1.5),
+        ...ellipsoid(1.8, -0.5, 0, 1.5, 2.0, 1.5),
+      ]) },
+      // Central zone (pinkish)
+      { color: '#f5c8a0', voxels: unique([...ellipsoid(0, 0.8, -0.5, 1.8, 1.6, 1.6)]) },
+      // Neurovascular bundles (yellow nerves)
+      { color: '#ffffaa', voxels: unique([
+        ...tube([[-3.0,1.5,-1.5],[-3.0,-0.5,-1.5],[-3.0,-2.5,-1.0]], 0.32),
+        ...tube([[3.0,1.5,-1.5],[3.0,-0.5,-1.5],[3.0,-2.5,-1.0]], 0.32),
+      ]) },
+      // Ejaculatory ducts (gold)
+      { color: '#d4a017', voxels: unique([
+        ...tube([[-0.8,2.5,-0.5],[-0.5,0.5,0],[0,-1.0,0.5]], 0.28),
+        ...tube([[0.8,2.5,-0.5],[0.5,0.5,0],[0,-1.0,0.5]], 0.28),
+      ]) },
+      // Venous sinuses (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-2.5,-0.5,-1.5],[-2.0,0.5,-1.5],[-2.0,2.0,-1.0]], 0.28),
+        ...tube([[2.5,-0.5,-1.5],[2.0,0.5,-1.5],[2.0,2.0,-1.0]], 0.28),
+        ...tube([[0,-2.0,-0.5],[0,-1.0,0],[0,0,0.5]], 0.25),
+      ]) },
+    ],
   },
 
   testes: {
@@ -1131,6 +1408,29 @@ const ORGANS = {
       ...tag(tube([[-2.8,3.5,0.3],[-2.5,5.5,0.3],[-2.0,7.5,0.3]], 0.32), 'cord'),
       ...tag(tube([[2.8,3.5,0.3],[2.5,5.5,0.3],[2.0,7.5,0.3]], 0.32), 'cord'),
     ]),
+    interior: [
+      // Seminiferous tubules right (pink)
+      { color: '#ffb6c1', voxels: unique([...noisyEllipsoid(-2.8, 0, 0, 1.6, 2.2, 1.6, 0.15, 1.2)]) },
+      // Seminiferous tubules left
+      { color: '#ffb6c1', voxels: unique([...noisyEllipsoid(2.8, 0, 0, 1.6, 2.2, 1.6, 0.15, 1.2)]) },
+      // Rete testis right (pale tan)
+      { color: '#d4b896', voxels: unique([...ellipsoid(-1.8, 0, 0, 0.45, 1.2, 0.45)]) },
+      // Rete testis left
+      { color: '#d4b896', voxels: unique([...ellipsoid(1.8, 0, 0, 0.45, 1.2, 0.45)]) },
+      // Epididymis right (darker tan)
+      { color: '#b89060', voxels: unique([...tube([[-2.5,3.0,0],[-3.5,2.5,0],[-4.0,1.0,0],[-3.5,-1.0,0],[-2.8,-2.0,0]], 0.35)]) },
+      // Epididymis left
+      { color: '#b89060', voxels: unique([...tube([[2.5,3.0,0],[3.5,2.5,0],[4.0,1.0,0],[3.5,-1.0,0],[2.8,-2.0,0]], 0.35)]) },
+      // Testicular artery right (red)
+      { color: '#cc2222', voxels: unique([...tube([[-2.0,7.5,0.4],[-2.5,5.5,0.4],[-2.8,3.5,0.4],[-2.8,1.0,0.4]], 0.25)]) },
+      // Testicular artery left
+      { color: '#cc2222', voxels: unique([...tube([[2.0,7.5,0.4],[2.5,5.5,0.4],[2.8,3.5,0.4],[2.8,1.0,0.4]], 0.25)]) },
+      // Pampiniform venous plexus (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-2.0,7.5,-0.3],[-2.5,5.5,-0.3],[-2.8,3.5,-0.3]], 0.28),
+        ...tube([[2.0,7.5,-0.3],[2.5,5.5,-0.3],[2.8,3.5,-0.3]], 0.28),
+      ]) },
+    ],
   },
 
   // ══ GYNECOLOGICAL ═══════════════════════════════════════════════════════
@@ -1185,6 +1485,40 @@ const ORGANS = {
       ...tag(tube([[-3.8,0,0],[-3.8,2.0,0],[-3.8,3.5,0]], 0.40), 'corpus'),
       ...tag(tube([[3.8,0,0],[3.8,2.0,0],[3.8,3.5,0]], 0.40), 'corpus'),
     ]),
+    interior: [
+      // Primary follicles right (small pink spheres)
+      { color: '#ffb6c1', voxels: unique([
+        ...sphere(-3.5, -0.5, 0.5, 0.4), ...sphere(-4.0, 0.5, -0.5, 0.4),
+        ...sphere(-3.0, -1.0, -0.3, 0.4), ...sphere(-4.2, -0.8, 0.3, 0.4),
+      ]) },
+      // Graafian follicle right (fluid-filled)
+      { color: '#b0d8f0', voxels: unique([...sphere(-4.8, 1.5, 0.5, 0.65)]) },
+      // Corpus luteum right (golden)
+      { color: '#ffd700', voxels: unique([...sphere(-3.0, 1.0, 0.8, 0.65)]) },
+      // Ovarian stroma right (tan)
+      { color: '#deb887', voxels: unique([...ellipsoid(-3.8, 0, 0, 1.8, 2.2, 1.6)]) },
+      // Primary follicles left
+      { color: '#ffb6c1', voxels: unique([
+        ...sphere(3.5, -0.5, 0.5, 0.4), ...sphere(4.0, 0.5, -0.5, 0.4),
+        ...sphere(3.0, -1.0, -0.3, 0.4), ...sphere(4.2, -0.8, 0.3, 0.4),
+      ]) },
+      // Graafian follicle left
+      { color: '#b0d8f0', voxels: unique([...sphere(4.8, 1.5, 0.5, 0.65)]) },
+      // Corpus luteum left
+      { color: '#ffd700', voxels: unique([...sphere(3.0, 1.0, 0.8, 0.65)]) },
+      // Ovarian stroma left (tan)
+      { color: '#deb887', voxels: unique([...ellipsoid(3.8, 0, 0, 1.8, 2.2, 1.6)]) },
+      // Ovarian artery (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-3.8,0,0],[-3.8,2.0,0],[-3.8,3.5,0]], 0.32),
+        ...tube([[3.8,0,0],[3.8,2.0,0],[3.8,3.5,0]], 0.32),
+      ]) },
+      // Ovarian vein (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-3.8,0.3,0],[-3.8,2.3,0],[-3.8,3.5,0.3]], 0.28),
+        ...tube([[3.8,0.3,0],[3.8,2.3,0],[3.8,3.5,0.3]], 0.28),
+      ]) },
+    ],
   },
 
   uterus: {
@@ -1239,6 +1573,37 @@ const ORGANS = {
       ...tag(tube([[-3.5,1.5,0],[-3.0,0,0],[-3.0,-2.0,0]], 0.42), 'junctional'),
       ...tag(tube([[3.5,1.5,0],[3.0,0,0],[3.0,-2.0,0]], 0.42), 'junctional'),
     ]),
+    interior: [
+      // Uterine cavity (pink)
+      { color: '#ffb6c1', voxels: unique([...ellipsoid(0, 1.5, 0, 1.5, 3.2, 1.2)]) },
+      // Endometrial lining (deeper pink)
+      { color: '#ff8898', voxels: unique([...ellipsoid(0, 1.5, 0, 2.0, 3.5, 1.8)]) },
+      // Fallopian tube stubs at cornua (pink)
+      { color: '#e8a0b0', voxels: unique([
+        ...tube([[-3.0,4.5,0],[-4.5,4.5,0],[-5.0,4.0,0]], 0.4),
+        ...tube([[3.0,4.5,0],[4.5,4.5,0],[5.0,4.0,0]], 0.4),
+      ]) },
+      // Uterine arteries (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-3.5,1.5,0],[-3.0,3.0,0],[-3.0,5.0,0]], 0.38),
+        ...tube([[3.5,1.5,0],[3.0,3.0,0],[3.0,5.0,0]], 0.38),
+      ]) },
+      // Uterine veins (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-3.5,1.0,0.5],[-3.0,3.0,0.5],[-3.0,5.0,0.5]], 0.32),
+        ...tube([[3.5,1.0,0.5],[3.0,3.0,0.5],[3.0,5.0,0.5]], 0.32),
+      ]) },
+      // Myometrial vessels branching
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-3.0,3.0,0],[-2.0,2.5,0.5],[-1.0,2.5,0.8]], 0.25),
+        ...tube([[3.0,3.0,0],[2.0,2.5,0.5],[1.0,2.5,0.8]], 0.25),
+      ]) },
+      // Arcuate vessels (red encircling)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-3.0,2.0,0.5],[0,2.0,0.8],[3.0,2.0,0.5]], 0.28),
+        ...tube([[-2.5,0,0.5],[0,0,0.8],[2.5,0,0.5]], 0.25),
+      ]) },
+    ],
   },
 
   cervix: {
@@ -1253,6 +1618,30 @@ const ORGANS = {
       ...ellipsoid(0, -2.5, 0, 2.0, 1.2, 1.8),
       ...ellipsoid(0, 2.5, 0, 2.2, 1.0, 2.0),
     ]),
+    interior: [
+      // Cervical canal (gold)
+      { color: '#ffd700', voxels: unique([...cylinder(0, 0, -2.5, 2.5, 0.5)]) },
+      // Ectocervix (pale pink)
+      { color: '#ffb6c1', voxels: unique([...ellipsoid(0, -2.5, 0, 1.8, 1.0, 1.6)]) },
+      // Cervical glands (pale yellow)
+      { color: '#ffffaa', voxels: unique([
+        ...sphere(-1.0, 0, 0.5, 0.35), ...sphere(1.0, 0, 0.5, 0.35),
+        ...sphere(0, 0.8, -0.5, 0.35), ...sphere(-0.8, -0.8, 0.3, 0.35),
+        ...sphere(0.8, -0.8, -0.3, 0.35),
+      ]) },
+      // Cervical stroma (fibrous)
+      { color: '#deb887', voxels: unique([...ellipsoid(0, 0, 0, 1.8, 1.2, 1.6)]) },
+      // Blood vessels red
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-2.0,2.0,0],[-2.0,0,0],[-2.0,-2.0,0]], 0.25),
+        ...tube([[2.0,2.0,0],[2.0,0,0],[2.0,-2.0,0]], 0.25),
+      ]) },
+      // Blood vessels blue
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-1.5,2.0,0.5],[-1.5,0,0.5],[-1.5,-2.0,0.5]], 0.22),
+        ...tube([[1.5,2.0,0.5],[1.5,0,0.5],[1.5,-2.0,0.5]], 0.22),
+      ]) },
+    ],
   },
 
   // ══ HEAD & NECK ══════════════════════════════════════════════════════════
@@ -1476,6 +1865,40 @@ const ORGANS = {
       ...tag(sphere(3.5, 2.0, -0.8, 0.45), 'follicle'),
       ...tag(sphere(3.5, -2.0, -0.8, 0.45), 'follicle'),
     ]),
+    interior: [
+      // Thyroid follicles (pale yellow colloid)
+      { color: '#ffffaa', voxels: unique([
+        ...sphere(-3.0, 0.5, 0.5, 0.55), ...sphere(-2.0, 1.5, 0.5, 0.50),
+        ...sphere(-3.0, -1.0, 0.5, 0.50), ...sphere(-1.5, -1.5, 0.3, 0.45),
+        ...sphere(-2.5, 0, -0.5, 0.48), ...sphere(3.0, 0.5, 0.5, 0.55),
+        ...sphere(2.0, 1.5, 0.5, 0.50), ...sphere(3.0, -1.0, 0.5, 0.50),
+        ...sphere(1.5, -1.5, 0.3, 0.45), ...sphere(2.5, 0, -0.5, 0.48),
+      ]) },
+      // Superior thyroid arteries (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-2.2,4.5,0],[-2.5,3.0,0],[-2.5,1.0,0]], 0.32),
+        ...tube([[2.2,4.5,0],[2.5,3.0,0],[2.5,1.0,0]], 0.32),
+      ]) },
+      // Inferior thyroid arteries (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-5.0,1.0,0],[-4.0,0,0],[-2.5,-1.5,0]], 0.3),
+        ...tube([[5.0,1.0,0],[4.0,0,0],[2.5,-1.5,0]], 0.3),
+      ]) },
+      // Thyroid veins (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-2.5,3.0,0.5],[-2.5,0,0.5],[-2.5,-2.0,0.5]], 0.3),
+        ...tube([[2.5,3.0,0.5],[2.5,0,0.5],[2.5,-2.0,0.5]], 0.3),
+      ]) },
+      // Parathyroid glands posterior (tan)
+      { color: '#deb887', voxels: unique([
+        ...sphere(-3.5, 2.0, -0.8, 0.35), ...sphere(-3.5, -2.0, -0.8, 0.35),
+        ...sphere(3.5, 2.0, -0.8, 0.35), ...sphere(3.5, -2.0, -0.8, 0.35),
+      ]) },
+      // Trachea behind (cartilage)
+      { color: '#e8f4e8', voxels: unique([...cylinder(0, -2.0, -5.0, 5.0, 0.8)]) },
+      // Isthmus vessels (red/blue)
+      { color: '#cc2222', voxels: unique([...tube([[-1.0,-0.5,0.8],[0,-0.5,0.8],[1.0,-0.5,0.8]], 0.22)]) },
+    ],
   },
 
   larynx: {
@@ -1491,6 +1914,36 @@ const ORGANS = {
       ...ellipsoid(0, 3, 0, 2.5, 0.4, 1.8),
       ...tube([[0,-1.5,0],[0,0,0],[0,1.5,0],[0,4,0]], 0.6),
     ]),
+    interior: [
+      // Vocal cords (pale pink horizontal ellipsoids)
+      { color: '#ffb6c1', voxels: unique([
+        ...ellipsoid(-1.0, 1, 0, 0.8, 0.4, 1.4),
+        ...ellipsoid(1.0, 1, 0, 0.8, 0.4, 1.4),
+      ]) },
+      // Tracheal cartilage rings (cartilage)
+      { color: '#e8f4e8', voxels: unique([
+        ...hollowCylinder(0, 0, -1, 0, 2.2, 1.5),
+        ...hollowCylinder(0, 0, 0, 1, 2.2, 1.5),
+        ...hollowCylinder(0, 0, 1, 2, 2.2, 1.5),
+        ...hollowCylinder(0, 0, 2, 3, 2.2, 1.5),
+      ]) },
+      // Arytenoid cartilages (pale)
+      { color: '#d4e8d4', voxels: unique([
+        ...sphere(-0.8, 3, 0, 0.5), ...sphere(0.8, 3, 0, 0.5),
+      ]) },
+      // Epiglottis (cartilage)
+      { color: '#e8f4e8', voxels: unique([...ellipsoid(0, 4.5, -0.5, 1.5, 1.0, 0.6)]) },
+      // Laryngeal arteries (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-2.0,4.0,0],[-2.0,2.0,0],[-2.0,0,0]], 0.25),
+        ...tube([[2.0,4.0,0],[2.0,2.0,0],[2.0,0,0]], 0.25),
+      ]) },
+      // Laryngeal nerves (pale yellow)
+      { color: '#ffffaa', voxels: unique([
+        ...tube([[-2.2,4.0,-0.5],[-2.2,1.0,-0.5],[-2.2,-1.0,-0.5]], 0.22),
+        ...tube([[2.2,4.0,-0.5],[2.2,1.0,-0.5],[2.2,-1.0,-0.5]], 0.22),
+      ]) },
+    ],
   },
 
   oralCavity: {
@@ -1507,6 +1960,29 @@ const ORGANS = {
       ...ellipsoid(-3.8, 0, 0, 0.9, 2.2, 2.2),
       ...ellipsoid(3.8, 0, 0, 0.9, 2.2, 2.2),
     ]),
+    interior: [
+      // Tongue (muscle red)
+      { color: '#cc4444', voxels: unique([...ellipsoid(0, -1, 0, 2.5, 1.8, 1.8)]) },
+      // Teeth approximations (white)
+      { color: '#f5f5dc', voxels: unique([
+        ...sphere(-3.0, -2.5, 1.5, 0.4), ...sphere(-1.5, -3.0, 1.8, 0.4),
+        ...sphere(0, -3.2, 2.0, 0.4), ...sphere(1.5, -3.0, 1.8, 0.4),
+        ...sphere(3.0, -2.5, 1.5, 0.4), ...sphere(-2.2, -3.0, 1.5, 0.38),
+        ...sphere(2.2, -3.0, 1.5, 0.38),
+      ]) },
+      // Salivary ducts (pale)
+      { color: '#f0d8c0', voxels: unique([
+        ...tube([[0,-1,0],[0,-2,0],[0,-3,0.5]], 0.25),
+        ...tube([[-1.5,-1.5,0],[-2.0,-2.5,0.5]], 0.22),
+        ...tube([[1.5,-1.5,0],[2.0,-2.5,0.5]], 0.22),
+      ]) },
+      // Lingual artery (red)
+      { color: '#cc2222', voxels: unique([...tube([[0,-4,0],[0,-2,0],[0,0,0],[0,1,0]], 0.3)]) },
+      // Lingual vein (blue)
+      { color: '#2244cc', voxels: unique([...tube([[0,-4,0.4],[0,-2,0.4],[0,0,0.4],[0,1,0.4]], 0.28)]) },
+      // Floor of mouth muscles (red)
+      { color: '#cc4444', voxels: unique([...ellipsoid(0, -3, 0, 3.2, 1.0, 2.0)]) },
+    ],
   },
 
   salivaryGland: {
@@ -1523,6 +1999,37 @@ const ORGANS = {
       ...ellipsoid(-1.8, -2, 0, 1.2, 1.2, 1.0),
       ...ellipsoid(1.8, -2, 0, 1.2, 1.2, 1.0),
     ]),
+    interior: [
+      // Acinar cells right parotid (pink)
+      { color: '#ffb6c1', voxels: unique([...noisyEllipsoid(-4.5, 2, 2, 2.2, 2.6, 1.8, 0.12, 0.9)]) },
+      // Acinar cells left parotid
+      { color: '#ffb6c1', voxels: unique([...noisyEllipsoid(4.5, 2, 2, 2.2, 2.6, 1.8, 0.12, 0.9)]) },
+      // Parotid duct (pale tan)
+      { color: '#d4b896', voxels: unique([
+        ...tube([[-4.5,2,2],[-3.0,0,1.0],[-1.8,-2,0.5]], 0.35),
+        ...tube([[4.5,2,2],[3.0,0,1.0],[1.8,-2,0.5]], 0.35),
+      ]) },
+      // Submandibular duct
+      { color: '#d4b896', voxels: unique([
+        ...tube([[-1.8,-2,0],[-1.0,-1.0,0.2],[0,-0.5,0.3]], 0.28),
+        ...tube([[1.8,-2,0],[1.0,-1.0,0.2],[0,-0.5,0.3]], 0.28),
+      ]) },
+      // Blood supply (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-4.5,2,2],[-4.5,4.0,2],[-4.5,4.5,2]], 0.28),
+        ...tube([[4.5,2,2],[4.5,4.0,2],[4.5,4.5,2]], 0.28),
+      ]) },
+      // Blood supply (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-4.5,2,1.8],[-4.0,3.5,1.8]], 0.25),
+        ...tube([[4.5,2,1.8],[4.0,3.5,1.8]], 0.25),
+      ]) },
+      // Lymphatics (light green)
+      { color: '#90ee90', voxels: unique([
+        ...tube([[-3.5,1.5,1.5],[-4.5,3.0,2.0]], 0.2),
+        ...tube([[3.5,1.5,1.5],[4.5,3.0,2.0]], 0.2),
+      ]) },
+    ],
   },
 
   nasopharynx: {
@@ -1538,6 +2045,31 @@ const ORGANS = {
       ...ellipsoid(1.2, 2.2, 0.5, 1.0, 1.5, 0.7),
       ...ellipsoid(0, -1, 0, 3.2, 1.2, 2.8),
     ]),
+    interior: [
+      // Mucosa lining (pink)
+      { color: '#ffb6c1', voxels: unique([...ellipsoid(0, 0.5, 0, 2.5, 1.8, 2.5)]) },
+      // Eustachian tube orifices (tan)
+      { color: '#d4b896', voxels: unique([
+        ...sphere(-2.5, 1.5, 0.3, 0.5), ...sphere(2.5, 1.5, 0.3, 0.5),
+      ]) },
+      // Adenoid tissue (pink-purple)
+      { color: '#c8a8d8', voxels: unique([...ellipsoid(0, 2.0, -1.2, 2.0, 1.2, 1.5)]) },
+      // Blood supply (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-2.5,2.0,0],[-1.0,1.5,0],[0,1.0,0]], 0.28),
+        ...tube([[2.5,2.0,0],[1.0,1.5,0],[0,1.0,0]], 0.28),
+      ]) },
+      // Blood supply (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-2.5,1.5,0.5],[-1.0,1.0,0.5],[0,0.5,0.5]], 0.25),
+        ...tube([[2.5,1.5,0.5],[1.0,1.0,0.5],[0,0.5,0.5]], 0.25),
+      ]) },
+      // Nasopharyngeal vessels
+      { color: '#cc2222', voxels: unique([
+        ...tube([[0,0,2.0],[0,-0.5,1.5],[0,-1,1.0]], 0.25),
+        ...tube([[0,2.0,-1.5],[0,1.5,-1.0],[0,0.5,-0.5]], 0.22),
+      ]) },
+    ],
   },
 
   // ══ BREAST ══════════════════════════════════════════════════════════════
@@ -1596,6 +2128,49 @@ const ORGANS = {
       ...tag(sphere(5.5, 0, 6.5, 1.2), 'nipple'),
       ...tag(noisyEllipsoid(5.5, 0, 6.8, 1.0, 1.0, 0.8, 0.15, 1.2), 'nipple'),
     ]),
+    interior: [
+      // Lactiferous ducts right converging at nipple (pale pink)
+      { color: '#ffb6c1', voxels: unique([
+        ...tube([[-5.5,0,5.5],[-5.5,0.5,3.5],[-5.5,0.8,1.5],[-5.5,0,6.5]], 0.45),
+        ...tube([[-5.5,0,5.5],[-6.0,0.5,3.5],[-6.0,0.5,1.5]], 0.38),
+        ...tube([[-5.5,0,5.5],[-5.0,-0.5,3.5],[-5.0,-0.8,1.5]], 0.36),
+        ...tube([[-5.5,0,5.5],[-5.5,1.5,3.0],[-5.0,2.0,1.0]], 0.35),
+        ...tube([[-5.5,0,5.5],[-5.5,-1.5,3.0],[-5.0,-2.0,1.0]], 0.35),
+      ]) },
+      // Lobules right (pink spheres)
+      { color: '#f0b0c0', voxels: unique([
+        ...sphere(-7.0, 0.5, 2.5, 0.5), ...sphere(-5.5, 2.0, 1.5, 0.5),
+        ...sphere(-4.5, -1.5, 3.0, 0.5), ...sphere(-6.5, -1.0, 1.5, 0.5),
+        ...sphere(-5.0, 1.0, 4.0, 0.5),
+      ]) },
+      // Cooper's ligaments right (fibrous)
+      { color: '#deb887', voxels: unique([
+        ...tube([[-5.5,0,5.5],[-5.5,0,2.5],[-5.5,0,0]], 0.22),
+        ...tube([[-5.5,2.0,5.0],[-5.5,2.0,2.5]], 0.22),
+        ...tube([[-5.5,-2.0,5.0],[-5.5,-2.0,2.5]], 0.22),
+      ]) },
+      // Blood supply right (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-5.5,0,0],[-6.5,0.5,2.0],[-7.0,0.5,4.5]], 0.28),
+        ...tube([[-5.5,0,0],[-4.5,-0.5,2.0],[-4.0,-0.5,4.0]], 0.28),
+      ]) },
+      // Lactiferous ducts left (pale pink)
+      { color: '#ffb6c1', voxels: unique([
+        ...tube([[5.5,0,5.5],[5.5,0.5,3.5],[5.5,0.8,1.5],[5.5,0,6.5]], 0.45),
+        ...tube([[5.5,0,5.5],[6.0,0.5,3.5],[6.0,0.5,1.5]], 0.38),
+        ...tube([[5.5,0,5.5],[5.0,-0.5,3.5],[5.0,-0.8,1.5]], 0.36),
+      ]) },
+      // Lobules left
+      { color: '#f0b0c0', voxels: unique([
+        ...sphere(7.0, 0.5, 2.5, 0.5), ...sphere(5.5, 2.0, 1.5, 0.5),
+        ...sphere(4.5, -1.5, 3.0, 0.5), ...sphere(6.5, -1.0, 1.5, 0.5),
+      ]) },
+      // Blood supply left (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[5.5,0,0],[6.5,0.5,2.0],[7.0,0.5,4.5]], 0.28),
+        ...tube([[5.5,0,0],[4.5,-0.5,2.0],[4.0,-0.5,4.0]], 0.28),
+      ]) },
+    ],
   },
 
   // ══ HEMATOLOGICAL ═══════════════════════════════════════════════════════
@@ -1673,6 +2248,45 @@ const ORGANS = {
       ...tag(tube([[-5.5,-9.0,0],[-5.5,-11.0,0]], 0.7), 'femoral'),
       ...tag(tube([[5.5,-9.0,0],[5.5,-11.0,0]], 0.7), 'femoral'),
     ]),
+    interior: [
+      // Sinusoids within vertebral marrow (dark red)
+      { color: '#8b1a1a', voxels: unique([
+        ...tube([[0,9,0],[0,8.5,0.5],[0,8,0]], 0.5),
+        ...tube([[0,6,0],[0,5.5,0.5],[0,5,0]], 0.5),
+        ...tube([[0,3,0],[0,2.5,0.5],[0,2,0]], 0.5),
+        ...tube([[0,0,0],[0,-0.5,0.5],[0,-1,0]], 0.5),
+        ...tube([[0,-3,0],[0,-3.5,0.5],[0,-4,0]], 0.5),
+      ]) },
+      // Central arterioles in vertebrae (bright red)
+      { color: '#cc2222', voxels: unique([
+        ...cylinder(0, 0, 8.0, 10.0, 0.4),
+        ...cylinder(0, 0, 5.0, 7.0, 0.4),
+        ...cylinder(0, 0, 2.0, 4.0, 0.4),
+        ...cylinder(0, 0, -1.0, 1.0, 0.4),
+        ...cylinder(0, 0, -4.0, -2.0, 0.4),
+      ]) },
+      // Venous sinuses (blue)
+      { color: '#2244cc', voxels: unique([
+        ...cylinder(0.8, 0, 8.0, 10.0, 0.3),
+        ...cylinder(0.8, 0, 5.0, 7.0, 0.3),
+        ...cylinder(0.8, 0, 2.0, 4.0, 0.3),
+        ...cylinder(-0.8, 0, -1.0, 1.0, 0.3),
+        ...cylinder(-0.8, 0, -4.0, -2.0, 0.3),
+      ]) },
+      // Trabeculae in vertebrae (bone beige)
+      { color: '#f5f5dc', voxels: unique([
+        ...tube([[-2.5,9,0],[2.5,9,0]], 0.3), ...tube([[0,8.5,-2.5],[0,8.5,2.5]], 0.3),
+        ...tube([[-2.5,6,0],[2.5,6,0]], 0.3), ...tube([[0,5.5,-2.5],[0,5.5,2.5]], 0.3),
+        ...tube([[-2.5,3,0],[2.5,3,0]], 0.3), ...tube([[0,2.5,-2.5],[0,2.5,2.5]], 0.3),
+      ]) },
+      // Fat cells in marrow (lemon chiffon)
+      { color: '#fffacd', voxels: unique([
+        ...sphere(-1.5, 9, 1.0, 0.5), ...sphere(1.5, 6, -1.0, 0.5),
+        ...sphere(-1.0, 3, 1.0, 0.5), ...sphere(1.0, 0, -1.0, 0.5),
+        ...sphere(-1.5, -3, 0.8, 0.5),
+        ...sphere(-5.5, -1.5, 0.8, 0.6), ...sphere(5.5, -1.5, 0.8, 0.6),
+      ]) },
+    ],
   },
 
   lymphNodes: {
@@ -1708,6 +2322,39 @@ const ORGANS = {
       ...tag(sphere(-6, 2, 0, 0.8), 'capsule'),
       ...tag(sphere(6, 2, 0, 0.8), 'capsule'),
     ]),
+    interior: [
+      // Germinal centers (pale lavender) in major nodes
+      { color: '#c8a8d8', voxels: unique([
+        ...sphere(0, 8, 0, 0.6), ...sphere(-6, 2, 0, 0.7),
+        ...sphere(6, 2, 0, 0.7), ...sphere(-1.5, 1, 0, 0.6),
+        ...sphere(1.5, 1, 0, 0.6), ...sphere(0, -0.5, 0, 0.6),
+      ]) },
+      // Subcapsular sinus (light green) wrapping nodes
+      { color: '#90ee90', voxels: unique([
+        ...sphere(0, 8, 0, 1.4), ...sphere(-6, 2, 0, 1.4),
+        ...sphere(6, 2, 0, 1.4),
+      ]) },
+      // Afferent lymphatic vessels (light green)
+      { color: '#90ee90', voxels: unique([
+        ...tube([[0,8,0],[0,9.5,0]], 0.3),
+        ...tube([[-6,2,0],[-7.0,3.0,0]], 0.3),
+        ...tube([[6,2,0],[7.0,3.0,0]], 0.3),
+        ...tube([[-4,-7.5,0],[-5,-8.5,0]], 0.28),
+        ...tube([[4,-7.5,0],[5,-8.5,0]], 0.28),
+      ]) },
+      // Efferent lymphatic vessels (light green)
+      { color: '#90ee90', voxels: unique([
+        ...tube([[0,8,0],[0,6.5,0],[-2,5.5,0]], 0.28),
+        ...tube([[-6,2,0],[-4.5,3.0,0],[-4,4,0]], 0.28),
+        ...tube([[6,2,0],[4.5,3.0,0],[4,4,0]], 0.28),
+      ]) },
+      // High endothelial venules (tiny red)
+      { color: '#cc2222', voxels: unique([
+        ...sphere(0, 8, 0, 0.35), ...sphere(-6, 2, 0, 0.35),
+        ...sphere(6, 2, 0, 0.35), ...sphere(-1.5, 1, 0, 0.35),
+        ...sphere(1.5, 1, 0, 0.35),
+      ]) },
+    ],
   },
 
   // ══ ENDOCRINE ═══════════════════════════════════════════════════════════
@@ -1731,6 +2378,37 @@ const ORGANS = {
       ...tag(tube([[-5,3.5,0],[-4.5,2,0],[-4.0,0.5,0]], 0.38), 'vessel'),
       ...tag(tube([[5,3.5,0],[4.5,2,0],[4.0,0.5,0]], 0.38), 'vessel'),
     ]),
+    interior: [
+      // Cortical zones left (golden gradient)
+      { color: '#e0a020', voxels: unique([...ellipsoid(-5, 3.5, 0, 1.6, 1.2, 1.0)]) },
+      // Cortical zones right
+      { color: '#e0a020', voxels: unique([...ellipsoid(5, 3.5, 0, 1.6, 1.5, 1.0)]) },
+      // Medulla left (dark brown)
+      { color: '#8b4513', voxels: unique([...sphere(-5, 3.5, 0, 0.7)]) },
+      // Medulla right
+      { color: '#8b4513', voxels: unique([...sphere(5, 3.5, 0, 0.7)]) },
+      // Central vein left (blue)
+      { color: '#2244cc', voxels: unique([...tube([[-5,3.5,0],[-4.5,2,0],[-4.0,0.5,0]], 0.28)]) },
+      // Central vein right
+      { color: '#2244cc', voxels: unique([...tube([[5,3.5,0],[4.5,2,0],[4.0,0.5,0]], 0.28)]) },
+      // Adrenal arteries left (3 small)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-6.5,4.5,0],[-5.5,3.8,0],[-5,3.5,0]], 0.22),
+        ...tube([[-5.5,5.0,0.5],[-5.2,4.0,0.3],[-5,3.5,0]], 0.2),
+        ...tube([[-4.0,5.0,0],[-4.5,4.0,0],[-5,3.5,0]], 0.2),
+      ]) },
+      // Adrenal arteries right
+      { color: '#cc2222', voxels: unique([
+        ...tube([[6.5,4.5,0],[5.5,3.8,0],[5,3.5,0]], 0.22),
+        ...tube([[5.5,5.0,0.5],[5.2,4.0,0.3],[5,3.5,0]], 0.2),
+        ...tube([[4.0,5.0,0],[4.5,4.0,0],[5,3.5,0]], 0.2),
+      ]) },
+      // Chromaffin cells (reddish-brown spheres in medulla)
+      { color: '#a05030', voxels: unique([
+        ...sphere(-5.2, 3.5, 0.3, 0.35), ...sphere(-4.8, 3.8, -0.3, 0.35),
+        ...sphere(5.2, 3.5, 0.3, 0.35), ...sphere(4.8, 3.8, -0.3, 0.35),
+      ]) },
+    ],
   },
 
   // ══ DERMATOLOGICAL ══════════════════════════════════════════════════════
@@ -1756,6 +2434,45 @@ const ORGANS = {
         }
       return unique(v)
     })(),
+    interior: [
+      // Hair follicles (dark tan) cylinder stubs pointing down
+      { color: '#8b6914', voxels: unique([
+        ...cylinder(-8, 0, -2, 0, 0.3), ...cylinder(-5, 3, -2, 0, 0.3),
+        ...cylinder(-2, 6, -2, 0, 0.3), ...cylinder(0, 0, -2, 0, 0.3),
+        ...cylinder(3, -4, -2, 0, 0.3), ...cylinder(6, 2, -2, 0, 0.3),
+        ...cylinder(8, -6, -2, 0, 0.3), ...cylinder(-4, -7, -2, 0, 0.3),
+        ...cylinder(4, 7, -2, 0, 0.3),
+      ]) },
+      // Sebaceous glands (pale yellow) next to follicles
+      { color: '#fffacd', voxels: unique([
+        ...sphere(-8, 0, 0, 0.45), ...sphere(-5, 3, 0, 0.45),
+        ...sphere(3, -4, 0, 0.45), ...sphere(6, 2, 0, 0.45),
+        ...sphere(8, -6, 0, 0.45), ...sphere(-4, -7, 0, 0.45),
+      ]) },
+      // Sweat glands (pale pink) coiled tubes
+      { color: '#ffb6c1', voxels: unique([
+        ...tube([[-6,5,-1],[-6.5,5.5,-0.5],[-6,6,-1]], 0.28),
+        ...tube([[2,-8,-1],[2.5,-8.5,-0.5],[2,-9,-1]], 0.28),
+        ...tube([[7,3,-1],[7.5,3.5,-0.5],[7,4,-1]], 0.28),
+        ...tube([[-3,8,-1],[-3.5,8.5,-0.5],[-3,9,-1]], 0.28),
+      ]) },
+      // Capillary loops dermis (red)
+      { color: '#cc2222', voxels: unique([
+        ...tube([[-9,0,0],[-6,0,0],[-3,0,0],[0,0,0],[3,0,0],[6,0,0],[9,0,0]], 0.25),
+        ...tube([[-9,-4,0],[-6,-4,0],[-3,-4,0],[0,-4,0],[3,-4,0],[6,-4,0]], 0.25),
+        ...tube([[-9,4,0],[-6,4,0],[-3,4,0],[0,4,0],[3,4,0],[6,4,0]], 0.25),
+      ]) },
+      // Venous plexus dermis (blue)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[-9,0,-0.5],[-6,0,-0.5],[-3,0,-0.5],[0,0,-0.5],[3,0,-0.5],[6,0,-0.5],[9,0,-0.5]], 0.25),
+        ...tube([[-9,5,-0.5],[-6,5,-0.5],[0,5,-0.5],[6,5,-0.5]], 0.22),
+      ]) },
+      // Lymphatics (light green)
+      { color: '#90ee90', voxels: unique([
+        ...tube([[-8,3,0],[-4,3,0],[0,3,0],[4,3,0],[8,3,0]], 0.2),
+        ...tube([[-8,-3,0],[-4,-3,0],[0,-3,0],[4,-3,0],[8,-3,0]], 0.2),
+      ]) },
+    ],
   },
 
   // ══ MUSCULOSKELETAL ══════════════════════════════════════════════════════
@@ -1789,6 +2506,38 @@ const ORGANS = {
       ...tag(ellipsoid(0, 10.5, 1.0, 1.5, 0.5, 1.5), 'cancellous'),
       ...tag(ellipsoid(0, -10.5, 1.0, 1.5, 0.5, 1.5), 'cancellous'),
     ]),
+    interior: [
+      // Medullary cavity red marrow (dark red)
+      { color: '#8b0000', voxels: unique([...cylinder(0, 0, -8, 8, 1.5)]) },
+      // Haversian canals (bone color vertical cylinders in cortical)
+      { color: '#f5f5dc', voxels: unique([
+        ...cylinder(2.2, 0, -8, 8, 0.25), ...cylinder(-2.2, 0, -8, 8, 0.25),
+        ...cylinder(0, 2.2, -8, 8, 0.25), ...cylinder(0, -2.2, -8, 8, 0.25),
+        ...cylinder(1.6, 1.6, -8, 8, 0.22), ...cylinder(-1.6, 1.6, -8, 8, 0.22),
+        ...cylinder(1.6, -1.6, -8, 8, 0.22), ...cylinder(-1.6, -1.6, -8, 8, 0.22),
+      ]) },
+      // Endosteum lining (pale tan inner cylinder)
+      { color: '#d4c8a0', voxels: unique([...cylinder(0, 0, -8, 8, 1.75)]) },
+      // Nutrient artery (red tube through cortex)
+      { color: '#cc2222', voxels: unique([...tube([[3.2,1.5,0],[2.5,0,0],[1.7,-1.5,0]], 0.35)]) },
+      // Venous sinusoids (blue in marrow)
+      { color: '#2244cc', voxels: unique([
+        ...tube([[0,0,0],[0.5,2.5,0],[0.5,5,0],[0,7.5,0]], 0.32),
+        ...tube([[0,0,0],[-0.5,-2.5,0],[-0.5,-5,0],[0,-7.5,0]], 0.32),
+      ]) },
+      // Fat cells in marrow (lemon chiffon)
+      { color: '#fffacd', voxels: unique([
+        ...sphere(0.5, 3, 0.5, 0.45), ...sphere(-0.5, -3, 0.5, 0.45),
+        ...sphere(0.5, 6, -0.5, 0.45), ...sphere(-0.5, -6, -0.5, 0.45),
+        ...sphere(0, 0, 0.8, 0.45),
+      ]) },
+      // Trabeculae in epiphyses (crossing tubes)
+      { color: '#f5f5dc', voxels: unique([
+        ...tube([[-2.5,10,0],[2.5,10,0]], 0.3), ...tube([[0,9.5,-2.0],[0,9.5,2.0]], 0.3),
+        ...tube([[-2.5,-10,0],[2.5,-10,0]], 0.3), ...tube([[0,-9.5,-2.0],[0,-9.5,2.0]], 0.3),
+        ...tube([[0,9,0],[0,10,0],[0,11,0]], 0.4), ...tube([[0,-9,0],[0,-10,0],[0,-11,0]], 0.4),
+      ]) },
+    ],
   },
 
   softTissue: {
@@ -1807,6 +2556,40 @@ const ORGANS = {
       ...tag(ellipsoid(1.5, 0, 0, 0.6, 5.8, 0.6), 'fat'),
       ...tag(ellipsoid(-1.5, 0, 0, 0.6, 5.8, 0.6), 'fat'),
     ]),
+    interior: [
+      // Muscle fascicles (dark red) along y axis
+      { color: '#8b1010', voxels: unique([
+        ...tube([[0,-7,0],[0,-3,0],[0,0,0],[0,3,0],[0,7,0]], 1.0),
+        ...tube([[-2.0,-6,0],[-2.0,-2,0],[-2.0,2,0],[-2.0,6,0]], 0.8),
+        ...tube([[2.0,-6,0],[2.0,-2,0],[2.0,2,0],[2.0,6,0]], 0.8),
+        ...tube([[-3.5,-5,0],[-3.5,0,0],[-3.5,5,0]], 0.65),
+        ...tube([[3.5,-5,0],[3.5,0,0],[3.5,5,0]], 0.65),
+      ]) },
+      // Fascia planes (fibrous tan) perpendicular to muscle
+      { color: '#deb887', voxels: unique([
+        ...ellipsoid(0, 3.5, 0, 4.0, 0.4, 4.0),
+        ...ellipsoid(0, 0, 0, 4.2, 0.4, 4.2),
+        ...ellipsoid(0, -3.5, 0, 4.0, 0.4, 4.0),
+      ]) },
+      // Neurovascular bundle artery (red)
+      { color: '#cc2222', voxels: unique([...tube([[0,-7,2],[0,-3,2],[0,0,2],[0,3,2],[0,7,2]], 0.35)]) },
+      // Neurovascular bundle vein (blue)
+      { color: '#2244cc', voxels: unique([...tube([[0,-7,1.5],[0,-3,1.5],[0,0,1.5],[0,3,1.5],[0,7,1.5]], 0.4)]) },
+      // Neurovascular bundle nerve (yellow)
+      { color: '#ffffaa', voxels: unique([...tube([[0,-7,2.5],[0,-3,2.5],[0,0,2.5],[0,3,2.5],[0,7,2.5]], 0.28)]) },
+      // Intramuscular fat (lemon chiffon)
+      { color: '#fffacd', voxels: unique([
+        ...sphere(-3.0, 2.0, 0, 0.5), ...sphere(3.0, -2.0, 0, 0.5),
+        ...sphere(-2.0, -4.0, 0, 0.5), ...sphere(2.0, 4.0, 0, 0.5),
+        ...sphere(0, 1.5, -1.5, 0.5), ...sphere(0, -1.5, 1.5, 0.5),
+      ]) },
+      // Perimysium separating bundles (fibrous)
+      { color: '#c8a870', voxels: unique([
+        ...tube([[-4.5,-6,0],[-4.5,0,0],[-4.5,6,0]], 0.3),
+        ...tube([[4.5,-6,0],[4.5,0,0],[4.5,6,0]], 0.3),
+        ...tube([[-4.5,0,0],[0,0,1.5],[4.5,0,0]], 0.28),
+      ]) },
+    ],
   },
 }
 
