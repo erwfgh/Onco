@@ -29,7 +29,6 @@ async function verifyNPI(npi) {
 
   // Both endpoints failed — accept self-attested NPI
   return { ok: true, name: '', specialty: 'Healthcare Provider', npi, selfAttested: true }
-  }
 }
 
 export default function DoctorAuth({ onBack, onAuth }) {
@@ -62,7 +61,7 @@ export default function DoctorAuth({ onBack, onAuth }) {
   }
 
   function handleEnter() {
-    const user = { v: 2, role: 'doctor', email, phone, npi: verified.npi, name: verified.name || manualName, specialty: verified.specialty }
+    const user = { v: 3, role: 'doctor', email, phone, npi: verified.npi, name: verified.name || manualName, specialty: verified.specialty }
     localStorage.setItem('oncoviz_user', JSON.stringify(user))
     onAuth(user)
   }
