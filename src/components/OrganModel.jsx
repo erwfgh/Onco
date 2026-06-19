@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-const VOXEL_SIZE = 1.0
+const VOXEL_SIZE = 0.88
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
 const STAGE_SCATTER = { 1: 0, 2: 0, 3: 0.04, 4: 0.18 }
@@ -85,7 +85,7 @@ function InteriorStructure({ voxels, color }) {
   )
 }
 
-export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode, exploreMode, interior }) {
+export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode, exploreMode, interior, xrayMode }) {
   const meshRef = useRef()
   const colorsApplied = useRef(false)
   const prevMode = useRef(null)
@@ -172,11 +172,21 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
   }, [positions, baseColors, highlightedSet, purple, insideMode])
 
   useEffect(() => {
-    const modeKey = `${insideMode}:${crossSection}:${exploreMode}`
+    const modeKey = `${xrayMode}:${insideMode}:${crossSection}:${exploreMode}`
     if (prevMode.current === modeKey) return
     prevMode.current = modeKey
 
-    if (exploreMode) {
+    if (xrayMode) {
+      material.clippingPlanes = []
+      material.side = THREE.FrontSide
+      material.transparent = true
+      material.opacity = 0.22
+      material.depthWrite = false
+      material.roughness = 0.55
+      material.metalness = 0.08
+      material.emissive = new THREE.Color('#000000')
+      material.emissiveIntensity = 0
+    } else if (exploreMode) {
       material.clippingPlanes = []
       material.side = THREE.BackSide
       material.transparent = true
@@ -219,7 +229,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     }
     material.clipShadows = true
     material.needsUpdate = true
-  }, [insideMode, crossSection, exploreMode, material])
+  }, [xrayMode, insideMode, crossSection, exploreMode, material])
 
   useFrame(() => {
     if (!colorsApplied.current && meshRef.current) {
@@ -253,7 +263,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
         castShadow
         receiveShadow
       />
-      {exploreMode && interior && interior.map((struct, i) => (
+      {(exploreMode || xrayMode) && interior && interior.map((struct, i) => (
         <InteriorStructure key={i} voxels={struct.voxels} color={struct.color} />
       ))}
     </>
