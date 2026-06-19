@@ -44,10 +44,7 @@ export default function ChatBot({ organKey, stage }) {
       if (!res.ok) throw new Error(data.error || 'Server error')
       setMessages([...newMessages, { role: 'assistant', content: data.reply }])
     } catch (err) {
-      const msg = err.message?.includes('GROQ_API_KEY')
-        ? 'The AI is not yet activated on this site. The site owner needs to add a GROQ_API_KEY in Vercel settings.'
-        : 'Something went wrong. Please try again in a moment.'
-      setMessages([...newMessages, { role: 'assistant', content: msg }])
+      setMessages([...newMessages, { role: 'assistant', content: `Error: ${err.message}` }])
     }
     setLoading(false)
   }
