@@ -48,7 +48,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
           enablePan
           enableZoom
           enableRotate
-          minDistance={5}
+          minDistance={3}
           maxDistance={120}
           makeDefault
           autoRotate={highlights.length === 0}
@@ -57,12 +57,19 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
       </Canvas>
 
       {organ && (
-        <button
-          onClick={() => onCrossSection(prev => !prev)}
-          className="absolute bottom-3 left-3 text-xs px-3 py-1.5 rounded-md bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
-        >
-          {crossSection ? '⊙ Close' : '⊘ Dissect'}
-        </button>
+        <div className="absolute bottom-3 left-3 flex flex-col gap-1.5 items-start">
+          <button
+            onClick={() => onCrossSection(prev => !prev)}
+            className="text-xs px-3 py-1.5 rounded-md bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
+          >
+            {crossSection ? '⊙ Close Dissect' : '⊘ Dissect'}
+          </button>
+          {!crossSection && (
+            <span className="text-[10px] text-slate-400 bg-white/80 px-2 py-0.5 rounded shadow-sm">
+              ⊕ Scroll in to reveal interior
+            </span>
+          )}
+        </div>
       )}
     </div>
   )
