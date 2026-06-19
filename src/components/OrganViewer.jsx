@@ -10,8 +10,8 @@ function CameraRig({ insideMode, controlsRef }) {
 
   useFrame(() => {
     if (insideMode) {
-      // Pull in close, slightly elevated, looking at the cut face
-      camera.position.lerp({ x: 2, y: 3, z: 14 }, 0.07)
+      // Come from the right side to look at the lateral (X-axis) cut face
+      camera.position.lerp({ x: 20, y: 3, z: 4 }, 0.07)
       if (controlsRef.current) {
         controlsRef.current.target.lerp({ x: 0, y: 0, z: 0 }, 0.07)
         controlsRef.current.update()
@@ -62,14 +62,14 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
         <directionalLight position={[15, 25, 10]} intensity={insideMode ? 0.8 : 1.6} castShadow shadow-mapSize={[2048, 2048]} color="#ffffff" />
         <directionalLight position={[-12, 8, -8]} intensity={0.6} color="#c0d8ff" />
         <directionalLight position={[0, -10, 5]} intensity={insideMode ? 1.2 : 0.3} color="#ffe0d0" />
-        {/* Extra fill lights for inside cross-section — illuminate the cut face */}
+        {/* Lights for interior lateral cut — illuminate from right side (camera direction) */}
         {insideMode && (
           <>
-            <pointLight position={[0, 0, 2]} intensity={3.0} color="#fff0ee" distance={30} decay={1.0} />
-            <pointLight position={[0, 8, 4]} intensity={2.0} color="#ffd0c0" distance={20} decay={1.2} />
-            <pointLight position={[0, -8, 4]} intensity={2.0} color="#ffc8b0" distance={20} decay={1.2} />
-            <pointLight position={[-8, 0, 4]} intensity={1.5} color="#ffe0d0" distance={20} decay={1.2} />
-            <pointLight position={[8, 0, 4]} intensity={1.5} color="#ffe0d0" distance={20} decay={1.2} />
+            <pointLight position={[6, 0, 0]} intensity={4.0} color="#fff5f0" distance={35} decay={0.9} />
+            <pointLight position={[4, 10, 2]} intensity={2.5} color="#ffd0c0" distance={25} decay={1.1} />
+            <pointLight position={[4, -10, 2]} intensity={2.5} color="#ffc8b0" distance={25} decay={1.1} />
+            <pointLight position={[4, 0, 8]} intensity={2.0} color="#ffe8e0" distance={22} decay={1.2} />
+            <pointLight position={[4, 0, -8]} intensity={2.0} color="#ffe8e0" distance={22} decay={1.2} />
           </>
         )}
 

@@ -15,9 +15,10 @@ const PURPLE = {
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
-// Clips front-facing voxels to reveal interior — offset pushes cut deeper in inside mode
+// Normal dissect: cut front face off (Z-axis)
 const CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
-const CLIP_PLANE_DEEP = new THREE.Plane(new THREE.Vector3(0, 0, -1), 3) // 3 units deeper
+// Interior view: lateral cut (X-axis) reveals airways/vessels running top-to-bottom
+const CLIP_PLANE_INTERIOR = new THREE.Plane(new THREE.Vector3(1, 0, 0), 1)
 
 function voxelHash(x, y, z) {
   const h = Math.sin(x * 13.7 + y * 47.3 + z * 89.1) * 43758.5453
@@ -135,8 +136,8 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     prevMode.current = modeKey
 
     if (insideMode) {
-      // Deep cut so camera at z=14 can see well into the organ interior
-      material.clippingPlanes = [CLIP_PLANE_DEEP]
+      // Lateral X-axis cut: reveals airways/vessels running top-to-bottom
+      material.clippingPlanes = [CLIP_PLANE_INTERIOR]
       material.side = THREE.DoubleSide
       material.roughness = 0.30
       material.metalness = 0.12
@@ -168,8 +169,19 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     }
   })
 
+  const pointerDownPos = useRef(null)
+
+  const handlePointerDown = useCallback(e => {
+    pointerDownPos.current = { x: e.clientX, y: e.clientY }
+  }, [])
+
   const handleClick = useCallback(e => {
     e.stopPropagation()
+    if (!pointerDownPos.current) return
+    const dx = e.clientX - pointerDownPos.current.x
+    const dy = e.clientY - pointerDownPos.current.y
+    // Ignore if pointer moved more than 4px — that was a drag, not a click
+    if (dx * dx + dy * dy > 16) return
     if (e.instanceId != null) onVoxelClick(e.instanceId)
   }, [onVoxelClick])
 
@@ -177,6 +189,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     <instancedMesh
       ref={meshRef}
       args={[GEO, material, count]}
+      onPointerDown={handlePointerDown}
       onClick={handleClick}
       castShadow
       receiveShadow
