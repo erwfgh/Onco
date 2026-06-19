@@ -1,20 +1,19 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, ContactShadows, Grid } from '@react-three/drei'
 import * as THREE from 'three'
 import OrganModel from './OrganModel'
 
-// Smoothly moves the camera to inside/outside position
+// Smoothly moves camera to interior cross-section position
 function CameraRig({ insideMode, controlsRef }) {
   const { camera } = useThree()
-  const target = useRef(new THREE.Vector3())
 
   useFrame(() => {
     if (insideMode) {
-      // Lerp camera to organ center (inside), freeze target at same spot
-      camera.position.lerp({ x: 0, y: 0, z: 0.5 }, 0.08)
+      // Pull in close, slightly elevated, looking at the cut face
+      camera.position.lerp({ x: 2, y: 3, z: 14 }, 0.07)
       if (controlsRef.current) {
-        controlsRef.current.target.lerp({ x: 0, y: 0, z: 0 }, 0.08)
+        controlsRef.current.target.lerp({ x: 0, y: 0, z: 0 }, 0.07)
         controlsRef.current.update()
       }
     } else {
@@ -35,10 +34,12 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
   function handleInsideToggle() {
     const next = !insideMode
     setInsideMode(next)
+    // Also enable cross-section clip when entering interior
+    onCrossSection(() => next)
     if (controlsRef.current) {
-      controlsRef.current.minDistance = next ? 0 : 3
-      controlsRef.current.maxDistance = next ? 1.5 : 120
-      controlsRef.current.enablePan = !next
+      controlsRef.current.minDistance = next ? 3 : 3
+      controlsRef.current.maxDistance = next ? 22 : 120
+      controlsRef.current.enablePan = true
       controlsRef.current.update()
     }
   }
@@ -48,29 +49,27 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 5, 36], fov: insideMode ? 90 : 60 }}
+        camera={{ position: [0, 5, 36], fov: 55 }}
         shadows
-        style={{ background: insideMode ? '#0d0d1a' : 'transparent' }}
+        style={{ background: 'transparent' }}
         gl={{ antialias: true }}
-        onCreated={({ gl }) => { gl.localClippingEnabled = true }}
+        onCreated={({ gl }) => {
+          gl.localClippingEnabled = true
+          gl.setClearColor(0x000000, 0)
+        }}
       >
-        {/* Outside lighting */}
-        {!insideMode && (
-          <>
-            <ambientLight intensity={1.1} color="#e8f0ff" />
-            <directionalLight position={[15, 25, 10]} intensity={1.6} castShadow shadow-mapSize={[2048, 2048]} color="#ffffff" />
-            <directionalLight position={[-12, 8, -8]} intensity={0.5} color="#c0d8ff" />
-            <directionalLight position={[0, -10, 5]} intensity={0.3} color="#ffe8e0" />
-          </>
-        )}
-
-        {/* Inside lighting — point light at organ center illuminates all interior faces */}
+        <ambientLight intensity={insideMode ? 1.8 : 1.1} color="#ffe8f0" />
+        <directionalLight position={[15, 25, 10]} intensity={insideMode ? 0.8 : 1.6} castShadow shadow-mapSize={[2048, 2048]} color="#ffffff" />
+        <directionalLight position={[-12, 8, -8]} intensity={0.6} color="#c0d8ff" />
+        <directionalLight position={[0, -10, 5]} intensity={insideMode ? 1.2 : 0.3} color="#ffe0d0" />
+        {/* Extra fill lights for inside cross-section — illuminate the cut face */}
         {insideMode && (
           <>
-            <ambientLight intensity={0.4} color="#ffe8e0" />
-            <pointLight position={[0, 0, 0]} intensity={4.0} color="#fff5f0" distance={25} decay={1.2} />
-            <pointLight position={[3, 3, 0]} intensity={2.0} color="#ffd0d0" distance={15} decay={1.5} />
-            <pointLight position={[-3, -3, 0]} intensity={2.0} color="#d0e8ff" distance={15} decay={1.5} />
+            <pointLight position={[0, 0, 2]} intensity={3.0} color="#fff0ee" distance={30} decay={1.0} />
+            <pointLight position={[0, 8, 4]} intensity={2.0} color="#ffd0c0" distance={20} decay={1.2} />
+            <pointLight position={[0, -8, 4]} intensity={2.0} color="#ffc8b0" distance={20} decay={1.2} />
+            <pointLight position={[-8, 0, 4]} intensity={1.5} color="#ffe0d0" distance={20} decay={1.2} />
+            <pointLight position={[8, 0, 4]} intensity={1.5} color="#ffe0d0" distance={20} decay={1.2} />
           </>
         )}
 
@@ -83,7 +82,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
           stage={stage}
           highlights={highlights}
           onVoxelClick={onVoxelClick}
-          crossSection={crossSection && !insideMode}
+          crossSection={insideMode || crossSection}
           insideMode={insideMode}
         />
 
@@ -107,21 +106,21 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
 
         <OrbitControls
           ref={controlsRef}
-          enablePan={!insideMode}
-          enableZoom={!insideMode}
+          enablePan
+          enableZoom
           enableRotate
-          minDistance={insideMode ? 0 : 3}
-          maxDistance={insideMode ? 1.5 : 120}
+          minDistance={3}
+          maxDistance={insideMode ? 22 : 120}
           makeDefault
           autoRotate={!insideMode && highlights.length === 0}
           autoRotateSpeed={0.7}
         />
       </Canvas>
 
-      {/* Overlay hint for inside mode */}
+      {/* Inside mode label */}
       {insideMode && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full pointer-events-none">
-          Drag to look around inside the organ
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full pointer-events-none backdrop-blur-sm">
+          Interior cross-section — drag to orbit around the cut face
         </div>
       )}
 

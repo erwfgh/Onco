@@ -15,7 +15,9 @@ const PURPLE = {
 }
 
 const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
-const MANUAL_CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
+// Clips front-facing voxels to reveal interior — offset pushes cut deeper in inside mode
+const CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
+const CLIP_PLANE_DEEP = new THREE.Plane(new THREE.Vector3(0, 0, -1), 3) // 3 units deeper
 
 function voxelHash(x, y, z) {
   const h = Math.sin(x * 13.7 + y * 47.3 + z * 89.1) * 43758.5453
@@ -133,14 +135,15 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     prevMode.current = modeKey
 
     if (insideMode) {
-      material.clippingPlanes = []
+      // Deep cut so camera at z=14 can see well into the organ interior
+      material.clippingPlanes = [CLIP_PLANE_DEEP]
       material.side = THREE.DoubleSide
-      material.roughness = 0.35
-      material.metalness = 0.15
-      material.emissive = new THREE.Color('#220000')
-      material.emissiveIntensity = 0.25
+      material.roughness = 0.30
+      material.metalness = 0.12
+      material.emissive = new THREE.Color('#180808')
+      material.emissiveIntensity = 0.3
     } else if (crossSection) {
-      material.clippingPlanes = [MANUAL_CLIP_PLANE]
+      material.clippingPlanes = [CLIP_PLANE]
       material.side = THREE.DoubleSide
       material.roughness = 0.55
       material.metalness = 0.08
