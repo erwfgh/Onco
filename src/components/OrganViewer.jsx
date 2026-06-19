@@ -189,15 +189,9 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
         </div>
       )}
 
-      {/* Top-right buttons when not in explore mode */}
+      {/* Top-right buttons */}
       {!exploreMode && (
         <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
-          <button
-            onClick={handleEnterExplore}
-            className="text-xs px-3 py-1.5 rounded-md shadow font-semibold transition-all bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/40"
-          >
-            🔬 Explore Interior
-          </button>
           <button
             onClick={handleInsideToggle}
             className={`text-xs px-3 py-1.5 rounded-md shadow font-medium transition-all ${
@@ -206,7 +200,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
                 : 'bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50'
             }`}
           >
-            {insideMode ? '← Exit Cross-section' : '⊙ Cross-section'}
+            {insideMode ? '← Exit Interior' : '⊙ View Interior'}
           </button>
         </div>
       )}
