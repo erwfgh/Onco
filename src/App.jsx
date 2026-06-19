@@ -235,7 +235,7 @@ export default function App() {
           </div>
         </div>
 
-        <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} />
+        <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} highlights={highlights} />
       </div>
     </div>
   )

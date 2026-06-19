@@ -38,7 +38,7 @@ function applyColors(mesh, positions, dummy, baseColors, highlightedSet, purple,
   mesh.instanceColor.needsUpdate = true
 }
 
-function InteriorStructure({ voxels, color }) {
+function InteriorStructure({ voxels, color, stage, highlightPositions }) {
   const meshRef = useRef()
   const colorsApplied = useRef(false)
   const count = voxels.length
@@ -65,10 +65,27 @@ function InteriorStructure({ voxels, color }) {
     })
   }, [positions, baseColor])
 
+  const highlightedSet = useMemo(() => {
+    const set = new Set()
+    if (!highlightPositions || highlightPositions.length === 0) return set
+    const radius = STAGE_RADIUS[stage] * 1.5
+    positions.forEach((pos, i) => {
+      for (const hp of highlightPositions) {
+        if (hp.distanceTo(pos) <= radius) { set.add(i); break }
+      }
+    })
+    return set
+  }, [highlightPositions, positions, stage])
+
+  const purple = PURPLE[stage]
+
+  useEffect(() => {
+    colorsApplied.current = false
+  }, [highlightedSet])
+
   useFrame(() => {
     if (!colorsApplied.current && meshRef.current) {
-      const emptySet = new Set()
-      applyColors(meshRef.current, positions, dummy, baseColors, emptySet, baseColor, count)
+      applyColors(meshRef.current, positions, dummy, baseColors, highlightedSet, purple, count)
       colorsApplied.current = true
     }
   })
@@ -167,6 +184,11 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     return set
   }, [highlights, positions, stage])
 
+  const highlightPositions = useMemo(
+    () => highlights.map(hi => positions[hi]).filter(Boolean),
+    [highlights, positions]
+  )
+
   useEffect(() => {
     colorsApplied.current = false
   }, [positions, baseColors, highlightedSet, purple, insideMode])
@@ -264,7 +286,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
         receiveShadow
       />
       {(exploreMode || xrayMode) && interior && interior.map((struct, i) => (
-        <InteriorStructure key={i} voxels={struct.voxels} color={struct.color} />
+        <InteriorStructure key={i} voxels={struct.voxels} color={struct.color} stage={stage} highlightPositions={highlightPositions} />
       ))}
     </>
   )

@@ -2,7 +2,14 @@ import { useState, useRef, useEffect } from 'react'
 import CLINICAL from '../data/clinicalData'
 import ORGANS from '../data/organs'
 
-export default function DoctorChat({ organKey, stage }) {
+const STAGE_ANATOMY = {
+  1: 'The tumor is localized within the primary organ, likely involving only the innermost tissue layers. Lymph nodes are not yet affected. Blood vessels and lymphatics nearby may show early micro-invasion that is not yet clinically apparent.',
+  2: 'The tumor has grown larger within the organ and may have begun invading regional lymph nodes (Stage II). Peri-tumoral lymphatics are at risk. Blood vessel walls adjacent to the tumor may show early permeation (lymphovascular invasion).',
+  3: 'The tumor has spread to regional lymph nodes and may be invading nearby structures such as major blood vessels, nerves, or adjacent organs. Lymphatics are obstructed or invaded. Lymph node chains in the drainage territory are likely involved.',
+  4: 'Distant metastatic disease. Cancer cells have entered the bloodstream (hematogenous spread) and/or lymphatic channels, seeding distant organs (liver, lungs, bones, brain). The lymphatic network is a highway for spread at this stage. Blood vessels within the organ show frank tumor emboli.',
+}
+
+export default function DoctorChat({ organKey, stage, highlights = [] }) {
   const organ = ORGANS[organKey]
   const data = CLINICAL[organKey]
 
@@ -30,9 +37,23 @@ export default function DoctorChat({ organKey, stage }) {
     setMessages(newMessages)
     setLoading(true)
 
+    const markedSites = highlights.length > 0 ? ` The physician has marked ${highlights.length} tumor site${highlights.length !== 1 ? 's' : ''} on the 3D model.` : ''
     const systemPrompt = organ && data
-      ? `You are a clinical communication coach helping an oncologist explain a diagnosis to their patient. The patient has Stage ${stageLabel} ${organ.label} cancer (${data.fullName}). 5-year survival: ${data.survival5yr?.[stage] || 'unknown'}. Common treatments at this stage: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}. Help the doctor with: clear plain-language scripts, helpful analogies, answering patient questions compassionately, and preparing patients for treatment discussions. Be concise and practical.`
-      : `You are a clinical communication coach helping an oncologist explain cancer diagnoses to their patients in clear, compassionate language. Provide practical scripts and analogies.`
+      ? `You are an expert oncologist and clinical AI assistant. The physician is viewing a 3D anatomical model of Stage ${stageLabel} ${organ.label} cancer (${data.fullName}).
+
+Anatomical context for Stage ${stageLabel}: ${STAGE_ANATOMY[stage]}${markedSites}
+
+5-year survival: ${data.survival5yr?.[stage] || 'unknown'}. Common treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
+
+You help the doctor with:
+- Explaining to patients how the tumor affects interior anatomy (lymph nodes, blood vessels, ducts, nerves) in plain language
+- Describing how cancer spreads through the lymphatic system and vasculature at this stage
+- Providing compassionate scripts and analogies for patient communication
+- Answering clinical questions about interior spread and staging
+- Suggesting what the interior anatomy view reveals about prognosis
+
+Be medically accurate, detailed, and practical. Reference specific anatomical structures when relevant.`
+      : `You are an expert oncologist AI assistant helping physicians explain cancer diagnoses, including how tumors affect interior anatomy like lymph nodes, blood vessels, and ducts. Be medically accurate and compassionate.`
 
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY
@@ -90,10 +111,10 @@ export default function DoctorChat({ organKey, stage }) {
   }
 
   const starters = [
-    `How do I explain Stage ${stageLabel} ${organ.label} cancer to my patient in simple terms?`,
-    `What analogy can I use to explain how ${data.treatments?.[stage]?.[0] || 'chemotherapy'} works?`,
-    `My patient is scared. How do I discuss the prognosis sensitively?`,
-    `What questions should I expect from my patient at this stage?`,
+    `How do I explain Stage ${stageLabel} ${organ.label} cancer to my patient, including what's happening inside the organ?`,
+    `At Stage ${stageLabel}, how does this cancer spread through lymph nodes and blood vessels?`,
+    `What analogy can I use to explain how ${data.treatments?.[stage]?.[0] || 'chemotherapy'} works against this cancer?`,
+    `What does the interior anatomy view show us about prognosis at Stage ${stageLabel}?`,
   ]
 
   return (
