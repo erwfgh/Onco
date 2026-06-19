@@ -248,6 +248,32 @@ const ORGANS = {
       ...tag(tube([[5.5,7.0,0.5],[6.0,6.0,-0.8],[5.5,4.5,-1.5]], 0.32), 'vessel'),
       ...tag(tube([[4.5,-6.5,0.3],[5.5,-7.0,-1.0],[5.0,-8.0,-1.5]], 0.30), 'vessel'),
     ]),
+    interior: [
+      // Trachea lumen — bright pinkish-white
+      { color: '#f5c8b8', voxels: unique(cylinder(0, 0, 3, 12, 0.6)) },
+      // Main bronchi
+      { color: '#f5c8b8', voxels: unique([...tube([[0,3,0],[-4.0,2.0,0]], 0.5), ...tube([[0,3,0],[4.0,2.0,0]], 0.5)]) },
+      // Lobar bronchi right
+      { color: '#e8b0a0', voxels: unique([
+        ...tube([[-4.0,2.0,0],[-4.5,5.5,0.3],[-4.2,8.5,0.5]], 0.38),
+        ...tube([[-4.0,2.0,0],[-5.0,2.0,1.5],[-5.2,1.0,2.0]], 0.32),
+        ...tube([[-4.0,2.0,0],[-4.5,-1.5,0],[-4.8,-5.5,0]], 0.38),
+      ]) },
+      // Lobar bronchi left
+      { color: '#e8b0a0', voxels: unique([
+        ...tube([[4.0,2.0,0],[4.2,5.5,0.3],[3.8,8.5,0.5]], 0.38),
+        ...tube([[4.0,2.0,0],[3.8,-1.5,0],[4.0,-5.5,0]], 0.38),
+      ]) },
+      // Pulmonary vessels (arteries — blue-purple, veins — dark red)
+      { color: '#8888dd', voxels: unique([
+        ...sphere(-3.5, 1.5, 0.8, 1.2),
+        ...tube([[-3.5,1.5,0.8],[-5.5,4.0,0.5],[-6.0,7.0,0.5]], 0.42),
+        ...tube([[-3.5,1.5,0.8],[-4.5,-2.5,0.3],[-5.0,-6.5,0.3]], 0.40),
+        ...sphere(3.5, 1.5, 0.8, 1.2),
+        ...tube([[3.5,1.5,0.8],[5.0,4.0,0.5],[5.5,7.0,0.5]], 0.42),
+        ...tube([[3.5,1.5,0.8],[4.2,-2.5,0.3],[4.5,-6.5,0.3]], 0.40),
+      ]) },
+    ],
   },
 
   heart: {
@@ -394,6 +420,21 @@ const ORGANS = {
       // ── Pericardium — outer thin layer ────────────────────────────────────
       ...tag(noisyEllipsoid(0, 0, 0, 6.5, 8.5, 6.0, 0.05, 0.6), 'vessel'),
     ]),
+    interior: [
+      // Left ventricular cavity — dark red chamber
+      { color: '#8b0000', voxels: unique(ellipsoid(-1.5, -2.0, 0, 2.5, 4.5, 2.0)) },
+      // Right ventricular cavity — slightly lighter red
+      { color: '#a01010', voxels: unique(ellipsoid(2.5, -0.5, 0.8, 1.8, 3.2, 1.8)) },
+      // Left atrium — pink-red
+      { color: '#b83040', voxels: unique(ellipsoid(-1.5, 4.5, -0.5, 2.2, 1.8, 2.0)) },
+      // Right atrium — pink-red
+      { color: '#b83040', voxels: unique(ellipsoid(3.0, 4.0, 0.2, 1.8, 1.8, 1.5)) },
+      // Coronary arteries — bright yellow-orange
+      { color: '#e8a020', voxels: unique([
+        ...tube([[-0.5,5.0,3.8],[0.5,-0.5,3.5],[0.0,-5.5,2.0],[0.0,-7.0,1.0]], 0.35),
+        ...tube([[1.5,5.0,3.5],[4.2,1.5,2.2],[2.0,-5.0,0.8]], 0.32),
+      ]) },
+    ],
   },
 
   // ══ THORACIC CONTINUED ══════════════════════════════════════════════════
@@ -733,6 +774,21 @@ const ORGANS = {
       ...tag(tube([[0,0,0],[-2.5,-2.0,0],[-5.0,-4.0,0]], 0.45), 'vessel'),
       ...tag(tube([[0,0,0],[2.5,-2.0,0],[5.0,-4.0,0]], 0.45), 'vessel'),
     ]),
+    interior: [
+      // Intestinal lumen — pale tan/cream
+      { color: '#f0e0b8', voxels: unique([
+        ...tube([[-5.5,-5.0,0],[-5.5,6.0,0]], 1.0),
+        ...tube([[-5.5,6.0,0],[0,7.0,0],[5.5,6.5,0]], 1.0),
+        ...tube([[5.5,6.0,0],[5.5,-5.5,0]], 1.0),
+        ...tube([[5.5,-5.5,0],[0,-8.0,0],[-2.0,-6.0,0],[0,-4.5,0]], 1.0),
+        ...tube([[0,-4.5,0],[0,0,-3.5]], 1.2),
+      ]) },
+      // Mucosal folds — slightly darker tan
+      { color: '#d4b880', voxels: unique([
+        ...tube([[-5.5,-5.0,0],[-5.5,6.0,0]], 0.5),
+        ...tube([[5.5,6.0,0],[5.5,-5.5,0]], 0.5),
+      ]) },
+    ],
   },
 
   spleen: {
@@ -899,6 +955,29 @@ const ORGANS = {
       ...tag(noisyEllipsoid(6.5, 7.0, 0, 1.8, 1.2, 1.2, 0.12, 0.9), 'cortex'),
       ...tag(sphere(6.5, 7.0, 0, 0.7), 'medulla'),
     ]),
+    interior: [
+      // Renal sinus / collecting system — bright golden-yellow
+      { color: '#f0c840', voxels: unique([
+        ...ellipsoid(-4.8, 0.5, 0, 1.5, 2.5, 1.2),
+        ...sphere(-5.5, 3.5, 0, 0.8), ...sphere(-5.5, -3.5, 0, 0.8),
+        ...ellipsoid(4.8, 1.0, 0, 1.5, 2.5, 1.2),
+        ...sphere(5.5, 4.0, 0, 0.8), ...sphere(5.5, -3.0, 0, 0.8),
+      ]) },
+      // Medullary pyramids — dark maroon
+      { color: '#6a1808', voxels: unique([
+        ...ellipsoid(-6.0, 4.0, 0, 0.8, 1.5, 0.8),
+        ...ellipsoid(-6.0, 0.3, 1.2, 0.7, 1.2, 0.7),
+        ...ellipsoid(-6.0, -4.5, 0, 0.8, 1.5, 0.8),
+        ...ellipsoid(6.0, 4.5, 0, 0.8, 1.5, 0.8),
+        ...ellipsoid(6.0, 0.8, 1.2, 0.7, 1.2, 0.7),
+        ...ellipsoid(6.0, -4.0, 0, 0.8, 1.5, 0.8),
+      ]) },
+      // Ureters — orange
+      { color: '#e07818', voxels: unique([
+        ...tube([[-4.8,0.5,0],[-5.0,-6.0,0],[-4.5,-9.5,0]], 0.42),
+        ...tube([[4.8,1.0,0],[5.0,-6.0,0],[4.5,-9.5,0]], 0.42),
+      ]) },
+    ],
   },
 
   // ══ UROLOGICAL CONTINUED ════════════════════════════════════════════════
@@ -1284,6 +1363,27 @@ const ORGANS = {
       // Central sulcus left
       ...tag(ellipsoid(-5.0, 3.0, 0, 0.6, 3.5, 2.0), 'fissure'),
     ]),
+    interior: [
+      // Lateral ventricles — cerebrospinal fluid (blue-grey)
+      { color: '#b0c8e8', voxels: unique([
+        ...ellipsoid(2.5, 1.0, 0, 1.5, 4.5, 2.5),
+        ...ellipsoid(-2.5, 1.0, 0, 1.5, 4.5, 2.5),
+      ]) },
+      // Third ventricle
+      { color: '#b0c8e8', voxels: unique(ellipsoid(0, 0, -0.5, 0.6, 2.0, 1.0)) },
+      // Fourth ventricle
+      { color: '#a8c0e0', voxels: unique(ellipsoid(0, -6.0, -7.5, 1.2, 1.5, 1.2)) },
+      // Deep white matter (bright)
+      { color: '#f8f0e8', voxels: unique([
+        ...ellipsoid(3.5, 1.0, 0, 3.5, 5.5, 6.5),
+        ...ellipsoid(-3.5, 1.0, 0, 3.5, 5.5, 6.5),
+      ]) },
+      // Thalami — grey nuclei
+      { color: '#a08878', voxels: unique([
+        ...ellipsoid(1.8, 0.5, -0.5, 1.5, 2.0, 2.0),
+        ...ellipsoid(-1.8, 0.5, -0.5, 1.5, 2.0, 2.0),
+      ]) },
+    ],
   },
 
   thyroid: {

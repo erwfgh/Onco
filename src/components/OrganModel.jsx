@@ -2,6 +2,45 @@ import { useRef, useMemo, useEffect, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
+function InteriorStructure({ group, clippingPlanes }) {
+  const meshRef = useRef()
+  const applied = useRef(false)
+  const count = group.voxels.length
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const positions = useMemo(() => group.voxels.map(v => new THREE.Vector3(v.x, v.y, v.z)), [group.voxels])
+  const color = useMemo(() => new THREE.Color(group.color), [group.color])
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
+    roughness: 0.35,
+    metalness: 0.05,
+    side: THREE.DoubleSide,
+    clippingPlanes,
+    clipShadows: true,
+  }), [clippingPlanes])
+
+  useEffect(() => { material.color.set(color) }, [color, material])
+
+  useEffect(() => { applied.current = false }, [positions])
+
+  useFrame(() => {
+    if (!applied.current && meshRef.current) {
+      for (let i = 0; i < positions.length; i++) {
+        dummy.position.copy(positions[i])
+        dummy.updateMatrix()
+        meshRef.current.setMatrixAt(i, dummy.matrix)
+        if (meshRef.current.instanceColor) {
+          meshRef.current.setColorAt(i, color)
+        }
+      }
+      meshRef.current.instanceMatrix.needsUpdate = true
+      if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true
+      applied.current = true
+    }
+  })
+
+  if (!count) return null
+  return <instancedMesh ref={meshRef} args={[GEO, material, count]} />
+}
+
 const VOXEL_SIZE = 1.0
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
@@ -40,7 +79,7 @@ function applyColors(mesh, positions, dummy, baseColors, highlightedSet, purple,
   mesh.instanceColor.needsUpdate = true
 }
 
-export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode }) {
+export default function OrganModel({ voxels, baseColor, zones, stage, highlights, onVoxelClick, crossSection, insideMode, interior }) {
   const meshRef = useRef()
   const colorsApplied = useRef(false)
   const prevMode = useRef(null)
@@ -185,14 +224,21 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
     if (e.instanceId != null) onVoxelClick(e.instanceId)
   }, [onVoxelClick])
 
+  const interiorClipPlanes = useMemo(() => [CLIP_PLANE_INTERIOR], [])
+
   return (
-    <instancedMesh
-      ref={meshRef}
-      args={[GEO, material, count]}
-      onPointerDown={handlePointerDown}
-      onClick={handleClick}
-      castShadow
-      receiveShadow
-    />
+    <>
+      <instancedMesh
+        ref={meshRef}
+        args={[GEO, material, count]}
+        onPointerDown={handlePointerDown}
+        onClick={handleClick}
+        castShadow
+        receiveShadow
+      />
+      {insideMode && interior?.map((group, i) => (
+        <InteriorStructure key={i} group={group} clippingPlanes={interiorClipPlanes} />
+      ))}
+    </>
   )
 }
