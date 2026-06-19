@@ -1,58 +1,38 @@
 import { useState, useCallback } from 'react'
-import { UserButton, useUser, SignIn } from '@clerk/clerk-react'
 import OrganViewer from './components/OrganViewer'
 import OrganSelector from './components/OrganSelector'
 import StageSelector from './components/StageSelector'
-import Paywall from './components/Paywall'
 import InfoPanel from './components/InfoPanel'
-import PatientChat from './components/PatientChat'
-import PatientOrganViewer from './components/PatientOrganViewer'
+import LandingPage from './components/LandingPage'
+import ReportModal from './components/ReportModal'
+import CaseBar from './components/CaseBar'
+import RoleSelector from './components/RoleSelector'
 import ORGANS from './data/organs'
+import CLINICAL from './data/clinicalData'
 
-function Landing({ onSelect }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-white to-blue-50 px-4">
-      <div className="mb-10 text-center">
-        <div className="text-5xl mb-4">🔬</div>
-        <h1 className="text-4xl font-black tracking-tight mb-2">
-          <span className="text-slate-800">ONCO</span><span className="text-blue-600">VIZ</span>
-        </h1>
-        <p className="text-slate-500 text-sm">3D Tumor Staging & Oncology Assistant</p>
-      </div>
+const SESSION_VERSION = 3
 
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-        <button
-          onClick={() => onSelect('doctor')}
-          className="flex-1 flex flex-col items-center gap-3 px-6 py-8 rounded-2xl bg-white border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all group shadow-sm"
-        >
-          <span className="text-4xl">🔬</span>
-          <div className="text-center">
-            <div className="text-slate-800 font-semibold text-lg group-hover:text-blue-600 transition-colors">I'm a Doctor</div>
-            <div className="text-slate-400 text-xs mt-1">3D organ staging · AI clinical assistant · subscription required</div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => onSelect('patient')}
-          className="flex-1 flex flex-col items-center gap-3 px-6 py-8 rounded-2xl bg-white border border-teal-200 hover:border-teal-400 hover:bg-teal-50 transition-all group shadow-sm"
-        >
-          <span className="text-4xl">🩺</span>
-          <div className="text-center">
-            <div className="text-slate-800 font-semibold text-lg group-hover:text-teal-600 transition-colors">I'm a Patient</div>
-            <div className="text-slate-400 text-xs mt-1">Ask about cancer, treatments & what to expect · free</div>
-          </div>
-        </button>
-      </div>
-    </div>
-  )
+function loadUser() {
+  try {
+    const u = JSON.parse(localStorage.getItem('oncoviz_user'))
+    if (!u || !u.role || u.v !== SESSION_VERSION) {
+      localStorage.removeItem('oncoviz_user')
+      return null
+    }
+    return u
+  } catch { return null }
 }
 
-function DoctorApp() {
+export default function App() {
+  const [user, setUser] = useState(loadUser)
   const [selectedOrgan, setSelectedOrgan] = useState(null)
   const [stage, setStage] = useState(1)
   const [highlights, setHighlights] = useState([])
-  const [crossSection, setCrossSection] = useState(false)
-
+  const [showLanding, setShowLanding] = useState(true)
+  const [showReport, setShowReport] = useState(false)
+  const [caseId, setCaseId] = useState('')
+  const [notes, setNotes] = useState('')
+  const [showNotes, setShowNotes] = useState(false)
   const handleOrganSelect = useCallback(key => {
     setSelectedOrgan(key)
     setHighlights([])
@@ -69,181 +49,194 @@ function DoctorApp() {
   }, [])
 
   const organ = selectedOrgan ? ORGANS[selectedOrgan] : null
+  const clinical = selectedOrgan ? CLINICAL[selectedOrgan] : null
+  const survival = clinical?.survival5yr?.[stage]
+
+  const isPatient = user?.role === 'patient'
+
+  if (!user) return <RoleSelector onAuth={u => { setUser(u); setShowLanding(false) }} />
 
   return (
-    <Paywall>
-      <div className="flex flex-col h-full bg-white text-slate-800 select-none">
-        <header className="flex items-center justify-between px-5 py-2.5 border-b border-blue-100 bg-white flex-shrink-0 z-10 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-lg font-black tracking-tight">
-                <span className="text-slate-800">ONCO</span><span className="text-blue-600">VIZ</span>
-              </h1>
-              <p className="text-xs text-slate-400 -mt-0.5">3D Voxel Tumor Staging</p>
-            </div>
-            <div className="h-8 w-px bg-blue-100" />
-            <div className="text-xs text-slate-400">For oncologists · hematologists · dermatologists</div>
-          </div>
+    <div className="flex flex-col h-full bg-[#f0f6ff] text-slate-800 select-none relative">
+      {showLanding && !isPatient && <LandingPage onEnter={() => setShowLanding(false)} />}
 
-          <div className="flex items-center gap-3">
-            <UserButton afterSignOutUrl="/" />
-            {organ && (
-              <>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-50 border border-blue-200 text-sm">
-                  <span>{organ.icon}</span>
-                  <span className="font-medium text-slate-700">{organ.label}</span>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-slate-400 text-xs">{organ.system}</span>
-                </div>
-                <div className="text-xs text-slate-400 max-w-xs truncate hidden lg:block">
-                  {organ.description}
-                </div>
-              </>
-            )}
-            {highlights.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-blue-600 font-medium">{highlights.length} site{highlights.length !== 1 ? 's' : ''} marked</span>
-                <button
-                  onClick={() => setHighlights([])}
-                  className="text-xs px-3 py-1.5 rounded-md bg-white hover:bg-blue-50 text-slate-600 transition-colors border border-blue-200"
-                >
-                  ✕ Reset
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
+      {showReport && selectedOrgan && (
+        <ReportModal
+          organKey={selectedOrgan}
+          stage={stage}
+          highlights={highlights}
+          caseId={caseId}
+          notes={notes}
+          onClose={() => setShowReport(false)}
+        />
+      )}
 
-        <div className="flex flex-1 overflow-hidden bg-blue-50/40">
-          <OrganSelector selected={selectedOrgan} onSelect={handleOrganSelect} />
-          <div className="flex-1 flex flex-col overflow-hidden relative">
-            <div className="flex-1 relative bg-gradient-to-b from-blue-50/60 to-white">
-              <OrganViewer
-                organ={organ}
-                stage={stage}
-                highlights={highlights}
-                onVoxelClick={handleVoxelClick}
-                crossSection={crossSection}
-                onCrossSection={setCrossSection}
-              />
-              {!organ && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <div className="flex gap-4 justify-center text-5xl mb-6 opacity-20">🧠🫁❤️🦴🫘</div>
-                    <p className="text-slate-400 text-xl font-light mb-2">Select an organ to begin</p>
-                    <p className="text-slate-300 text-sm">
-                      {Object.keys(ORGANS).length} anatomical structures · spin · zoom · click to stage
-                    </p>
-                  </div>
-                </div>
-              )}
-              {organ && highlights.length === 0 && (
-                <div className="absolute bottom-3 right-3 text-xs text-slate-400 space-y-0.5 pointer-events-none text-right">
-                  <div>🖱️ Drag to rotate</div>
-                  <div>⚙️ Scroll to zoom</div>
-                  <div>👆 Click voxel to mark</div>
-                </div>
-              )}
-            </div>
-            <div className="px-5 py-3 border-t border-blue-100 bg-white flex-shrink-0">
-              <StageSelector stage={stage} onStageChange={handleStageChange} />
-            </div>
-          </div>
-          <InfoPanel organKey={selectedOrgan} stage={stage} />
-        </div>
-      </div>
-    </Paywall>
-  )
-}
-
-function PatientApp({ onExit }) {
-  const { isLoaded, isSignedIn, user } = useUser()
-  const [tab, setTab] = useState('ai')
-
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center h-full bg-white">
-        <div className="w-6 h-6 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (!isSignedIn) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-white to-blue-50 px-4">
-        <div className="mb-8 text-center">
-          <div className="text-4xl mb-3">🩺</div>
-          <h1 className="text-2xl font-black tracking-tight mb-2">
-            <span className="text-slate-800">ONCO</span><span className="text-teal-500">VIZ</span>
-            <span className="text-slate-400 font-normal text-lg ml-2">for Patients</span>
-          </h1>
-          <p className="text-slate-500 text-sm max-w-xs">
-            Sign in with Google to chat with our oncology AI — free, no subscription needed.
-          </p>
-        </div>
-        <SignIn routing="hash" />
-        <button
-          onClick={onExit}
-          className="mt-6 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          ← Back
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="flex flex-col h-full bg-white text-slate-800">
-      <header className="flex items-center justify-between px-5 py-2.5 border-b border-blue-100 bg-white flex-shrink-0 z-10 shadow-sm">
+      {/* Top bar */}
+      <header className="flex items-center justify-between px-5 py-2.5 border-b border-blue-200 bg-white shadow-sm flex-shrink-0 z-10 relative">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-lg font-black tracking-tight">
-              <span className="text-slate-800">ONCO</span><span className="text-teal-500">VIZ</span>
+            <h1 className="text-lg font-black tracking-tight cursor-pointer" onClick={() => setShowLanding(true)}>
+              <span className="text-blue-900">ONCO</span><span className="text-blue-500">VIZ</span>
             </h1>
-            <p className="text-xs text-slate-400 -mt-0.5">Patient Portal</p>
+            <p className="text-xs text-slate-400 -mt-0.5">3D Voxel Tumor Staging</p>
           </div>
           <div className="h-8 w-px bg-blue-100" />
-          <div className="flex gap-1">
-            <button
-              onClick={() => setTab('ai')}
-              className={`text-sm px-4 py-1.5 rounded-md font-medium transition-all ${tab === 'ai' ? 'bg-teal-500 text-white' : 'text-slate-500 hover:text-slate-700 hover:bg-blue-50'}`}
-            >
-              🩺 Ask AI
-            </button>
-            <button
-              onClick={() => setTab('organs')}
-              className={`text-sm px-4 py-1.5 rounded-md font-medium transition-all ${tab === 'organs' ? 'bg-teal-500 text-white' : 'text-slate-500 hover:text-slate-700 hover:bg-blue-50'}`}
-            >
-              🫀 3D Organs
-            </button>
+          <div className="text-xs text-slate-400 leading-relaxed hidden md:block">
+            <span className="text-slate-500">For oncologists · hematologists · dermatologists</span>
           </div>
         </div>
+
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 hidden sm:block">
-            {user?.firstName || user?.primaryEmailAddress?.emailAddress}
-          </span>
-          <UserButton afterSignOutUrl="/" />
-          <button
-            onClick={onExit}
-            className="text-xs px-3 py-1.5 rounded-md bg-white hover:bg-blue-50 text-slate-600 border border-blue-200 transition-colors"
-          >
-            ← Home
-          </button>
+          <CaseBar
+            caseId={caseId}
+            setCaseId={setCaseId}
+            notes={notes}
+            setNotes={setNotes}
+            showNotes={showNotes}
+            setShowNotes={setShowNotes}
+          />
+
+          {organ && (
+            <>
+              <div className="h-6 w-px bg-blue-100" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-50 border border-blue-200 text-sm">
+                <span className="text-blue-500">{organ.icon}</span>
+                <span className="font-medium text-slate-700">{organ.label}</span>
+                <span className="text-slate-300">·</span>
+                <span className="text-slate-400 text-xs">{organ.system}</span>
+              </div>
+
+              {survival && (
+                <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-blue-50 border border-blue-200 text-xs">
+                  <span className="text-slate-400">5-yr:</span>
+                  <span className={`font-bold ${
+                    parseInt(survival) >= 70 ? 'text-emerald-600' :
+                    parseInt(survival) >= 40 ? 'text-amber-600' :
+                    parseInt(survival) >= 20 ? 'text-orange-600' : 'text-red-600'
+                  }`}>{survival}</span>
+                </div>
+              )}
+            </>
+          )}
+
+          {highlights.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-blue-600 font-medium">{highlights.length} site{highlights.length !== 1 ? 's' : ''} marked</span>
+              <button
+                onClick={() => setHighlights([])}
+                className="text-xs px-3 py-1.5 rounded-md bg-white hover:bg-blue-50 text-slate-600 transition-colors border border-blue-200"
+              >
+                ✕ Reset
+              </button>
+            </div>
+          )}
+
+          {organ && (
+            <button
+              onClick={() => setShowReport(true)}
+              className="text-xs px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium shadow-sm"
+            >
+              ▤ Report
+            </button>
+          )}
+
+          {!isPatient && (
+            <button
+              onClick={() => setShowLanding(true)}
+              className="text-xs px-3 py-1.5 rounded-md border border-blue-200 text-slate-500 hover:text-blue-600 hover:border-blue-400 transition-colors hidden md:block"
+            >
+              Why OncoViz?
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 pl-1 border-l border-blue-100 ml-1">
+            <span className="text-xs text-slate-500 font-medium hidden md:block">
+              {isPatient ? `♡ ${user.name}` : `✚ ${user.name || user.email}`}
+            </span>
+            <button
+              onClick={() => { localStorage.removeItem('oncoviz_user'); setUser(null) }}
+              className="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors font-medium"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="flex-1 overflow-hidden">
-        {tab === 'ai'     && <PatientChat embedded />}
-        {tab === 'organs' && <PatientOrganViewer />}
+      {/* Notes drawer */}
+      {showNotes && (
+        <div className="px-5 py-3 border-b border-blue-200 bg-white flex-shrink-0 z-10 shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Clinical Notes</span>
+            {caseId && <span className="text-xs text-slate-400 font-mono">· {caseId}</span>}
+          </div>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Add clinical observations, treatment plan notes, consultation findings..."
+            rows={3}
+            className="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-400 resize-none"
+          />
+        </div>
+      )}
+
+      {/* Main */}
+      <div className="flex flex-1 overflow-hidden">
+        <OrganSelector selected={selectedOrgan} onSelect={handleOrganSelect} />
+
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+
+          {/* 3D Canvas */}
+          <div className="flex-1 relative">
+            <OrganViewer
+              organ={organ}
+              stage={stage}
+              highlights={highlights}
+              onVoxelClick={handleVoxelClick}
+            />
+
+            {/* Empty state */}
+            {!organ && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <div className="text-center">
+                  <div className="flex gap-6 justify-center text-4xl mb-6 opacity-20 font-light tracking-widest text-blue-400">
+                    <span>Ω</span><span>Ψ</span><span>♡</span><span>✚</span><span>⊕</span>
+                  </div>
+                  <p className="text-slate-400 text-xl font-light mb-2">Select an organ to begin</p>
+                  <p className="text-slate-300 text-sm">
+                    {Object.keys(ORGANS).length} anatomical structures · spin · zoom · click to stage
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Controls hint */}
+            {organ && highlights.length === 0 && (
+              <div className="absolute bottom-3 right-3 text-xs text-slate-400 space-y-0.5 pointer-events-none text-right">
+                <div>⊙ Drag to rotate</div>
+                <div>⊞ Scroll to zoom</div>
+                <div>◎ Click voxel to mark</div>
+              </div>
+            )}
+
+            {/* Marked sites overlay */}
+            {highlights.length > 0 && organ && (
+              <div className="absolute top-3 left-3 bg-white/90 border border-blue-200 rounded-lg px-3 py-2 text-xs pointer-events-none shadow-sm">
+                <div className="text-blue-600 font-semibold mb-1">{highlights.length} tumor site{highlights.length !== 1 ? 's' : ''} marked</div>
+                <div className="text-slate-500">Stage {['I','II','III','IV'][stage-1]} — {organ.label}</div>
+                {survival && <div className="text-slate-400 mt-0.5">5-yr survival: <span className="text-slate-600 font-medium">{survival}</span></div>}
+              </div>
+            )}
+          </div>
+
+          {/* Stage bar */}
+          <div className="px-5 py-3 border-t border-blue-200 bg-white flex-shrink-0 shadow-sm">
+            <StageSelector stage={stage} onStageChange={handleStageChange} organ={organ} clinical={clinical} />
+          </div>
+        </div>
+
+        <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} />
       </div>
     </div>
   )
-}
-
-export default function App() {
-  const [role, setRole] = useState(null)
-
-  if (!role) return <Landing onSelect={setRole} />
-  if (role === 'patient') return <PatientApp onExit={() => setRole(null)} />
-  return <DoctorApp />
 }
