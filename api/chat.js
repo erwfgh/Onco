@@ -26,7 +26,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ model: 'llama3-8b-8192', messages, max_tokens: 512 }),
+      body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages, max_tokens: 512 }),
     })
 
     if (!groqRes.ok) {
