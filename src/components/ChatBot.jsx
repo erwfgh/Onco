@@ -98,7 +98,7 @@ export default function ChatBot({ organKey, stage }) {
           <div className="text-xs font-semibold text-slate-700">AI Assistant</div>
           <div className="text-[10px] text-slate-400">{organ.label} · Stage {['I','II','III','IV'][stage-1]} · Plain-language answers</div>
         </div>
-        <div className="text-base">🤖</div>
+        <div className="text-base">✦</div>
       </div>
 
       {/* Messages */}
