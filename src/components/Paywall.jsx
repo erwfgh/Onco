@@ -62,9 +62,8 @@ export default function Paywall({ children }) {
         <div className="max-w-md w-full bg-white border border-blue-100 rounded-2xl p-8 text-center shadow-sm">
           <div className="text-4xl mb-4">🔬</div>
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Subscribe to OncoViz</h2>
-          <p className="text-slate-500 text-sm mb-6">
-            Full access to 3D tumor staging for all organs. Start with a free 7-day trial — no charge until day 8.
-          </p>
+          <p className="text-slate-500 text-sm mb-1">One App, two views.</p>
+          <p className="text-slate-400 text-xs mb-6">Start with a free 7-day trial — no charge until day 8.</p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
             <div className="text-3xl font-black text-slate-800">$19<span className="text-lg font-normal text-slate-400">/month</span></div>
