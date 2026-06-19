@@ -182,10 +182,7 @@ export default function PatientMode({ organKey, stage }) {
       {/* What is this cancer */}
       <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
         <p className="text-slate-400 uppercase tracking-wider text-[10px] font-semibold mb-1.5">What is this cancer?</p>
-        <p className="text-slate-800 font-semibold mb-1">{data.fullName}</p>
-        <p className="text-slate-600 leading-relaxed">
-          {organ.description}. There are {data.subtypes?.length || 'several'} main types: {data.subtypes?.slice(0, 3).join(', ')}.
-        </p>
+        <p className="text-slate-600 leading-relaxed">{organ.description}.</p>
       </div>
 
       {/* What does your stage mean */}
@@ -193,12 +190,6 @@ export default function PatientMode({ organKey, stage }) {
         <p className="text-slate-400 uppercase tracking-wider text-[10px] font-semibold mb-1.5">What does your stage mean?</p>
         <p className={`font-bold mb-1.5 ${stageInfo.color}`}>{stageInfo.label}</p>
         <p className="text-slate-600 leading-relaxed">{stageInfo.summary}</p>
-        {tnm.desc && (
-          <div className="mt-2 bg-white rounded-lg p-2.5">
-            <p className="text-slate-400 text-[10px] mb-0.5">In medical terms:</p>
-            <p className="text-slate-400">{tnm.desc}</p>
-          </div>
-        )}
       </div>
 
       {/* Survival */}
@@ -209,7 +200,7 @@ export default function PatientMode({ organKey, stage }) {
           <span className="text-slate-500 text-[10px]">of people alive at 5 years</span>
         </div>
         <p className="text-slate-500 leading-relaxed">
-          This is a statistical average. Your outcome depends on many personal factors. Your doctor can give you a more personalized estimate.
+          This is an average across many people. Your personal outlook depends on many factors — your doctor can give you a clearer picture.
         </p>
       </div>
 
@@ -222,10 +213,7 @@ export default function PatientMode({ organKey, stage }) {
             return (
               <div key={i} className="flex gap-2 items-start">
                 <span className="text-blue-500 flex-shrink-0 mt-0.5">{plain.icon}</span>
-                <div>
-                  <p className="text-slate-700 leading-relaxed">{plain.desc}</p>
-                  <p className="text-slate-400 text-[10px] mt-0.5 italic">{t}</p>
-                </div>
+                <p className="text-slate-700 leading-relaxed">{plain.desc}</p>
               </div>
             )
           })}
@@ -239,8 +227,8 @@ export default function PatientMode({ organKey, stage }) {
           {[
             `What are my treatment options for Stage ${['I','II','III','IV'][stage-1]} ${organ.label} cancer?`,
             'Am I eligible for any clinical trials?',
-            data.biomarkers?.length ? `Should I be tested for ${data.biomarkers.slice(0,2).join(' or ')}?` : 'What biomarker tests do you recommend?',
-            'What side effects should I expect?',
+            'Are there any genetic or biomarker tests I should have?',
+            'What side effects should I expect from treatment?',
             'What support resources do you recommend?',
           ].map((q, i) => (
             <div key={i} className="flex gap-2 items-start">
