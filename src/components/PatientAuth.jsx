@@ -2,12 +2,14 @@ import { useState } from 'react'
 
 export default function PatientAuth({ onBack, onAuth }) {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [error, setError] = useState('')
 
   function handleSubmit(e) {
     e.preventDefault()
-    if (!name.trim()) return setError('Please enter your name.')
-    const user = { v: 3, role: 'patient', name: name.trim() }
+    if (!name.trim()) return setError('Please enter your first name.')
+    if (!email.includes('@')) return setError('Please enter a valid email address.')
+    const user = { v: 3, role: 'patient', name: name.trim(), email: email.trim() }
     localStorage.setItem('oncoviz_user', JSON.stringify(user))
     onAuth(user)
   }
@@ -30,13 +32,13 @@ export default function PatientAuth({ onBack, onAuth }) {
             <div className="text-5xl mb-4 text-blue-400 font-light">♡</div>
             <h2 className="text-2xl font-black text-slate-800 mb-2">Patient View</h2>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Just enter your first name — no password, no account needed.
+              Free access — just enter your name and email.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Your first name</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">First name</label>
               <input
                 type="text"
                 value={name}
@@ -44,6 +46,18 @@ export default function PatientAuth({ onBack, onAuth }) {
                 placeholder="e.g. Sarah"
                 required
                 autoFocus
+                className="w-full px-4 py-3 rounded-xl border border-blue-200 bg-blue-50 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Email address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@gmail.com"
+                required
                 className="w-full px-4 py-3 rounded-xl border border-blue-200 bg-blue-50 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
               />
             </div>
@@ -56,7 +70,7 @@ export default function PatientAuth({ onBack, onAuth }) {
           </form>
 
           <p className="text-xs text-slate-300 text-center">
-            No password · No account · Educational use only
+            No password · Educational use only
           </p>
         </div>
       </div>
