@@ -28,21 +28,46 @@ export default function ChatBot({ organKey, stage }) {
     setMessages(newMessages)
     setLoading(true)
 
+    const systemPrompt = `You are a compassionate oncology assistant helping patients understand cancer. Explain medical terms in plain, simple English. Be warm, clear, and reassuring. Always remind users to consult their own doctor for personal medical advice.`
+
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          organ: organ?.label,
-          stage,
-          message: text,
-          history: messages,
-          patientMode: true,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Server error')
-      setMessages([...newMessages, { role: 'assistant', content: data.reply }])
+      const apiKey = import.meta.env.VITE_GROQ_API_KEY
+      const endpoint = apiKey
+        ? 'https://api.groq.com/openai/v1/chat/completions'
+        : '/api/chat'
+
+      let reply
+      if (apiKey) {
+        // Direct browser → Groq (uses VITE_GROQ_API_KEY build-time var)
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: 'llama3-8b-8192',
+            max_tokens: 512,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...messages.slice(-10),
+              { role: 'user', content: text },
+            ],
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error?.message || 'Groq error')
+        reply = data.choices[0].message.content
+      } else {
+        // Fallback: server-side /api/chat
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ organ: organ?.label, stage, message: text, history: messages, patientMode: true }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Server error')
+        reply = data.reply
+      }
+
+      setMessages([...newMessages, { role: 'assistant', content: reply }])
     } catch (err) {
       setMessages([...newMessages, { role: 'assistant', content: `Error: ${err.message}` }])
     }
