@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react'
-import { UserButton } from '@clerk/clerk-react'
+import { UserButton, useUser } from '@clerk/clerk-react'
 import OrganViewer from './components/OrganViewer'
 import OrganSelector from './components/OrganSelector'
 import StageSelector from './components/StageSelector'
 import Paywall from './components/Paywall'
 import AiAssistant from './components/AiAssistant'
 import PatientChat from './components/PatientChat'
+import PatientOrganViewer from './components/PatientOrganViewer'
 import ORGANS from './data/organs'
 
 function Landing({ onSelect }) {
@@ -154,10 +155,56 @@ function DoctorApp() {
   )
 }
 
+function PatientApp({ onExit }) {
+  const [tab, setTab] = useState('ai')
+
+  return (
+    <div className="flex flex-col h-full bg-[#060d1a] text-white">
+      {/* Header with tabs */}
+      <header className="flex items-center justify-between px-5 py-2.5 border-b border-slate-700/60 bg-[#0a1525]/90 backdrop-blur-sm flex-shrink-0 z-10">
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-lg font-black tracking-tight">
+              <span className="text-white">ONCO</span><span className="text-teal-400">VIZ</span>
+            </h1>
+            <p className="text-xs text-slate-500 -mt-0.5">Patient Portal</p>
+          </div>
+          <div className="h-8 w-px bg-slate-700/60" />
+          <div className="flex gap-1">
+            <button
+              onClick={() => setTab('ai')}
+              className={`text-sm px-4 py-1.5 rounded-md font-medium transition-all ${tab === 'ai' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
+            >
+              🩺 Ask AI
+            </button>
+            <button
+              onClick={() => setTab('organs')}
+              className={`text-sm px-4 py-1.5 rounded-md font-medium transition-all ${tab === 'organs' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700/60'}`}
+            >
+              🫀 3D Organs
+            </button>
+          </div>
+        </div>
+        <button
+          onClick={onExit}
+          className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition-colors"
+        >
+          ← Home
+        </button>
+      </header>
+
+      <div className="flex-1 overflow-hidden">
+        {tab === 'ai'     && <PatientChat embedded />}
+        {tab === 'organs' && <PatientOrganViewer />}
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [role, setRole] = useState(null)
 
   if (!role) return <Landing onSelect={setRole} />
-  if (role === 'patient') return <PatientChat onExit={() => setRole(null)} />
+  if (role === 'patient') return <PatientApp onExit={() => setRole(null)} />
   return <DoctorApp />
 }

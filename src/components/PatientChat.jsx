@@ -9,7 +9,7 @@ const STARTERS = [
   'What questions should I ask my oncologist at my next visit?',
 ]
 
-function Chat({ onExit }) {
+function Chat({ onExit, embedded }) {
   const { user } = useUser()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -50,29 +50,31 @@ function Chat({ onExit }) {
 
   return (
     <div className="flex flex-col h-full bg-[#060d1a] text-white">
-      {/* Header */}
-      <header className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 bg-[#0a1525]/90 backdrop-blur-sm flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-lg font-black tracking-tight">
-              <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
-            </h1>
-            <p className="text-xs text-slate-500 -mt-0.5">Patient Oncology Assistant</p>
+      {/* Header — only shown when not embedded inside PatientApp */}
+      {!embedded && (
+        <header className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60 bg-[#0a1525]/90 backdrop-blur-sm flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-lg font-black tracking-tight">
+                <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
+              </h1>
+              <p className="text-xs text-slate-500 -mt-0.5">Patient Oncology Assistant</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">
-            Hi, {user?.firstName || user?.primaryEmailAddress?.emailAddress}
-          </span>
-          <UserButton afterSignOutUrl="/" />
-          <button
-            onClick={onExit}
-            className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition-colors"
-          >
-            ← Back to Organs
-          </button>
-        </div>
-      </header>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400">
+              Hi, {user?.firstName || user?.primaryEmailAddress?.emailAddress}
+            </span>
+            <UserButton afterSignOutUrl="/" />
+            <button
+              onClick={onExit}
+              className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 transition-colors"
+            >
+              ← Back
+            </button>
+          </div>
+        </header>
+      )}
 
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 max-w-3xl mx-auto w-full">
@@ -154,8 +156,11 @@ function Chat({ onExit }) {
   )
 }
 
-export default function PatientChat({ onExit }) {
+export default function PatientChat({ onExit, embedded }) {
   const { isLoaded, isSignedIn } = useUser()
+
+  // When embedded, skip the auth gate — AI is free and immediate
+  if (embedded) return <Chat onExit={onExit} embedded />
 
   if (!isLoaded) {
     return (
