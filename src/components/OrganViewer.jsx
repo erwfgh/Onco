@@ -4,42 +4,27 @@ import { OrbitControls, ContactShadows, Grid } from '@react-three/drei'
 import * as THREE from 'three'
 import OrganModel from './OrganModel'
 
-// Smoothly moves camera to interior cross-section position
-function CameraRig({ insideMode, exploreMode, controlsRef }) {
-  const { camera } = useThree()
-
-  useFrame(() => {
-    if (exploreMode) return // first-person controls handle camera
-    if (insideMode) {
-      camera.position.lerp({ x: 20, y: 3, z: 4 }, 0.07)
-      if (controlsRef.current) {
-        controlsRef.current.target.lerp({ x: 0, y: 0, z: 0 }, 0.07)
-        controlsRef.current.update()
-      }
-    } else {
-      camera.position.lerp({ x: 0, y: 5, z: 36 }, 0.06)
-      if (controlsRef.current) {
-        controlsRef.current.target.lerp({ x: 0, y: 0, z: 0 }, 0.06)
-        controlsRef.current.update()
-      }
-    }
-  })
-  return null
-}
-
 function FirstPersonController({ active, onExit }) {
   const { camera } = useThree()
   const keys = useRef({})
+  const initialized = useRef(false)
 
   useEffect(() => {
-    if (!active) return
-    // Position camera inside organ when entering explore mode
-    camera.position.set(0, 0, 3)
-    camera.rotation.set(0, 0, 0)
+    if (!active) {
+      initialized.current = false
+      keys.current = {}
+      return
+    }
+    // Start camera at center of organ looking forward
+    camera.position.set(0, 0, 0)
+    camera.rotation.set(0, Math.PI, 0) // look toward +z so interior is in front
+    initialized.current = true
 
     const onKeyDown = (e) => {
       keys.current[e.key] = true
       if (e.key === 'Escape') onExit?.()
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))
+        e.preventDefault()
     }
     const onKeyUp = (e) => { keys.current[e.key] = false }
 
@@ -53,8 +38,8 @@ function FirstPersonController({ active, onExit }) {
 
   useFrame(() => {
     if (!active) return
-    const speed = 0.08
-    const turnSpeed = 0.02
+    const speed = 0.15
+    const turnSpeed = 0.025
     const k = keys.current
 
     if (k['ArrowLeft']) camera.rotation.y += turnSpeed
@@ -63,10 +48,10 @@ function FirstPersonController({ active, onExit }) {
     const dir = new THREE.Vector3()
     camera.getWorldDirection(dir)
 
-    if (k['ArrowUp'] || k['w'] || k['W']) camera.position.addScaledVector(dir, speed)
-    if (k['ArrowDown'] || k['s'] || k['S']) camera.position.addScaledVector(dir, -speed)
-    if (k[' ']) camera.position.y += speed
-    if (k['Shift']) camera.position.y -= speed
+    if (k['ArrowUp'])   camera.position.addScaledVector(dir, speed)
+    if (k['ArrowDown']) camera.position.addScaledVector(dir, -speed)
+    if (k[' '])         camera.position.y += speed
+    if (k['Shift'])     camera.position.y -= speed
   })
 
   return null
@@ -77,16 +62,16 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
   const [exploreMode, setExploreMode] = useState(false)
   const controlsRef = useRef()
 
+  // Reset modes when organ changes
+  useEffect(() => {
+    setInsideMode(false)
+    setExploreMode(false)
+  }, [organ])
+
   function handleInsideToggle() {
     const next = !insideMode
     setInsideMode(next)
-    onCrossSection(() => next)
-    if (controlsRef.current) {
-      controlsRef.current.minDistance = next ? 3 : 3
-      controlsRef.current.maxDistance = next ? 22 : 120
-      controlsRef.current.enablePan = true
-      controlsRef.current.update()
-    }
+    onCrossSection(next)
   }
 
   function handleEnterExplore() {
@@ -102,37 +87,41 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 5, 36], fov: 55 }}
+        camera={{ position: [0, 3, 28], fov: 50 }}
         shadows
-        style={{ background: 'transparent' }}
+        style={{ background: 'transparent', width: '100%', height: '100%' }}
         gl={{ antialias: true }}
         onCreated={({ gl }) => {
           gl.localClippingEnabled = true
           gl.setClearColor(0x000000, 0)
         }}
       >
-        <ambientLight intensity={exploreMode ? 2.5 : insideMode ? 1.8 : 1.1} color="#ffe8f0" />
-        <directionalLight position={[15, 25, 10]} intensity={exploreMode ? 0.5 : insideMode ? 0.8 : 1.6} castShadow shadow-mapSize={[2048, 2048]} color="#ffffff" />
-        <directionalLight position={[-12, 8, -8]} intensity={0.6} color="#c0d8ff" />
-        <directionalLight position={[0, -10, 5]} intensity={insideMode ? 1.2 : 0.3} color="#ffe0d0" />
-        {insideMode && !exploreMode && (
-          <>
-            <pointLight position={[6, 0, 0]} intensity={4.0} color="#fff5f0" distance={35} decay={0.9} />
-            <pointLight position={[4, 10, 2]} intensity={2.5} color="#ffd0c0" distance={25} decay={1.1} />
-            <pointLight position={[4, -10, 2]} intensity={2.5} color="#ffc8b0" distance={25} decay={1.1} />
-            <pointLight position={[4, 0, 8]} intensity={2.0} color="#ffe8e0" distance={22} decay={1.2} />
-            <pointLight position={[4, 0, -8]} intensity={2.0} color="#ffe8e0" distance={22} decay={1.2} />
-          </>
-        )}
+        {/* Lighting */}
+        <ambientLight intensity={exploreMode ? 3.5 : 1.2} />
+        <directionalLight position={[15, 25, 10]} intensity={exploreMode ? 1.0 : 1.6} castShadow shadow-mapSize={[2048, 2048]} />
+        <directionalLight position={[-12, 8, -8]} intensity={0.5} color="#c0d8ff" />
+        <directionalLight position={[0, -10, 5]} intensity={0.3} color="#ffe0d0" />
+
         {exploreMode && (
           <>
-            <pointLight position={[0, 0, 0]} intensity={3.0} color="#ffffff" distance={30} decay={0.8} />
-            <pointLight position={[0, 5, 0]} intensity={2.0} color="#ffe8e0" distance={25} decay={1.0} />
-            <pointLight position={[0, -5, 0]} intensity={2.0} color="#ffe0d0" distance={25} decay={1.0} />
+            <pointLight position={[0, 0, 0]}   intensity={4.0} color="#ffffff" distance={40} decay={0.5} />
+            <pointLight position={[0, 8, 0]}   intensity={2.0} color="#ffe8e0" distance={30} decay={0.8} />
+            <pointLight position={[0, -8, 0]}  intensity={2.0} color="#ffe0d0" distance={30} decay={0.8} />
+            <pointLight position={[8, 0, 0]}   intensity={2.0} color="#ffffff" distance={30} decay={0.8} />
+            <pointLight position={[-8, 0, 0]}  intensity={2.0} color="#ffffff" distance={30} decay={0.8} />
+            <pointLight position={[0, 0, 8]}   intensity={2.0} color="#ffffff" distance={30} decay={0.8} />
+            <pointLight position={[0, 0, -8]}  intensity={2.0} color="#ffffff" distance={30} decay={0.8} />
           </>
         )}
 
-        <CameraRig insideMode={insideMode} exploreMode={exploreMode} controlsRef={controlsRef} />
+        {insideMode && !exploreMode && (
+          <>
+            <pointLight position={[10, 0, 0]} intensity={5.0} color="#fff5f0" distance={40} decay={0.7} />
+            <pointLight position={[5, 8, 0]}  intensity={3.0} color="#ffd0c0" distance={30} decay={0.9} />
+            <pointLight position={[5,-8, 0]}  intensity={3.0} color="#ffc8b0" distance={30} decay={0.9} />
+          </>
+        )}
+
         <FirstPersonController active={exploreMode} onExit={handleExitExplore} />
 
         <OrganModel
@@ -155,10 +144,10 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
               args={[100, 100]}
               cellSize={2}
               cellThickness={0.2}
-              cellColor="#c8d8f0"
+              cellColor="#1a3050"
               sectionSize={10}
               sectionThickness={0.5}
-              sectionColor="#a0b8e0"
+              sectionColor="#1e3a5f"
               fadeDistance={80}
               position={[0, -14, 0]}
               infiniteGrid
@@ -168,73 +157,66 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
 
         <OrbitControls
           ref={controlsRef}
-          enablePan={!exploreMode}
+          enablePan
           enableZoom={!exploreMode}
           enableRotate={!exploreMode}
           minDistance={3}
           maxDistance={insideMode ? 22 : 120}
           makeDefault
-          autoRotate={!insideMode && !exploreMode && highlights.length === 0}
-          autoRotateSpeed={0.7}
+          autoRotate={false}
         />
       </Canvas>
 
       {/* Explore mode HUD */}
       {exploreMode && (
         <>
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-4 py-2 rounded-full pointer-events-none backdrop-blur-sm">
-            ↑↓ Move &nbsp;·&nbsp; ←→ Turn &nbsp;·&nbsp; Space=Up &nbsp;·&nbsp; Shift=Down &nbsp;·&nbsp; ESC=Exit
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-4 py-2 rounded-full pointer-events-none backdrop-blur-sm">
+            ↑ Forward &nbsp;·&nbsp; ↓ Back &nbsp;·&nbsp; ← → Turn &nbsp;·&nbsp; Space=Up &nbsp;·&nbsp; Shift=Down &nbsp;·&nbsp; ESC=Exit
           </div>
           <button
             onClick={handleExitExplore}
-            className="absolute top-3 right-3 text-xs px-3 py-1.5 rounded-md bg-violet-700 hover:bg-violet-600 text-white shadow-sm font-medium transition-all"
+            className="absolute top-3 right-3 text-xs px-3 py-1.5 rounded-md bg-violet-700 hover:bg-violet-600 text-white shadow font-medium transition-all"
           >
             ← Exit Explore
           </button>
         </>
       )}
 
-      {/* Inside mode label */}
+      {/* Interior cross-section label */}
       {insideMode && !exploreMode && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full pointer-events-none backdrop-blur-sm">
-          Interior cross-section — drag to orbit around the cut face
+          Interior view — drag to orbit
         </div>
       )}
 
-      {/* Explore Interior button - top right when organ selected and not in explore mode */}
+      {/* Top-right buttons when not in explore mode */}
       {!exploreMode && (
-        <div className="absolute top-3 right-3">
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
           <button
             onClick={handleEnterExplore}
-            className="text-xs px-3 py-1.5 rounded-md shadow-sm font-medium transition-all bg-white/90 border border-violet-300 text-violet-700 hover:bg-violet-50"
+            className="text-xs px-3 py-1.5 rounded-md shadow font-semibold transition-all bg-violet-600 hover:bg-violet-500 text-white border border-violet-400/40"
           >
             🔬 Explore Interior
           </button>
-        </div>
-      )}
-
-      {/* Buttons bottom left */}
-      {!exploreMode && (
-        <div className="absolute bottom-3 left-3 flex flex-col gap-1.5 items-start">
           <button
             onClick={handleInsideToggle}
-            className={`text-xs px-3 py-1.5 rounded-md shadow-sm font-medium transition-all ${
+            className={`text-xs px-3 py-1.5 rounded-md shadow font-medium transition-all ${
               insideMode
-                ? 'bg-blue-600 text-white border border-blue-500'
+                ? 'bg-blue-600 text-white border border-blue-400'
                 : 'bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50'
             }`}
           >
-            {insideMode ? '← Exit Interior' : '⊙ Enter Interior'}
+            {insideMode ? '← Exit Cross-section' : '⊙ Cross-section'}
           </button>
+        </div>
+      )}
 
-          {!insideMode && (
-            <button
-              onClick={() => onCrossSection(prev => !prev)}
-              className="text-xs px-3 py-1.5 rounded-md bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm"
-            >
-              {crossSection ? '✕ Close Dissect' : '⊘ Dissect'}
-            </button>
-          )}
+      {/* Controls hint */}
+      {!exploreMode && !insideMode && highlights.length === 0 && (
+        <div className="absolute bottom-16 right-3 text-xs text-slate-600 space-y-0.5 pointer-events-none text-right">
+          <div>🖱️ Drag to rotate</div>
+          <div>⚙️ Scroll to zoom</div>
+          <div>👆 Click voxel to mark</div>
         </div>
       )}
     </div>

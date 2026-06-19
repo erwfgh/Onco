@@ -409,8 +409,19 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(-2, 0, 0, 1.2, 1, 1), color: '#c0392b' },
-      { voxels: ellipsoid(2, 0, 0, 1.2, 1, 1), color: '#c0392b' },
+      // ovarian stroma (pale pink)
+      { color: '#e8b4c8', voxels: unique([...ellipsoid(-3.5,0,0,1.8,2.2,1.5), ...ellipsoid(3.5,0,0,1.8,2.2,1.5)]) },
+      // primary follicles (small, multiple)
+      { color: '#f9e4f0', voxels: unique([
+        ...sphere(-4,1,0,0.5), ...sphere(-3,1.5,0.3,0.4), ...sphere(-4.5,-0.5,0.3,0.4),
+        ...sphere(4,1,0,0.5), ...sphere(3,1.5,0.3,0.4), ...sphere(4.5,-0.5,0.3,0.4),
+      ])},
+      // graafian follicle / corpus luteum (yellow)
+      { color: '#f1c40f', voxels: unique([...sphere(-2.8,0.8,0.5,0.7), ...sphere(2.8,0.8,0.5,0.7)]) },
+      // hilum / medulla (darker pink-red)
+      { color: '#c0607a', voxels: unique([...sphere(-3.5,0,0,0.7), ...sphere(3.5,0,0,0.7)]) },
+      // fallopian tube lumen (teal mucosal folds)
+      { color: '#7ecec4', voxels: unique([...tube([[-3.5,2,0],[-1.5,3,0],[0,3,0]], 0.25)]) },
     ],
 },
 
@@ -430,8 +441,16 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 2, 3, 1.5), color: '#922b21' },
-      { voxels: ellipsoid(0, 0, 0, 1, 2, 0.8), color: '#c0392b' },
+      // myometrium — thick smooth muscle (deep red)
+      { color: '#922b21', voxels: unique(subtract(ellipsoid(0,1,0,2.8,3.8,2.3), ellipsoid(0,1,0,1.8,3.0,1.5))) },
+      // endometrium lining (bright pink)
+      { color: '#f06090', voxels: unique(subtract(ellipsoid(0,1,0,1.8,3.0,1.5), ellipsoid(0,1,0,1.0,2.2,0.8))) },
+      // endometrial cavity (pale straw)
+      { color: '#fde8d8', voxels: unique(ellipsoid(0,1,0,1.0,2.2,0.8)) },
+      // fundal region (darker muscle cap)
+      { color: '#7b1a12', voxels: unique(ellipsoid(0,4,0,2.2,1.2,1.8)) },
+      // cervical canal (whitish mucus)
+      { color: '#f5f0e8', voxels: unique(cylinder(0,0,-3,-0.5,0.6)) },
     ],
 },
 
@@ -449,8 +468,16 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: cylinder(0, 0, -2, 2, 1), color: '#c0392b' },
-      { voxels: cylinder(0, 0, -2, 2, 0.4), color: '#f5f0e8' },
+      // ectocervix (pink stratified squamous epithelium)
+      { color: '#f08090', voxels: unique(ellipsoid(0,1,0,1.7,0.7,1.6)) },
+      // transformation zone (squamocolumnar junction — slightly raised, pale)
+      { color: '#f5d0c0', voxels: unique(ellipsoid(0,0.5,0,1.2,0.4,1.2)) },
+      // endocervical mucosa (columnar epithelium — pale blue-white)
+      { color: '#d6eaf8', voxels: unique(subtract(cylinder(0,0,-2,2,1.4), cylinder(0,0,-2,2,0.8))) },
+      // endocervical canal lumen (straw/mucus)
+      { color: '#fef9e7', voxels: unique(cylinder(0,0,-2,2,0.8)) },
+      // cervical stroma (fibrous, whitish)
+      { color: '#e8e0d8', voxels: unique(ellipsoid(0,-2,0,1.5,0.8,1.3)) },
     ],
 },
 
@@ -477,11 +504,16 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 3.5, 4, 3.5), color: '#f5f0e8' },
-      { voxels: ellipsoid(0, -2, 0, 1.5, 1.5, 1.5), color: '#aed6f1' },
-      { voxels: ellipsoid(0, -3, -1, 0.8, 0.8, 0.8), color: '#aed6f1' },
-      { voxels: cylinder(0, 0, -5, -3, 0.5), color: '#aed6f1' },
-      { voxels: ellipsoid(0, -5, -1, 2, 1, 2), color: '#d4e6f1' },
+      { color: '#c39b8a', voxels: unique(subtract(ellipsoid(0,0,0,5.5,4.5,5.5), ellipsoid(0,0,0,4.5,3.5,4.5))) }, // gray matter cortex
+      { color: '#f5f0e8', voxels: unique(ellipsoid(0,0,0,4.2,3.2,4.2)) },   // white matter
+      { color: '#e8e4dc', voxels: unique(ellipsoid(0,0.5,0,2.8,0.5,1.8)) }, // corpus callosum
+      { color: '#aed6f1', voxels: unique([                                    // lateral ventricles (CSF)
+        ...ellipsoid(-2,1,0,1.4,0.8,0.8), ...ellipsoid(2,1,0,1.4,0.8,0.8),
+      ])},
+      { color: '#aed6f1', voxels: unique(ellipsoid(0,0,0,0.4,1.2,0.6)) },   // third ventricle
+      { color: '#d4956a', voxels: unique(ellipsoid(0,0,0,1.2,0.8,1.2)) },   // thalamus (orange-tan)
+      { color: '#d4b0a0', voxels: unique(ellipsoid(0,-4,-3,2.5,1.8,2.3)) }, // cerebellum interior
+      { color: '#b8856a', voxels: unique(cylinder(0,0,-7,-3,0.9)) },         // brainstem
     ],
 },
 
@@ -499,8 +531,22 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(-1.5, 0, 0, 1.2, 2, 0.8), color: '#c0392b' },
-      { voxels: ellipsoid(1.5, 0, 0, 1.2, 2, 0.8), color: '#c0392b' },
+      // follicular stroma (pale pink connective tissue)
+      { color: '#d5e8d4', voxels: unique([...ellipsoid(-2,0,0,1.8,2.3,1.1), ...ellipsoid(2,0,0,1.8,2.3,1.1)]) },
+      // thyroid follicles with colloid (golden-amber)
+      { color: '#f0c060', voxels: unique([
+        ...sphere(-1.5,0.8,0,0.55), ...sphere(-2.5,0.8,0,0.5), ...sphere(-2,0,0.3,0.45), ...sphere(-1.8,-0.8,0,0.5),
+        ...sphere(1.5,0.8,0,0.55), ...sphere(2.5,0.8,0,0.5), ...sphere(2,0,0.3,0.45), ...sphere(1.8,-0.8,0,0.5),
+      ])},
+      // follicular epithelium (darker green rim)
+      { color: '#7dbe8a', voxels: unique([
+        ...sphere(-1.5,0.8,0,0.35), ...sphere(-2.5,0.8,0,0.3), ...sphere(-2,0,0.3,0.25),
+        ...sphere(1.5,0.8,0,0.35), ...sphere(2.5,0.8,0,0.3), ...sphere(2,0,0.3,0.25),
+      ])},
+      // isthmus connection (pink)
+      { color: '#c8e0b0', voxels: unique(cylinder(0,0,-0.5,0.5,0.6)) },
+      // blood vessels (red streaks)
+      { color: '#c0392b', voxels: unique([...tube([[-3,0,0],[-1,0,0],[0,0,0]], 0.2), ...tube([[3,0,0],[1,0,0],[0,0,0]], 0.2)]) },
     ],
 },
 
@@ -519,8 +565,18 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: hollowCylinder(0, 0, -2, 2, 1.5, 0.8), color: '#c0392b' },
-      { voxels: cylinder(0, 0, -1, 1, 0.6), color: '#f5f0e8' },
+      // thyroid cartilage inner surface (yellow cartilage)
+      { color: '#e8d870', voxels: unique(subtract(hollowCylinder(0,0,-1,4,2.4,1.4), hollowCylinder(0,0,-1,4,2.0,1.3))) },
+      // mucosal lining (pink)
+      { color: '#e88080', voxels: unique(subtract(hollowCylinder(0,0,-1,4,2.0,1.3), hollowCylinder(0,0,-1,4,1.5,1.0))) },
+      // airway lumen (pale blue air)
+      { color: '#b3d9f5', voxels: unique(hollowCylinder(0,0,-1,4,1.5,1.0)) },
+      // vocal cords (white, at mid-larynx)
+      { color: '#f5f5f5', voxels: unique(ellipsoid(0,1,0,1.8,0.25,0.5)) },
+      // epiglottis (pale cartilage)
+      { color: '#f0e090', voxels: unique(ellipsoid(0,4.5,-0.5,1.2,0.8,0.35)) },
+      // arytenoid cartilages (yellow knobs)
+      { color: '#ddd060', voxels: unique([...sphere(-0.8,1.5,0,0.4), ...sphere(0.8,1.5,0,0.4)]) },
     ],
 },
 
@@ -543,8 +599,20 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 2.5, 1.5, 2), color: '#c0392b' },
-      { voxels: ellipsoid(0, -0.5, 0.5, 2, 1, 1.5), color: '#e8d5b0' },
+      // tongue musculature (dark red striated muscle)
+      { color: '#c0392b', voxels: unique(ellipsoid(0,-1,0,2.7,1.8,1.8)) },
+      // tongue dorsal mucosa (pink epithelium)
+      { color: '#f08090', voxels: unique(subtract(ellipsoid(0,-0.5,0,2.7,1.8,1.8), ellipsoid(0,-0.8,0,2.3,1.5,1.5))) },
+      // hard palate (whitish bone)
+      { color: '#f0ece4', voxels: unique(ellipsoid(0,1,0,3.2,0.6,2.2)) },
+      // soft palate / uvula (pink)
+      { color: '#e87890', voxels: unique([...ellipsoid(0,0.5,0,1.5,0.5,1.5), ...sphere(0,-0.5,0,0.5)]) },
+      // tonsillar pillars (lymphoid, deep pink-red)
+      { color: '#a93250', voxels: unique([...ellipsoid(-3,0,0,0.6,1.8,1.8), ...ellipsoid(3,0,0,0.6,1.8,1.8)]) },
+      // floor of mouth submucosa (pale pink)
+      { color: '#f5d0d0', voxels: unique(ellipsoid(0,-3,0,3,0.7,1.8)) },
+      // salivary ducts (pale white streaks)
+      { color: '#f5f5f0', voxels: unique([...tube([[0,-2,1],[0,-1,0],[0,0,-0.5]], 0.2)]) },
     ],
 },
 
@@ -567,7 +635,20 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 1.5, 1.2, 1), color: '#f5f0e8' },
+      // parotid acini (serous, pale tan)
+      { color: '#f5deb3', voxels: unique([...ellipsoid(-4,2,2,2.2,2.7,1.8), ...ellipsoid(4,2,2,2.2,2.7,1.8)]) },
+      // parotid ductal network (white streaks)
+      { color: '#f0f0e8', voxels: unique([
+        ...tube([[-4,2,2],[-2,0,1],[-1,0,0]], 0.25), ...tube([[4,2,2],[2,0,1],[1,0,0]], 0.25),
+      ])},
+      // submandibular acini (mixed mucous, pale blue-grey)
+      { color: '#d0e8f0', voxels: unique([...ellipsoid(-3,-1,0,1.3,1.3,1), ...ellipsoid(3,-1,0,1.3,1.3,1)]) },
+      // sublingual acini (mucous, pale)
+      { color: '#c8e0ea', voxels: unique([...sphere(-1.5,-2,0,0.75), ...sphere(1.5,-2,0,0.75)]) },
+      // blood vessels in parotid (red)
+      { color: '#d44040', voxels: unique([...sphere(-4.5,2.5,2.5,0.35), ...sphere(3.5,2.5,2.5,0.35)]) },
+      // facial nerve branches (yellow)
+      { color: '#f5c518', voxels: unique([...tube([[-5,2,2],[-4,3,2.5],[-3,4,2.5]], 0.15), ...tube([[5,2,2],[4,3,2.5],[3,4,2.5]], 0.15)]) },
     ],
 },
 
@@ -587,8 +668,16 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 2, 1.5, 1.5), color: '#c0392b' },
-      { voxels: cylinder(0, 0, -2, 2, 0.7), color: '#f5f0e8' },
+      // posterior nasopharynx wall mucosa (pink)
+      { color: '#f08878', voxels: unique(subtract(ellipsoid(0,0,0,2.8,1.8,2.8), ellipsoid(0,0,0,2.0,1.2,2.0))) },
+      // lymphoid tissue / adenoids (purple-red Waldeyer's ring)
+      { color: '#9b5080', voxels: unique([...ellipsoid(0,1.5,-1,2,0.8,1.5), ...ellipsoid(-1.5,0.5,-1,0.7,0.8,0.8), ...ellipsoid(1.5,0.5,-1,0.7,0.8,0.8)]) },
+      // airway lumen (blue-grey air space)
+      { color: '#b3d9f5', voxels: unique(ellipsoid(0,0,0,1.5,1.0,1.5)) },
+      // nasal turbinates (scroll-like, pink)
+      { color: '#e07070', voxels: unique([...ellipsoid(-1,2,0.5,0.7,1.0,0.4), ...ellipsoid(1,2,0.5,0.7,1.0,0.4)]) },
+      // Eustachian tube openings (pale oval patches)
+      { color: '#f0e0d0', voxels: unique([...ellipsoid(-2.5,0,0,0.4,0.6,0.5), ...ellipsoid(2.5,0,0,0.4,0.6,0.5)]) },
     ],
 },
 
@@ -614,8 +703,22 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 3, 3, 2), color: '#f5cba7' },
-      { voxels: tube([[0,0,0],[0,2,1],[0,3,2]], 0.3), color: '#922b21' },
+      // fatty stroma / Cooper's ligament background (pale yellow)
+      { color: '#f9f0d8', voxels: unique([...ellipsoid(-5,0,2,3.2,3.2,2.7), ...ellipsoid(5,0,2,3.2,3.2,2.7)]) },
+      // lobular units (small pale pink clusters = TDLU)
+      { color: '#f5c0c8', voxels: unique([
+        ...sphere(-5.5,1,2,0.7), ...sphere(-4.5,1,1.5,0.6), ...sphere(-5,-1,2,0.6), ...sphere(-5.5,0,0.5,0.6),
+        ...sphere(5.5,1,2,0.7), ...sphere(4.5,1,1.5,0.6), ...sphere(5,-1,2,0.6), ...sphere(5.5,0,0.5,0.6),
+      ])},
+      // lactiferous ducts (white branching tubes)
+      { color: '#f5f0e8', voxels: unique([
+        ...tube([[-5.5,1,2],[-5,0,1],[-5,0,-1]], 0.3), ...tube([[-4.5,1,1.5],[-5,0,1]], 0.25),
+        ...tube([[5.5,1,2],[5,0,1],[5,0,-1]], 0.3), ...tube([[4.5,1,1.5],[5,0,1]], 0.25),
+      ])},
+      // nipple areolar complex (darker pink)
+      { color: '#d4708a', voxels: unique([...sphere(-5,0,4.8,0.6), ...sphere(5,0,4.8,0.6)]) },
+      // blood vessels (red)
+      { color: '#c0392b', voxels: unique([...tube([[-7,0,2],[-5,0,2],[-3,0,2]], 0.2), ...tube([[7,0,2],[5,0,2],[3,0,2]], 0.2)]) },
     ],
 },
 
@@ -650,8 +753,27 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 3, 5, 3), color: '#c0392b' },
-      { voxels: ellipsoid(0, 0, 0, 2, 4, 2), color: '#f5cba7' },
+      // cortical bone of vertebrae (white)
+      { color: '#f5f0e8', voxels: unique([
+        ...subtract(ellipsoid(0,7,0,2.8,1.2,2.8), ellipsoid(0,7,0,2.0,0.8,2.0)),
+        ...subtract(ellipsoid(0,4,0,2.8,1.2,2.8), ellipsoid(0,4,0,2.0,0.8,2.0)),
+        ...subtract(ellipsoid(0,1,0,2.8,1.2,2.8), ellipsoid(0,1,0,2.0,0.8,2.0)),
+        ...subtract(ellipsoid(0,-2,0,2.8,1.2,2.8), ellipsoid(0,-2,0,2.0,0.8,2.0)),
+        ...subtract(ellipsoid(0,-5,0,2.8,1.2,2.8), ellipsoid(0,-5,0,2.0,0.8,2.0)),
+      ])},
+      // red marrow in vertebral bodies (deep red)
+      { color: '#b03030', voxels: unique([
+        ...ellipsoid(0,7,0,2.0,0.8,2.0), ...ellipsoid(0,4,0,2.0,0.8,2.0),
+        ...ellipsoid(0,1,0,2.0,0.8,2.0), ...ellipsoid(0,-2,0,2.0,0.8,2.0), ...ellipsoid(0,-5,0,2.0,0.8,2.0),
+      ])},
+      // red marrow in iliac crests (active hematopoiesis)
+      { color: '#cc3030', voxels: unique([...ellipsoid(-5,-1,0,3.2,1.7,1.7), ...ellipsoid(5,-1,0,3.2,1.7,1.7)]) },
+      // yellow marrow in femoral shafts (fatty, yellow)
+      { color: '#f5c040', voxels: unique([...ellipsoid(-4,-7,0,1.5,1.5,1.5), ...ellipsoid(4,-7,0,1.5,1.5,1.5)]) },
+      // sinusoids / vasculature (dark red)
+      { color: '#8b0000', voxels: unique([...tube([[0,-1,0],[0,3,0],[0,7,0]], 0.4)]) },
+      // sternum marrow (red)
+      { color: '#c02828', voxels: unique(ellipsoid(0,3,3.5,0.5,4.5,0.3)) },
     ],
 },
 
@@ -692,8 +814,34 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: sphere(0, 0, 0, 1.5), color: '#c0392b' },
-      { voxels: sphere(0, 0, 0, 0.8), color: '#f5f0e8' },
+      // cortical mantle (peripheral B-cell zone, pale tan-pink)
+      { color: '#d4b8c8', voxels: unique([
+        ...subtract(sphere(0,8,0,1.4), sphere(0,8,0,0.9)),
+        ...subtract(sphere(-2,7,0,1.1), sphere(-2,7,0,0.7)),
+        ...subtract(sphere(2,7,0,1.1), sphere(2,7,0,0.7)),
+      ])},
+      // germinal centers (pale blue-white reactive follicles)
+      { color: '#d6eaf8', voxels: unique([
+        ...sphere(0,8,0,0.55), ...sphere(-2,7,0,0.42), ...sphere(2,7,0,0.42),
+        ...sphere(-5.5,0,0,0.5), ...sphere(5.5,0,0,0.5),
+        ...sphere(-1.5,1,0,0.4), ...sphere(1.5,1,0,0.4),
+      ])},
+      // paracortex (T-cell zone, pink)
+      { color: '#e88898', voxels: unique([
+        ...sphere(-2.5,5.5,0,0.7), ...sphere(2.5,5.5,0,0.7),
+        ...sphere(-6,2,0,0.8), ...sphere(6,2,0,0.8),
+        ...sphere(-1,-4,0,0.7), ...sphere(1,-4,0,0.7),
+      ])},
+      // medullary cords / sinuses (dark purple-red)
+      { color: '#8e44ad', voxels: unique([
+        ...sphere(0,-0.5,0,0.7), ...sphere(0,-2,0,0.7),
+        ...sphere(-4,-7.5,0,0.7), ...sphere(4,-7.5,0,0.7),
+      ])},
+      // capsule (thin, light grey)
+      { color: '#c8c0b8', voxels: unique([
+        ...subtract(sphere(-4,4,0,1.1), sphere(-4,4,0,0.85)), ...subtract(sphere(4,4,0,1.1), sphere(4,4,0,0.85)),
+        ...subtract(sphere(-5,-6,0,1.4), sphere(-5,-6,0,1.1)), ...subtract(sphere(5,-6,0,1.4), sphere(5,-6,0,1.1)),
+      ])},
     ],
 },
 
@@ -715,8 +863,22 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 1.5, 1, 1), color: '#f5cba7' },
-      { voxels: ellipsoid(0, 0, 0, 0.7, 0.5, 0.5), color: '#d4ac0d' },
+      // adrenal cortex — zona glomerulosa (outer, pale yellow)
+      { color: '#f9e79f', voxels: unique([
+        ...subtract(ellipsoid(-5,3,0,1.7,1.1,0.9), ellipsoid(-5,3,0,1.2,0.8,0.6)),
+        ...subtract(ellipsoid(5,3,0,1.4,1.4,0.9), ellipsoid(5,3,0,1.0,1.0,0.6)),
+      ])},
+      // zona fasciculata (middle cortex — golden yellow, lipid-rich)
+      { color: '#f0c040', voxels: unique([
+        ...subtract(ellipsoid(-5,3,0,1.2,0.8,0.6), ellipsoid(-5,3,0,0.7,0.5,0.4)),
+        ...subtract(ellipsoid(5,3,0,1.0,1.0,0.6), ellipsoid(5,3,0,0.6,0.6,0.4)),
+      ])},
+      // zona reticularis (inner cortex — darker orange-red)
+      { color: '#e08030', voxels: unique([...ellipsoid(-5,3,0,0.7,0.5,0.4), ...ellipsoid(5,3,0,0.6,0.6,0.4)]) },
+      // adrenal medulla (deep brown-red catecholamine cells)
+      { color: '#7b3a2a', voxels: unique([...sphere(-5,3,0,0.3), ...sphere(5,3,0,0.3)]) },
+      // accessory lobes (pale cortex)
+      { color: '#f5e88a', voxels: unique([...ellipsoid(-5.5,4,0,0.8,0.6,0.6), ...ellipsoid(5.5,2,0,0.8,0.8,0.6)]) },
     ],
 },
 
@@ -745,8 +907,42 @@ const ORGANS = {
     })(),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 4, 5, 3), color: '#f5cba7' },
-      { voxels: ellipsoid(0, 0, 0, 3.5, 4.5, 2.5), color: '#c0392b' },
+      // hypodermis / subcutaneous fat (yellow, deepest)
+      { color: '#f5d060', voxels: unique((() => {
+        const v = []
+        for (let x = -8; x <= 8; x++) for (let z = -8; z <= 8; z++) {
+          if (x*x+z*z <= 64) { const y = Math.round(-x*x/50-z*z/50); v.push({x,y:y-1,z}) }
+        }
+        return v
+      })())},
+      // dermis (collagen-rich, pale pink-beige)
+      { color: '#f0d0b0', voxels: unique((() => {
+        const v = []
+        for (let x = -8; x <= 8; x++) for (let z = -8; z <= 8; z++) {
+          if (x*x+z*z <= 64) { const y = Math.round(-x*x/50-z*z/50); v.push({x,y,z}) }
+        }
+        return v
+      })())},
+      // epidermis (outermost thin layer, slightly darker tan)
+      { color: '#d4a878', voxels: unique((() => {
+        const v = []
+        for (let x = -8; x <= 8; x++) for (let z = -8; z <= 8; z++) {
+          if (x*x+z*z <= 64) { const y = Math.round(-x*x/50-z*z/50); v.push({x,y:y+1,z}) }
+        }
+        return v
+      })())},
+      // hair follicles (small dark brown dots)
+      { color: '#6b3a2a', voxels: unique([
+        ...sphere(-3,0,-3,0.3), ...sphere(0,0,-3,0.3), ...sphere(3,0,-3,0.3),
+        ...sphere(-4,0,0,0.3), ...sphere(0,0,0,0.3), ...sphere(4,0,0,0.3),
+        ...sphere(-2,0,3,0.3), ...sphere(2,0,3,0.3),
+      ])},
+      // blood vessels in dermis (red capillary loops)
+      { color: '#c03030', voxels: unique([
+        ...tube([[-5,0,-5],[-2,0,-2],[0,0,0]], 0.18), ...tube([[5,0,5],[2,0,2],[0,0,0]], 0.18),
+      ])},
+      // eccrine sweat glands (pale blue-grey coiled)
+      { color: '#a8d0e8', voxels: unique([...sphere(-5,0,2,0.35), ...sphere(5,0,-2,0.35), ...sphere(0,0,5,0.35)]) },
     ],
 },
 
@@ -770,10 +966,24 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: cylinder(0, 0, -8, 8, 1.5), color: '#c0392b' },
-      { voxels: hollowCylinder(0, 0, -8, 8, 3.5, 2.5), color: '#fef9e7' },
-      { voxels: ellipsoid(0, 8, 0, 2, 2, 2), color: '#f5cba7' },
-      { voxels: ellipsoid(0, -8, 0, 2, 2, 2), color: '#f5cba7' },
+      // periosteum (thin outer fibrous layer, white)
+      { color: '#fffbf0', voxels: unique([
+        ...subtract(hollowCylinder(0,0,-8,8,2.3,1.8), hollowCylinder(0,0,-8,8,2.1,1.9)),
+        ...subtract(sphere(0,8.5,0,2.5), sphere(0,8.5,0,2.2)),
+      ])},
+      // cortical bone (dense, ivory-white)
+      { color: '#f5f0e0', voxels: unique([...hollowCylinder(0,0,-8,8,2.1,1.3)]) },
+      // endosteum + inner spongy trabeculae (slightly yellow)
+      { color: '#f0e8c0', voxels: unique([...hollowCylinder(0,0,-8,8,1.3,1.0)]) },
+      // medullary canal — yellow fatty marrow (bright yellow)
+      { color: '#f0c840', voxels: unique(cylinder(0,0,-6,6,0.9)) },
+      // red marrow at epiphyses (active hematopoiesis, deep red)
+      { color: '#c02828', voxels: unique([...ellipsoid(0,8.5,0,1.8,1.8,1.8), ...ellipsoid(0,-8,0,2.0,1.2,2.0)]) },
+      // cancellous trabecular bone at epiphyses (pale tan)
+      { color: '#e8d8a0', voxels: unique([
+        ...subtract(sphere(0,8.5,0,2.2), ellipsoid(0,8.5,0,1.8,1.8,1.8)),
+        ...subtract(ellipsoid(0,-8,0,2.5,1.5,2.5), ellipsoid(0,-8,0,2.0,1.2,2.0)),
+      ])},
     ],
 },
 
@@ -792,8 +1002,25 @@ const ORGANS = {
     ]),
   
     interior: [
-      { voxels: ellipsoid(0, 0, 0, 3.5, 5, 3.5), color: '#c0392b' },
-      { voxels: ellipsoid(0, 0, 0, 2, 4, 2), color: '#7b241c' },
+      // epimysium / outer fascia (pale grey-white)
+      { color: '#e8e0d8', voxels: unique(subtract(ellipsoid(0,0,0,4,6,4), ellipsoid(0,0,0,3.6,5.6,3.6))) },
+      // perimysium (connective tissue between bundles, light pink)
+      { color: '#e8c0b0', voxels: unique([
+        ...subtract(ellipsoid(-1.5,0,0,1.5,5.2,1.5), ellipsoid(-1.5,0,0,1.1,4.8,1.1)),
+        ...subtract(ellipsoid(1.5,0,0,1.5,5.2,1.5), ellipsoid(1.5,0,0,1.1,4.8,1.1)),
+        ...subtract(ellipsoid(0,0,-1.5,1.5,5.2,1.5), ellipsoid(0,0,-1.5,1.1,4.8,1.1)),
+        ...subtract(ellipsoid(0,0,1.5,1.5,5.2,1.5), ellipsoid(0,0,1.5,1.1,4.8,1.1)),
+      ])},
+      // muscle fiber bundles (red striated muscle)
+      { color: '#c0392b', voxels: unique([
+        ...ellipsoid(-1.5,0,0,1.0,4.8,1.0), ...ellipsoid(1.5,0,0,1.0,4.8,1.0),
+        ...ellipsoid(0,0,-1.5,1.0,4.8,1.0), ...ellipsoid(0,0,1.5,1.0,4.8,1.0),
+      ])},
+      // adipose tissue (intramuscular fat, yellow)
+      { color: '#f5d060', voxels: unique([...sphere(-2.5,2,0,0.4), ...sphere(2.5,-2,0,0.4), ...sphere(0,3,2,0.4), ...sphere(0,-3,-2,0.4)]) },
+      // neurovascular bundle (yellow nerve + red artery)
+      { color: '#f0c000', voxels: unique(tube([[0,-5,0],[0,0,0],[0,5,0]], 0.25)) },
+      { color: '#d04040', voxels: unique(tube([[-0.5,-5,0],[-0.5,0,0],[-0.5,5,0]], 0.2)) },
     ],
 },
 }
