@@ -31,20 +31,21 @@ export default function Paywall({ children }) {
 
   if (!isLoaded) {
     return (
-      <div className="flex items-center justify-center h-full bg-[#060d1a]">
-        <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-full bg-white">
+        <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   if (!isSignedIn) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
+      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-white to-blue-50 px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black tracking-tight mb-2">
-            <span className="text-white">ONCO</span><span className="text-violet-400">VIZ</span>
+          <div className="text-4xl mb-3">🔬</div>
+          <h1 className="text-3xl font-black tracking-tight mb-2 text-slate-800">
+            ONCO<span className="text-blue-600">VIZ</span>
           </h1>
-          <p className="text-slate-400 text-sm">3D Voxel Tumor Staging for Clinicians</p>
+          <p className="text-slate-500 text-sm">3D Voxel Tumor Staging for Clinicians</p>
         </div>
         <SignIn routing="hash" />
       </div>
@@ -57,42 +58,42 @@ export default function Paywall({ children }) {
 
   if (!isSubscribed && !inTrial) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-[#060d1a] px-4">
-        <div className="max-w-md w-full bg-[#0a1525] border border-slate-700/60 rounded-2xl p-8 text-center shadow-2xl">
-          <div className="text-5xl mb-4">🔬</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Subscribe to OncoViz</h2>
-          <p className="text-slate-400 text-sm mb-6">
+      <div className="flex flex-col items-center justify-center h-full bg-gradient-to-b from-white to-blue-50 px-4">
+        <div className="max-w-md w-full bg-white border border-blue-100 rounded-2xl p-8 text-center shadow-sm">
+          <div className="text-4xl mb-4">🔬</div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Subscribe to OncoViz</h2>
+          <p className="text-slate-500 text-sm mb-6">
             Full access to 3D tumor staging for all organs. Start with a free 7-day trial — no charge until day 8.
           </p>
 
-          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4 mb-6">
-            <div className="text-3xl font-black text-white">$19<span className="text-lg font-normal text-slate-400">/month</span></div>
-            <div className="text-violet-400 text-sm mt-1">7-day free trial included</div>
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+            <div className="text-3xl font-black text-slate-800">$19<span className="text-lg font-normal text-slate-400">/month</span></div>
+            <div className="text-blue-600 text-sm mt-1 font-medium">7-day free trial included</div>
           </div>
 
-          <ul className="text-slate-400 text-sm text-left space-y-2 mb-6">
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> All organs & tumor stages</li>
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Interactive 3D voxel models</li>
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Explore organ interiors in 3D</li>
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> AI patient communication assistant</li>
-            <li className="flex items-center gap-2"><span className="text-violet-400">✓</span> Cancel anytime</li>
+          <ul className="text-slate-600 text-sm text-left space-y-2 mb-6">
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> All organs & tumor stages</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Interactive 3D voxel models</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Explore organ interiors in 3D</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> AI patient communication assistant</li>
+            <li className="flex items-center gap-2"><span className="text-blue-500">✓</span> Cancel anytime</li>
           </ul>
 
           <button
             onClick={handleCheckout}
             disabled={loading}
-            className="block w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-semibold transition-colors"
+            className="block w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold transition-colors"
           >
             {loading ? 'Redirecting to checkout...' : 'Start Free Trial'}
           </button>
 
           {checkoutError && (
-            <p className="text-red-400 text-xs mt-3 bg-red-900/20 border border-red-800/40 rounded-lg px-3 py-2">
+            <p className="text-red-500 text-xs mt-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               {checkoutError}
             </p>
           )}
 
-          <p className="text-slate-600 text-xs mt-4">
+          <p className="text-slate-400 text-xs mt-4">
             Signed in as {user?.primaryEmailAddress?.emailAddress}
           </p>
         </div>

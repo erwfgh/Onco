@@ -8,11 +8,11 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 if (!PUBLISHABLE_KEY) {
   document.getElementById('root').innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#060d1a;color:#94a3b8;font-family:sans-serif;text-align:center;padding:2rem">
-      <div>
+    <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:white;font-family:sans-serif;text-align:center;padding:2rem">
+      <div style="max-width:400px;background:#f8faff;border:1px solid #bfdbfe;border-radius:16px;padding:2rem">
         <div style="font-size:2rem;margin-bottom:1rem">⚠️</div>
-        <p style="color:white;font-size:1.1rem;margin-bottom:0.5rem">Missing Clerk configuration</p>
-        <p style="font-size:0.85rem">VITE_CLERK_PUBLISHABLE_KEY is not set.<br>Add it to your Vercel environment variables and redeploy.</p>
+        <p style="color:#1e3a5f;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">Missing Clerk configuration</p>
+        <p style="color:#64748b;font-size:0.85rem">VITE_CLERK_PUBLISHABLE_KEY is not set.<br>Add it to your Vercel environment variables and redeploy.</p>
       </div>
     </div>
   `
