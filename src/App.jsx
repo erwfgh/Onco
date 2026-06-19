@@ -10,7 +10,7 @@ import RoleSelector from './components/RoleSelector'
 import ORGANS from './data/organs'
 import CLINICAL from './data/clinicalData'
 
-const SESSION_VERSION = 3
+const SESSION_VERSION = 4
 
 function loadUser() {
   try {
