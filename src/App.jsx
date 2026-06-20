@@ -62,7 +62,7 @@ export default function App() {
     <div className="flex flex-col h-full bg-[#f0f6ff] text-slate-800 select-none relative">
       {showLanding && !isPatient && <LandingPage onEnter={() => setShowLanding(false)} />}
 
-      {slideShow && <SlideShow deck={slideShow} onClose={() => setSlideShow(null)} />}
+      {slideShow && <SlideShow deck={slideShow.deck} organKey={slideShow.organKey} stage={slideShow.stage} onClose={() => setSlideShow(null)} />}
 
       {showReport && selectedOrgan && (
         <ReportModal

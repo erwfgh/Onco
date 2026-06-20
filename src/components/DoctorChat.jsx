@@ -174,7 +174,7 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
         <div className="flex items-center gap-2">
           {onPresent && SLIDE_DECKS[`${organKey}-${stage}`] && (
             <button
-              onClick={() => onPresent(SLIDE_DECKS[`${organKey}-${stage}`])}
+              onClick={() => onPresent({ deck: SLIDE_DECKS[`${organKey}-${stage}`], organKey, stage })}
               className="text-xs px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
             >
               ▷ Present
