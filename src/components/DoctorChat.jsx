@@ -3,10 +3,54 @@ import CLINICAL from '../data/clinicalData'
 import ORGANS from '../data/organs'
 
 const STAGE_ANATOMY = {
-  1: 'The tumor is localized within the primary organ, likely involving only the innermost tissue layers. Lymph nodes are not yet affected. Blood vessels and lymphatics nearby may show early micro-invasion that is not yet clinically apparent.',
-  2: 'The tumor has grown larger within the organ and may have begun invading regional lymph nodes (Stage II). Peri-tumoral lymphatics are at risk. Blood vessel walls adjacent to the tumor may show early permeation (lymphovascular invasion).',
-  3: 'The tumor has spread to regional lymph nodes and may be invading nearby structures such as major blood vessels, nerves, or adjacent organs. Lymphatics are obstructed or invaded. Lymph node chains in the drainage territory are likely involved.',
-  4: 'Distant metastatic disease. Cancer cells have entered the bloodstream (hematogenous spread) and/or lymphatic channels, seeding distant organs (liver, lungs, bones, brain). The lymphatic network is a highway for spread at this stage. Blood vessels within the organ show frank tumor emboli.',
+  1: 'The tumor is localized within the primary organ. At this stage cancer can already be present INSIDE the organ — in small lymphatics, submucosal layers, or ductal epithelium — even though the outer surface looks normal. Early micro-invasion of peri-tumoral lymphatics may be present histologically.',
+  2: 'The tumor has grown and may have invaded regional lymph nodes. Intraluminal lymphatic spread is common. Peritumoral blood vessels show early lymphovascular invasion (LVI). The cancer is no longer just "on the surface" — it is tracking along internal vascular and lymphatic channels.',
+  3: 'Regional spread: lymph node chains in the drainage territory are invaded. The cancer may be compressing or invading nearby blood vessels, nerves (perineural invasion), or adjacent organ structures. Lymphatic obstruction can cause edema in downstream tissues.',
+  4: 'Distant metastatic disease. Tumor emboli have entered the systemic circulation (hematogenous spread) and seeded distant organs — commonly liver, lungs, bone, and brain. The lymphatic network is overwhelmed. Loss of lymphatic-neural signaling can disrupt organ function at a distance (e.g., lung cancer disrupting diaphragmatic nerve or brain signaling).',
+}
+
+// Organ-specific interior spread narrative per stage
+const ORGAN_INTERIOR = {
+  lungs: {
+    1: 'In Stage I lung cancer, the tumor may be entirely within the bronchial wall or alveolar parenchyma. The peribronchial lymphatics and pulmonary arterioles inside the lung may already show microscopic tumor cells even when lymph nodes appear clear. The bronchial tree interior is the first highway for spread.',
+    2: 'At Stage II, hilar lymph nodes (the nodes at the root of the lung where bronchi and vessels enter) are involved. Internally, the pulmonary artery branches and bronchial walls show perivascular invasion. The cancer tracks along the bronchovascular bundles visible in the interior.',
+    3: 'Stage III lung cancer invades mediastinal structures — the pulmonary veins draining to the heart, the superior vena cava, phrenic nerve, or esophagus. The lymphatic channels connecting lung to mediastinum are blocked, causing pleural effusion.',
+    4: 'Stage IV: tumor emboli enter the pulmonary veins → left heart → systemic circulation → brain, bone, liver, adrenal. The lung-brain neural axis (vagus nerve, phrenic nerve) is disrupted. Paraneoplastic syndromes arise from tumor signals traveling through blood and nerves.',
+  },
+  heart: {
+    1: 'Primary cardiac tumors (usually myxoma) sit in a chamber — most often the left atrium. Even small tumors obstruct blood flow through the mitral valve, causing symptoms disproportionate to size.',
+    2: 'The tumor grows along the endocardial surface and may extend into the coronary vasculature or pericardium.',
+    3: 'Invasion of the myocardium and pericardium. Coronary arteries may be compressed, causing ischemia.',
+    4: 'Pericardial effusion, tamponade, and systemic embolization through the aorta.',
+  },
+  kidney: {
+    1: 'The tumor is confined to the renal parenchyma. However, it may already be growing into the renal tubules, calyces, or invading small intrarenal veins — the "venous highway" that RCC famously uses.',
+    2: 'Renal vein involvement is the hallmark of Stage II RCC. Tumor thrombus grows inside the renal vein — visible as a filling defect extending toward the inferior vena cava.',
+    3: 'Tumor thrombus extends into the IVC. Adrenal gland or perirenal fat involvement. Lymphatics draining to para-aortic nodes are invaded.',
+    4: 'IVC thrombus reaches the heart. Hematogenous mets to lungs ("cannon-ball" mets), bone, brain. Loss of erythropoietin signaling → anemia.',
+  },
+  liver: {
+    1: 'Single hepatocellular carcinoma nodule. The portal vein branches inside the liver are the primary spread route — HCC invades portal venules early, creating satellite nodules.',
+    2: 'Multiple nodules or portal vein branch invasion. The bile ducts may be compressed causing jaundice. Hepatic artery branches show peritumoral arterial hypervascularity.',
+    3: 'Main portal vein or hepatic vein invasion. Biliary obstruction. Lymphatics draining to hepatoduodenal ligament nodes are involved.',
+    4: 'Extrahepatic spread via hepatic veins → IVC → lungs. Portal hypertension from vein obstruction causes varices and ascites.',
+  },
+  colon: {
+    1: 'Tumor confined to mucosa/submucosa. But submucosal lymphatics are the first route — even T1 tumors have ~10% lymph node involvement. The venous drainage through the mesenteric veins begins carrying cells to the portal system.',
+    2: 'Full-thickness bowel wall invasion. Pericolonic lymph nodes positive. Lymphovascular invasion of mesenteric vessels is key.',
+    3: 'Regional lymph node chains along the mesenteric arteries are involved. The tumor may be tethered to adjacent organs.',
+    4: 'Liver metastases via portal vein (most common). Then lung via hepatic veins → systemic circulation. The colon-liver-lung axis is the classic metastatic cascade.',
+  },
+  brain: {
+    1: 'Primary brain tumors rarely metastasize outside the CNS. The cancer spreads along white matter tracts, perivascular spaces (Virchow-Robin spaces), and CSF pathways within the brain.',
+    2: 'Local invasion along white matter tracts. Corpus callosum involvement allows spread to the contralateral hemisphere ("butterfly glioma").',
+    3: 'Leptomeningeal spread via CSF. Ventricular system involvement.',
+    4: 'CSF dissemination to spine. Rarely, systemic spread through the venous sinuses.',
+  },
+}
+
+function getOrganInterior(organKey, stage) {
+  return ORGAN_INTERIOR[organKey]?.[stage] || ''
 }
 
 export default function DoctorChat({ organKey, stage, highlights = [] }) {
@@ -38,22 +82,23 @@ export default function DoctorChat({ organKey, stage, highlights = [] }) {
     setLoading(true)
 
     const markedSites = highlights.length > 0 ? ` The physician has marked ${highlights.length} tumor site${highlights.length !== 1 ? 's' : ''} on the 3D model.` : ''
+    const interiorDetail = getOrganInterior(organKey, stage)
     const systemPrompt = organ && data
-      ? `You are an expert oncologist and clinical AI assistant. The physician is viewing a 3D anatomical model of Stage ${stageLabel} ${organ.label} cancer (${data.fullName}).
+      ? `You are an expert oncologist and clinical AI assistant. The physician is using a 3D anatomical model with X-Ray transparency to visualize Stage ${stageLabel} ${organ.label} cancer (${data.fullName}) — including interior anatomy (lymphatics, blood vessels, ducts, nerves).
 
-Anatomical context for Stage ${stageLabel}: ${STAGE_ANATOMY[stage]}${markedSites}
+CRITICAL INSIGHT: Cancer is NOT always on the outside. ${STAGE_ANATOMY[stage]}${interiorDetail ? `\n\n${organ.label}-specific interior spread at Stage ${stageLabel}: ${interiorDetail}` : ''}${markedSites}
 
 5-year survival: ${data.survival5yr?.[stage] || 'unknown'}. Common treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
 
-You help the doctor with:
-- Explaining to patients how the tumor affects interior anatomy (lymph nodes, blood vessels, ducts, nerves) in plain language
-- Describing how cancer spreads through the lymphatic system and vasculature at this stage
-- Providing compassionate scripts and analogies for patient communication
-- Answering clinical questions about interior spread and staging
-- Suggesting what the interior anatomy view reveals about prognosis
+Your role:
+- Help the doctor explain to patients what is happening INSIDE the organ — in lymphatics, blood vessels, ducts, and nerves — not just the outer surface
+- Point out which interior structures visible in the 3D model are likely involved at this stage
+- Give plain-language analogies (e.g. "the cancer is using the lymph vessels like highways to spread")
+- Explain how distant organ communication is disrupted (e.g. nerve signaling, hormonal, vascular)
+- Help the doctor prepare patients for what the interior view of the model shows
 
-Be medically accurate, detailed, and practical. Reference specific anatomical structures when relevant.`
-      : `You are an expert oncologist AI assistant helping physicians explain cancer diagnoses, including how tumors affect interior anatomy like lymph nodes, blood vessels, and ducts. Be medically accurate and compassionate.`
+Be direct, medically accurate, and practical. Always emphasize that interior spread can exist even when the outer surface looks normal.`
+      : `You are an expert oncologist AI assistant. Help physicians explain how cancer spreads through interior anatomy — lymphatics, blood vessels, ducts, nerves — not just the outer organ surface. Be medically accurate and use plain language analogies.`
 
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY
@@ -111,10 +156,10 @@ Be medically accurate, detailed, and practical. Reference specific anatomical st
   }
 
   const starters = [
-    `How do I explain Stage ${stageLabel} ${organ.label} cancer to my patient, including what's happening inside the organ?`,
-    `At Stage ${stageLabel}, how does this cancer spread through lymph nodes and blood vessels?`,
-    `What analogy can I use to explain how ${data.treatments?.[stage]?.[0] || 'chemotherapy'} works against this cancer?`,
-    `What does the interior anatomy view show us about prognosis at Stage ${stageLabel}?`,
+    `What's happening inside the ${organ.label} at Stage ${stageLabel} that the patient can't see from the outside?`,
+    `How do I explain the lymphatic and vascular spread visible in the X-Ray view to my patient?`,
+    `At Stage ${stageLabel}, which interior structures — lymphatics, blood vessels, nerves — are involved and why does it matter?`,
+    `What analogy helps a patient understand how cancer travels through internal anatomy at this stage?`,
   ]
 
   return (

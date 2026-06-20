@@ -203,7 +203,7 @@ export default function OrganModel({ voxels, baseColor, zones, stage, highlights
       material.clippingPlanes = []
       material.side = THREE.FrontSide
       material.transparent = true
-      material.opacity = 0.22
+      material.opacity = 0.10
       material.depthWrite = false
       material.roughness = 0.55
       material.metalness = 0.08
