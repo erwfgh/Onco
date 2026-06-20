@@ -1,10 +1,14 @@
 // ─── Primitive generators ─────────────────────────────────────────────────
+// All generators use S=0.5 step for 8× higher voxel resolution
+
+const S = 0.5
+const rndS = v => Math.round(v / S) * S
 
 function ellipsoid(cx, cy, cz, rx, ry, rz, zone) {
   const v = []
-  for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++)
-    for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++)
-      for (let z = Math.floor(cz - rz); z <= Math.ceil(cz + rz); z++)
+  for (let x = rndS(cx - rx); x <= rndS(cx + rx) + S * 0.01; x += S)
+    for (let y = rndS(cy - ry); y <= rndS(cy + ry) + S * 0.01; y += S)
+      for (let z = rndS(cz - rz); z <= rndS(cz + rz) + S * 0.01; z += S)
         if (((x-cx)/rx)**2 + ((y-cy)/ry)**2 + ((z-cz)/rz)**2 <= 1)
           v.push(zone ? { x, y, z, zone } : { x, y, z })
   return v
@@ -16,9 +20,9 @@ function sphere(cx, cy, cz, r, zone) {
 
 function cylinder(cx, cz, y0, y1, r, zone) {
   const v = []
-  for (let x = Math.floor(cx - r); x <= Math.ceil(cx + r); x++)
-    for (let y = y0; y <= y1; y++)
-      for (let z = Math.floor(cz - r); z <= Math.ceil(cz + r); z++)
+  for (let x = rndS(cx - r); x <= rndS(cx + r) + S * 0.01; x += S)
+    for (let y = rndS(y0); y <= rndS(y1) + S * 0.01; y += S)
+      for (let z = rndS(cz - r); z <= rndS(cz + r) + S * 0.01; z += S)
         if ((x-cx)**2 + (z-cz)**2 <= r*r)
           v.push(zone ? { x, y, z, zone } : { x, y, z })
   return v
@@ -26,9 +30,9 @@ function cylinder(cx, cz, y0, y1, r, zone) {
 
 function hollowCylinder(cx, cz, y0, y1, rOuter, rInner, zone) {
   const v = []
-  for (let x = Math.floor(cx - rOuter); x <= Math.ceil(cx + rOuter); x++)
-    for (let y = y0; y <= y1; y++)
-      for (let z = Math.floor(cz - rOuter); z <= Math.ceil(cz + rOuter); z++) {
+  for (let x = rndS(cx - rOuter); x <= rndS(cx + rOuter) + S * 0.01; x += S)
+    for (let y = rndS(y0); y <= rndS(y1) + S * 0.01; y += S)
+      for (let z = rndS(cz - rOuter); z <= rndS(cz + rOuter) + S * 0.01; z += S) {
         const d2 = (x-cx)**2 + (z-cz)**2
         if (d2 <= rOuter*rOuter && d2 >= rInner*rInner)
           v.push(zone ? { x, y, z, zone } : { x, y, z })
@@ -41,7 +45,7 @@ function tube(points, r, zone) {
   for (let i = 0; i < points.length - 1; i++) {
     const [ax, ay, az] = points[i]
     const [bx, by, bz] = points[i+1]
-    const steps = Math.ceil(Math.max(Math.abs(bx-ax), Math.abs(by-ay), Math.abs(bz-az)) * 3)
+    const steps = Math.ceil(Math.max(Math.abs(bx-ax), Math.abs(by-ay), Math.abs(bz-az)) * 6)
     for (let t = 0; t <= steps; t++) {
       const f = t / steps
       sphere(ax + (bx-ax)*f, ay + (by-ay)*f, az + (bz-az)*f, r, zone).forEach(p => v.push(p))
@@ -54,9 +58,9 @@ function tube(points, r, zone) {
 function noisyEllipsoid(cx, cy, cz, rx, ry, rz, amp, freq, zone) {
   const v = []
   const pad = Math.ceil(amp) + 1
-  for (let x = Math.floor(cx - rx - pad); x <= Math.ceil(cx + rx + pad); x++)
-    for (let y = Math.floor(cy - ry - pad); y <= Math.ceil(cy + ry + pad); y++)
-      for (let z = Math.floor(cz - rz - pad); z <= Math.ceil(cz + rz + pad); z++) {
+  for (let x = rndS(cx - rx - pad); x <= rndS(cx + rx + pad) + S * 0.01; x += S)
+    for (let y = rndS(cy - ry - pad); y <= rndS(cy + ry + pad) + S * 0.01; y += S)
+      for (let z = rndS(cz - rz - pad); z <= rndS(cz + rz + pad) + S * 0.01; z += S) {
         const noise = amp * Math.sin(x * freq) * Math.cos(y * freq * 1.3) * Math.sin(z * freq * 0.9)
         if (((x-cx)/rx)**2 + ((y-cy)/ry)**2 + ((z-cz)/rz)**2 <= (1 + noise) ** 2)
           v.push(zone ? { x, y, z, zone } : { x, y, z })
@@ -68,9 +72,9 @@ function noisyEllipsoid(cx, cy, cz, rx, ry, rz, amp, freq, zone) {
 function gyralEllipsoid(cx, cy, cz, rx, ry, rz, zone) {
   const v = []
   const pad = 2
-  for (let x = Math.floor(cx - rx - pad); x <= Math.ceil(cx + rx + pad); x++)
-    for (let y = Math.floor(cy - ry - pad); y <= Math.ceil(cy + ry + pad); y++)
-      for (let z = Math.floor(cz - rz - pad); z <= Math.ceil(cz + rz + pad); z++) {
+  for (let x = rndS(cx - rx - pad); x <= rndS(cx + rx + pad) + S * 0.01; x += S)
+    for (let y = rndS(cy - ry - pad); y <= rndS(cy + ry + pad) + S * 0.01; y += S)
+      for (let z = rndS(cz - rz - pad); z <= rndS(cz + rz + pad) + S * 0.01; z += S) {
         const fold =
           0.10 * Math.sin(x * 0.9 + z * 0.4) * Math.cos(y * 1.1) +
           0.06 * Math.sin(x * 1.8 - y * 0.6) * Math.cos(z * 1.0) +
@@ -81,15 +85,17 @@ function gyralEllipsoid(cx, cy, cz, rx, ry, rz, zone) {
   return v
 }
 
+const vk = (x, y, z) => `${Math.round(x*2)},${Math.round(y*2)},${Math.round(z*2)}`
+
 function subtract(base, cut) {
-  const cutSet = new Set(cut.map(({x,y,z}) => `${x},${y},${z}`))
-  return base.filter(({x,y,z}) => !cutSet.has(`${x},${y},${z}`))
+  const cutSet = new Set(cut.map(({x,y,z}) => vk(x,y,z)))
+  return base.filter(({x,y,z}) => !cutSet.has(vk(x,y,z)))
 }
 
 function unique(voxels) {
   const seen = new Set()
   return voxels.filter(({ x, y, z }) => {
-    const k = `${x},${y},${z}`
+    const k = vk(x, y, z)
     if (seen.has(k)) return false
     seen.add(k)
     return true

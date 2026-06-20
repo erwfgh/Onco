@@ -2,8 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-const VOXEL_SIZE = 0.88
-const SPHERE_RADIUS = 0.57
+const VOXEL_SIZE = 0.48
 
 const STAGE_RADIUS = { 1: 0.4, 2: 2.0, 3: 3.8, 4: 6.0 }
 const STAGE_SCATTER = { 1: 0, 2: 0, 3: 0.04, 4: 0.18 }
@@ -15,8 +14,8 @@ const PURPLE = {
   4: new THREE.Color('#4c1d95'),
 }
 
-const GEO = new THREE.SphereGeometry(SPHERE_RADIUS, 10, 7)
-const GEO_INTERIOR = new THREE.SphereGeometry(SPHERE_RADIUS * 0.82, 8, 6)
+const GEO = new THREE.BoxGeometry(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE)
+const GEO_INTERIOR = new THREE.BoxGeometry(VOXEL_SIZE * 0.82, VOXEL_SIZE * 0.82, VOXEL_SIZE * 0.82)
 const CLIP_PLANE = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
 const CLIP_PLANE_INTERIOR = new THREE.Plane(new THREE.Vector3(1, 0, 0), 1)
 
