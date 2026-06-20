@@ -121,20 +121,26 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
             <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${progressPct}%` }} />
           </div>
 
-          {/* Header */}
-          <div className="px-5 py-3 flex items-center justify-between flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)' }}>
+          {/* Header — patient-facing presentation bar */}
+          <div className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-blue-100 bg-white">
             <div className="flex items-center gap-3 min-w-0">
-              {organ && <span className="text-white/70 text-lg flex-shrink-0">{organ.icon}</span>}
-              <span className="text-white font-bold text-sm truncate">{deck.title}</span>
+              {organ && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200">
+                  <span className="text-blue-500">{organ.icon}</span>
+                  <span className="text-blue-800 font-semibold text-sm">{organ.label}</span>
+                  <span className="text-blue-300 text-xs">·</span>
+                  <span className="text-blue-600 text-xs font-medium">Stage {['I','II','III','IV'][stage-1]}</span>
+                </div>
+              )}
+              <span className="text-slate-400 text-xs hidden md:block">Understanding your diagnosis</span>
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-              <span className="text-white/60 text-xs">{current + 1} / {total}</span>
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <span className="text-slate-400 text-sm">{current + 1} of {total}</span>
               <button
                 onClick={onClose}
-                className="text-white/80 hover:text-white text-xs font-medium px-2 py-1 rounded hover:bg-white/20 transition-colors"
+                className="text-slate-400 hover:text-slate-700 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200"
               >
-                ✕ Close
+                ✕ End presentation
               </button>
             </div>
           </div>
@@ -162,53 +168,45 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
             )}
 
             {xray && (
-              <div className="absolute top-2 right-3 bg-blue-900/70 text-white text-[10px] px-2.5 py-1 rounded-full pointer-events-none backdrop-blur-sm">
-                X-Ray — interior anatomy
+              <div className="absolute top-2 right-3 bg-blue-700/80 text-white text-xs px-3 py-1 rounded-full pointer-events-none backdrop-blur-sm font-medium">
+                Showing inside the organ
               </div>
             )}
 
-            <div className="absolute bottom-2 right-3 text-[9px] text-slate-400 pointer-events-none">
-              Drag to rotate · Scroll to zoom
+            <div className="absolute bottom-2 right-3 text-[10px] text-slate-400 pointer-events-none">
+              You can rotate this model
             </div>
           </div>
 
-          {/* Slide content */}
-          <div className="flex-1 overflow-y-auto px-8 py-5 space-y-4 min-h-0">
-            <h2 className="text-2xl font-bold text-slate-800 leading-snug">{slide.title}</h2>
-            <ul className="space-y-2.5">
+          {/* Slide content — written for the patient */}
+          <div className="flex-1 overflow-y-auto px-10 py-6 space-y-5 min-h-0">
+            <h2 className="text-3xl font-bold text-slate-800 leading-snug">{slide.title}</h2>
+            <ul className="space-y-3">
               {slide.narrative
                 .split(/(?<=[.!?])\s+/)
                 .map(s => s.trim())
                 .filter(s => s.length > 10)
                 .map((bullet, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
-                    <span className="text-slate-700 text-base leading-relaxed">{bullet.replace(/[.!?]$/, '')}</span>
+                  <li key={i} className="flex items-start gap-4">
+                    <span className="mt-2 w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />
+                    <span className="text-slate-700 text-xl leading-relaxed">{bullet.replace(/[.!?]$/, '')}</span>
                   </li>
                 ))
               }
             </ul>
-            {slide.doctorTip && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-                <p className="text-blue-800 text-sm leading-relaxed italic">
-                  <span className="not-italic font-semibold">💡 Doctor tip: </span>
-                  {slide.doctorTip}
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Footer */}
-          <div className="border-t border-blue-100 px-5 py-3 flex-shrink-0 bg-blue-50 space-y-2.5">
+          <div className="border-t border-slate-100 px-6 py-4 flex-shrink-0 bg-white space-y-3">
 
             {/* Dot indicators */}
-            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
               {deck.slides.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrent(i)}
                   className={`rounded-full transition-all duration-200 flex-shrink-0 ${
-                    i === current ? 'w-5 h-2.5 bg-blue-500' : 'w-2.5 h-2.5 bg-blue-200 hover:bg-blue-400'
+                    i === current ? 'w-6 h-3 bg-blue-500' : 'w-3 h-3 bg-slate-200 hover:bg-blue-300'
                   }`}
                 />
               ))}
@@ -219,9 +217,9 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
               <button
                 onClick={goBack}
                 disabled={current === 0}
-                className="text-sm px-4 py-1.5 rounded-lg border border-blue-200 text-blue-700 disabled:opacity-30 hover:bg-blue-100 transition-colors font-medium"
+                className="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 disabled:opacity-30 hover:bg-slate-50 transition-colors font-medium"
               >
-                ← Back
+                ← Previous
               </button>
 
               <div className="flex items-center gap-2">
@@ -245,11 +243,11 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
               </div>
 
               {isLast ? (
-                <button onClick={onClose} className="text-sm px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors">
-                  Done ✓
+                <button onClick={onClose} className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-colors">
+                  All done ✓
                 </button>
               ) : (
-                <button onClick={goNext} className="text-sm px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
+                <button onClick={goNext} className="px-6 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors">
                   Next →
                 </button>
               )}
