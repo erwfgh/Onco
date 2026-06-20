@@ -61,7 +61,7 @@ export default function DoctorAuth({ onBack, onAuth }) {
   }
 
   function handleEnter() {
-    const user = { v: 3, role: 'doctor', email, phone, npi: verified.npi, name: verified.name || manualName, specialty: verified.specialty }
+    const user = { v: 4, role: 'doctor', email, phone, npi: verified.npi, name: verified.name || manualName, specialty: verified.specialty }
     localStorage.setItem('oncoviz_user', JSON.stringify(user))
     onAuth(user)
   }

@@ -9,7 +9,7 @@ export default function PatientAuth({ onBack, onAuth }) {
     e.preventDefault()
     if (!name.trim()) return setError('Please enter your first name.')
     if (!email.includes('@')) return setError('Please enter a valid email address.')
-    const user = { v: 3, role: 'patient', name: name.trim(), email: email.trim() }
+    const user = { v: 4, role: 'patient', name: name.trim(), email: email.trim() }
     localStorage.setItem('oncoviz_user', JSON.stringify(user))
     onAuth(user)
   }
