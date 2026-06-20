@@ -93,6 +93,34 @@ function detectOrganFromText(text, fallback) {
   return fallback
 }
 
+function cleanForPatient(text) {
+  return text
+    // Strip markdown
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/#+\s*/g, '')
+    // Strip numbered list markers (1. 2. 3.) at start of lines
+    .replace(/^\s*\d+\.\s*/gm, '')
+    // Strip bullet markers
+    .replace(/^\s*[-•]\s*/gm, '')
+    // Colons at end of a line become periods (remove list-intro artifacts)
+    .replace(/:\s*\n/gm, '. ')
+    .replace(/:\s*$/gm, '.')
+    // Remove ":1", ":2" style numbering artifacts
+    .replace(/:\d+/g, '')
+    // Patient-facing substitutions
+    .replace(/\bfor the patient\b/gi, 'for you')
+    .replace(/\bwhat (this |it )?means for the patient\b/gi, 'what this means for you')
+    .replace(/\bthe patient('s)?\b/gi, (_, s) => s ? 'your' : 'you')
+    .replace(/\ba patient\b/gi, 'you')
+    .replace(/\btheir doctor\b/gi, 'your doctor')
+    .replace(/\bthe doctor\b/gi, 'your doctor')
+    // Clean up stray whitespace
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function splitSentences(text) {
   // Protect common abbreviations so we don't split mid-sentence
   const safe = text.replace(/\b(Dr|Mr|Mrs|Ms|Prof|vs|etc|e\.g|i\.e|approx|No|St|Fig|Vol)\./gi, '$1<DOT>')
@@ -102,43 +130,39 @@ function splitSentences(text) {
     .filter(s => s.length > 20)
 }
 
-function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
-  // Strip markdown formatting from AI reply
-  const cleaned = reply
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/#+\s*/g, '')
-    .trim()
+function makeTitle(sentence) {
+  // Clean trailing punctuation, quotes, colons
+  const clean = sentence.replace(/[.!?:]+$/, '').replace(/["""]/g, '').trim()
+  if (clean.length <= 80) return clean
+  // Trim at last word boundary before 80 chars
+  return clean.slice(0, 80).replace(/\s+\S*$/, '') + '…'
+}
 
-  const sentences = splitSentences(cleaned)
-  if (sentences.length === 0) return null
+function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
+  const cleaned = cleanForPatient(reply)
+  const allSentences = splitSentences(cleaned)
+  if (allSentences.length === 0) return null
 
   // Group into 3–4 slides of ~3 sentences each
-  const TARGET_SLIDES = Math.min(4, Math.max(2, Math.ceil(sentences.length / 3)))
-  const perSlide = Math.ceil(sentences.length / TARGET_SLIDES)
-  const chunks = []
-  for (let i = 0; i < sentences.length; i += perSlide)
-    chunks.push(sentences.slice(i, i + perSlide).join(' '))
+  const TARGET_SLIDES = Math.min(4, Math.max(2, Math.ceil(allSentences.length / 3)))
+  const perSlide = Math.ceil(allSentences.length / TARGET_SLIDES)
+  const groups = []
+  for (let i = 0; i < allSentences.length; i += perSlide)
+    groups.push(allSentences.slice(i, i + perSlide))
 
-  // Slide title: use the full first sentence of the chunk (complete, never cut mid-phrase)
-  const makeTitle = para => {
-    const sents = splitSentences(para)
-    const first = (sents[0] || para).replace(/[.!?]$/, '').replace(/["""]/g, '').trim()
-    // If unusually long, trim at last word boundary before 80 chars
-    if (first.length <= 80) return first
-    const cut = first.slice(0, 80).replace(/\s+\S*$/, '')
-    return cut + '…'
-  }
+  const slides = groups.map(sents => {
+    const title = makeTitle(sents[0] || '')
+    // Bullets are all sentences EXCEPT the first (which is the title)
+    // If only 1 sentence, show it as the sole bullet too
+    const bulletSents = sents.length > 1 ? sents.slice(1) : sents
+    return {
+      title,
+      bullets: bulletSents,
+      viewMode: XRAY_RE.test(sents.join(' ')) ? 'xray' : 'normal',
+      organKey: detectOrganFromText(sents.join(' '), currentOrganKey),
+    }
+  })
 
-  const slides = chunks.map(para => ({
-    title: makeTitle(para),
-    narrative: para,
-    doctorTip: null,
-    viewMode: XRAY_RE.test(para) ? 'xray' : 'normal',
-    organKey: detectOrganFromText(para, currentOrganKey),
-  }))
-
-  // Deck title: clean, complete — organ + stage, no truncated question
   return {
     title: `${organ?.label || 'Your Diagnosis'} — Stage ${stageLabel}`,
     slides,

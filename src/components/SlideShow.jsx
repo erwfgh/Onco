@@ -182,24 +182,16 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
           <div className="flex-1 overflow-y-auto px-10 py-6 space-y-5 min-h-0">
             <h2 className="text-3xl font-bold text-slate-800 leading-snug">{slide.title}</h2>
             <ul className="space-y-3">
-              {slide.narrative
-                // Protect abbreviations before splitting
-                .replace(/\b(Dr|Mr|Mrs|Ms|Prof|vs|etc|e\.g|i\.e|approx|No|St)\./gi, '$1<DOT>')
-                .split(/(?<=[.!?])\s+/)
-                .map(s => s.replace(/<DOT>/g, '.').trim())
-                .filter(s => s.length > 20)
-                .map((bullet, i) => {
-                  // Capitalize first letter, ensure ends with a period
-                  const clean = bullet.replace(/[.!?]+$/, '').trim()
-                  const text = clean.charAt(0).toUpperCase() + clean.slice(1) + '.'
-                  return (
-                    <li key={i} className="flex items-start gap-4">
-                      <span className="mt-2.5 w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />
-                      <span className="text-slate-700 text-xl leading-relaxed">{text}</span>
-                    </li>
-                  )
-                })
-              }
+              {(slide.bullets || []).map((raw, i) => {
+                const clean = raw.replace(/[.!?:]+$/, '').trim()
+                const text = clean.charAt(0).toUpperCase() + clean.slice(1) + '.'
+                return (
+                  <li key={i} className="flex items-start gap-4">
+                    <span className="mt-2.5 w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />
+                    <span className="text-slate-700 text-xl leading-relaxed">{text}</span>
+                  </li>
+                )
+              })}
             </ul>
           </div>
 
