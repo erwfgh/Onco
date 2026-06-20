@@ -197,6 +197,10 @@ function cleanForPatient(text) {
     .replace(/\ba patient\b/gi, 'you')
     .replace(/\btheir doctor\b/gi, 'your doctor')
     .replace(/\bthe doctor\b/gi, 'your doctor')
+    .replace(/\bwe (will|can|need to|want to|are going to)\b/gi, 'your care team $1')
+    .replace(/\bour (goal|plan|next step|approach|treatment)\b/gi, 'your $1')
+    .replace(/\byour care team will\b/gi, 'your care team will')
+    .replace(/\bin (this|the) (?:3D )?model\b/gi, 'in the image on the screen')
     // Clean up stray whitespace
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
@@ -216,12 +220,13 @@ function cleanForPatient(text) {
 }
 
 function splitSentences(text) {
-  // Protect common abbreviations so we don't split mid-sentence
   const safe = text.replace(/\b(Dr|Mr|Mrs|Ms|Prof|vs|etc|e\.g|i\.e|approx|No|St|Fig|Vol)\./gi, '$1<DOT>')
   return safe
     .split(/(?<=[.!?])\s+/)
     .map(s => s.replace(/<DOT>/g, '.').trim())
-    .filter(s => s.length > 20)
+    // Remove any remaining colon-only or number artifacts
+    .map(s => s.replace(/:\s*\d*/g, '').replace(/\s{2,}/g, ' ').trim())
+    .filter(s => s.length > 25 && /[a-z]/i.test(s))
 }
 
 function makeTitle(sentence) {

@@ -6,15 +6,32 @@ import ORGANS from '../data/organs'
 
 /* ─── Embedded 3D organ viewer ──────────────────────────────────────────── */
 
-function SlideOrganView({ organKey, stage, xray, animKey }) {
+function SlideOrganView({ organKey, targetStage, xray, animKey }) {
   const organ = ORGANS[organKey]
+  // Animate: start at stage 1, step up to targetStage to show cancer spread
+  const [stageAnim, setStageAnim] = useState(1)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    setStageAnim(1)
+    clearInterval(timerRef.current)
+    if (targetStage > 1) {
+      let s = 1
+      timerRef.current = setInterval(() => {
+        s += 1
+        setStageAnim(s)
+        if (s >= targetStage) clearInterval(timerRef.current)
+      }, 700)
+    } else {
+      setStageAnim(1)
+    }
+    return () => clearInterval(timerRef.current)
+  }, [animKey, targetStage])
+
   if (!organ) return null
 
   return (
-    <div
-      key={animKey}
-      className="w-full h-full slide-organ-anim"
-    >
+    <div className="w-full h-full slide-organ-anim">
       <Canvas
         camera={{ position: [0, 3, 28], fov: 50 }}
         style={{ background: 'transparent', width: '100%', height: '100%' }}
@@ -40,7 +57,7 @@ function SlideOrganView({ organKey, stage, xray, animKey }) {
           voxels={organ.voxels}
           baseColor={organ.color}
           zones={organ.zones}
-          stage={stage}
+          stage={stageAnim}
           highlights={[]}
           onVoxelClick={() => {}}
           crossSection={false}
@@ -150,11 +167,10 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
             className="flex-shrink-0 relative organ-glow border-b border-blue-100 bg-[#f0f6ff]"
             style={{ height: '52vh' }}
           >
-            {/* Remount canvas when slide or organ changes to retrigger animation */}
             <SlideOrganView
               key={`${current}-${slideOrganKey}-${xray}`}
               organKey={slideOrganKey}
-              stage={stage}
+              targetStage={stage}
               xray={xray}
               animKey={current}
             />
@@ -173,8 +189,13 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
               </div>
             )}
 
+            {stage > 1 && (
+              <div className="absolute bottom-2 left-3 text-[10px] text-blue-400 pointer-events-none font-medium">
+                ▶ Showing cancer growth from Stage I → Stage {['I','II','III','IV'][stage-1]}
+              </div>
+            )}
             <div className="absolute bottom-2 right-3 text-[10px] text-slate-400 pointer-events-none">
-              You can rotate this model
+              Drag to rotate · scroll to zoom
             </div>
           </div>
 
