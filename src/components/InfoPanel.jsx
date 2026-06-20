@@ -26,7 +26,7 @@ const CATEGORY_COLOR = {
   'Combination': 'bg-slate-50 border-slate-200 text-slate-600',
 }
 
-export default function InfoPanel({ organKey, stage, patientDefault = false, highlights = [] }) {
+export default function InfoPanel({ organKey, stage, patientDefault = false, highlights = [], onPresent }) {
   const [tab, setTab] = useState('Consult')
   const [patientMode, setPatientMode] = useState(patientDefault)
 
@@ -276,7 +276,7 @@ export default function InfoPanel({ organKey, stage, patientDefault = false, hig
             )}
 
             {tab === 'Consult' && (
-              <DoctorChat organKey={organKey} stage={stage} highlights={highlights} />
+              <DoctorChat organKey={organKey} stage={stage} highlights={highlights} onPresent={onPresent} />
             )}
           </div>
         </>

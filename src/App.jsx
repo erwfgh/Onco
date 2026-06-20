@@ -5,6 +5,7 @@ import StageSelector from './components/StageSelector'
 import InfoPanel from './components/InfoPanel'
 import LandingPage from './components/LandingPage'
 import ReportModal from './components/ReportModal'
+import SlideShow from './components/SlideShow'
 import CaseBar from './components/CaseBar'
 import RoleSelector from './components/RoleSelector'
 import ORGANS from './data/organs'
@@ -33,6 +34,7 @@ export default function App() {
   const [caseId, setCaseId] = useState('')
   const [notes, setNotes] = useState('')
   const [showNotes, setShowNotes] = useState(false)
+  const [slideShow, setSlideShow] = useState(null)
   const handleOrganSelect = useCallback(key => {
     setSelectedOrgan(key)
     setHighlights([])
@@ -59,6 +61,8 @@ export default function App() {
   return (
     <div className="flex flex-col h-full bg-[#f0f6ff] text-slate-800 select-none relative">
       {showLanding && !isPatient && <LandingPage onEnter={() => setShowLanding(false)} />}
+
+      {slideShow && <SlideShow deck={slideShow} onClose={() => setSlideShow(null)} />}
 
       {showReport && selectedOrgan && (
         <ReportModal
@@ -235,7 +239,7 @@ export default function App() {
           </div>
         </div>
 
-        <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} highlights={highlights} />
+        <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} highlights={highlights} onPresent={setSlideShow} />
       </div>
     </div>
   )

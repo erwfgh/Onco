@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import CLINICAL from '../data/clinicalData'
 import ORGANS from '../data/organs'
+import { SLIDE_DECKS } from '../data/slideDeckTemplates'
 
 const STAGE_ANATOMY = {
   1: 'The tumor is localized within the primary organ. At this stage cancer can already be present INSIDE the organ — in small lymphatics, submucosal layers, or ductal epithelium — even though the outer surface looks normal. Early micro-invasion of peri-tumoral lymphatics may be present histologically.',
@@ -53,7 +54,7 @@ function getOrganInterior(organKey, stage) {
   return ORGAN_INTERIOR[organKey]?.[stage] || ''
 }
 
-export default function DoctorChat({ organKey, stage, highlights = [] }) {
+export default function DoctorChat({ organKey, stage, highlights = [], onPresent }) {
   const organ = ORGANS[organKey]
   const data = CLINICAL[organKey]
 
@@ -170,7 +171,17 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
           <div className="text-xs font-semibold text-slate-700">Patient Communication AI</div>
           <div className="text-[10px] text-slate-400">{organ.label} · Stage {stageLabel} · Scripts &amp; analogies</div>
         </div>
-        <div className="text-sm text-blue-500 font-bold">✦</div>
+        <div className="flex items-center gap-2">
+          {onPresent && SLIDE_DECKS[`${organKey}-${stage}`] && (
+            <button
+              onClick={() => onPresent(SLIDE_DECKS[`${organKey}-${stage}`])}
+              className="text-xs px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+            >
+              ▷ Present
+            </button>
+          )}
+          <div className="text-sm text-blue-500 font-bold">✦</div>
+        </div>
       </div>
 
       {/* Messages */}
