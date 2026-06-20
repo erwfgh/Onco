@@ -93,17 +93,99 @@ function detectOrganFromText(text, fallback) {
   return fallback
 }
 
+// Medical jargon → plain-English inline explanations
+const MEDICAL_TERMS = [
+  [/\bportal triad\b/gi, 'portal triad (the spot where blood vessels and bile ducts enter each section of your liver)'],
+  [/\bportal vein\b/gi, 'portal vein (a large blood vessel that carries blood from your intestines to your liver)'],
+  [/\bhepatic vein\b/gi, 'hepatic vein (the blood vessel that carries blood out of your liver)'],
+  [/\blymph nodes?\b/gi, 'lymph nodes (small bean-shaped glands that are part of your immune system)'],
+  [/\blymphatics\b/gi, 'lymphatics (a network of tiny vessels that carry fluid and help fight infection)'],
+  [/\blymphatic channels?\b/gi, 'lymphatic channels (tiny tubes in your body that carry immune fluid)'],
+  [/\bmetastas\w+/gi, 'spread (when cancer travels from where it started to other parts of your body)'],
+  [/\blymphovascular invasion\b/gi, 'invasion of nearby blood and lymph vessels'],
+  [/\bperineural invasion\b/gi, 'growth along nerve pathways'],
+  [/\bhematogenous\b/gi, 'through the bloodstream'],
+  [/\btumor thrombus\b/gi, 'tumor thrombus (a clump of cancer cells blocking a blood vessel)'],
+  [/\binferior vena cava\b/gi, 'inferior vena cava (the large vein that carries blood back to your heart)'],
+  [/\brenal vein\b/gi, 'renal vein (the blood vessel draining your kidney)'],
+  [/\bmesenteric vein\b/gi, 'mesenteric vein (the blood vessel draining your intestines)'],
+  [/\bpulmonary (vein|artery)\b/gi, 'pulmonary $1 (a blood vessel connecting your lungs and heart)'],
+  [/\bbronchial\b/gi, 'bronchial (relating to the airways in your lungs)'],
+  [/\balveol\w+\b/gi, 'alveoli (the tiny air sacs in your lungs where oxygen enters your blood)'],
+  [/\bpleural effusion\b/gi, 'pleural effusion (a buildup of fluid around your lungs)'],
+  [/\bsubmucosal\b/gi, 'submucosal (beneath the inner lining of the organ)'],
+  [/\bduccal\b/gi, 'ductal (relating to the tubes that carry fluids through an organ)'],
+  [/\bbile ducts?\b/gi, 'bile ducts (tubes that carry digestive fluid from your liver to your intestine)'],
+  [/\bsuperior vena cava\b/gi, 'superior vena cava (the large vein that carries blood from your upper body to your heart)'],
+  [/\bpericardium\b/gi, 'pericardium (the sac that surrounds your heart)'],
+  [/\bmyocardium\b/gi, 'myocardium (the muscle of your heart)'],
+  [/\bcoronary arteri\w+/gi, 'coronary arteries (the blood vessels that supply your heart muscle with blood)'],
+  [/\bparaneoplastic\b/gi, 'paraneoplastic (a side effect caused by the cancer releasing substances into your body)'],
+  [/\bvagus nerve\b/gi, 'vagus nerve (a major nerve that controls many organs in your body)'],
+  [/\bphrenic nerve\b/gi, 'phrenic nerve (the nerve that controls your breathing muscle)'],
+  [/\berythropoietin\b/gi, 'erythropoietin (a hormone your kidney makes to help produce red blood cells)'],
+  [/\bportal hypertension\b/gi, 'portal hypertension (high blood pressure in the vein that feeds your liver)'],
+  [/\bascites\b/gi, 'ascites (a buildup of fluid in your abdomen)'],
+  [/\bvarices\b/gi, 'varices (swollen veins, often in the stomach or esophagus)'],
+  [/\bjaundice\b/gi, 'jaundice (yellowing of the skin and eyes when bile builds up in your blood)'],
+  [/\bcorpus callosum\b/gi, 'corpus callosum (the bridge connecting the two sides of your brain)'],
+  [/\bleptomeningeal\b/gi, 'leptomeningeal (relating to the thin layers that cover your brain and spinal cord)'],
+  [/\bcsf\b/gi, 'CSF (the fluid surrounding your brain and spinal cord)'],
+  [/\bwhite matter\b/gi, 'white matter (the part of your brain that connects different regions together)'],
+  [/\bglioma\b/gi, 'glioma (a type of brain tumor that starts in the supportive cells of the brain)'],
+  [/\bpsa\b/gi, 'PSA (a protein made by the prostate — high levels can signal cancer)'],
+  [/\bandrogen\b/gi, 'androgen (a male hormone like testosterone that can fuel prostate cancer growth)'],
+  [/\bendometri\w+/gi, 'endometrium (the inner lining of the uterus)'],
+  [/\bperitoneal\b/gi, 'peritoneal (relating to the lining of the abdominal cavity)'],
+  [/\burothelial\b/gi, 'urothelial (relating to the inner lining of the bladder and urinary tract)'],
+  [/\bthyroglobulin\b/gi, 'thyroglobulin (a protein made only by your thyroid — used to detect thyroid cancer)'],
+  [/\bbarrett'?s?\b/gi, "Barrett's (a condition where stomach acid damages the lining of the esophagus, raising cancer risk)"],
+  [/\bepidermis\b/gi, 'epidermis (the outer layer of your skin)'],
+  [/\bdermis\b/gi, 'dermis (the deeper layer of your skin beneath the surface)'],
+  [/\bosseous\b/gi, 'osseous (relating to bone)'],
+  [/\bpheochromocytoma\b/gi, 'pheochromocytoma (a rare tumor in the adrenal glands that affects blood pressure)'],
+  [/\bduodenum\b/gi, 'duodenum (the first section of your small intestine, just past your stomach)'],
+  [/\bjejunum\b/gi, 'jejunum (the middle section of your small intestine)'],
+  [/\bileum\b/gi, 'ileum (the last section of your small intestine)'],
+  [/\bgingival\b/gi, 'gingival (relating to your gums)'],
+  [/\bbuccal\b/gi, 'buccal (relating to the inner lining of your cheek)'],
+  [/\bnasopharyn\w+/gi, 'nasopharynx (the upper part of your throat behind your nose)'],
+  [/\bepstein-barr\b/gi, 'Epstein-Barr (a common virus linked to certain cancers)'],
+  [/\bglottis\b/gi, 'glottis (the part of your larynx that contains your vocal cords)'],
+  [/\bhilum\b/gi, 'hilum (the area where blood vessels and airways enter or leave an organ)'],
+  [/\bmediastin\w+/gi, 'mediastinum (the space in the middle of your chest between your lungs)'],
+]
+
+function applyMedicalTerms(text) {
+  let result = text
+  const applied = new Set()
+  for (const [pattern, replacement] of MEDICAL_TERMS) {
+    const key = pattern.toString()
+    result = result.replace(pattern, (match) => {
+      if (applied.has(key)) return match
+      applied.add(key)
+      return replacement
+    })
+  }
+  return result
+}
+
+// Patterns that represent doctor stage-directions or meta-commentary — strip entire sentence
+const DOCTOR_META_RE = /^[^.!?]*(?:I(?:'d| would| want to)? (?:like to |now )?(?:point|refer|show|draw|highlight|direct|turn)|(?:point(?:ing)?|referring|looking|turning) to the(?: 3[dD])? model|now(?: I'?d? like)?,? let(?:'s| us)|as your doctor,?|let me (?:show|point|highlight|draw)|(?:here|here's where) (?:I|we) (?:see|look|show))[^.!?]*[.!?]\s*/gi
+
 function cleanForPatient(text) {
-  return text
+  let t = text
     // Strip markdown
     .replace(/\*\*(.+?)\*\*/g, '$1')
     .replace(/\*(.+?)\*/g, '$1')
     .replace(/#+\s*/g, '')
-    // Strip numbered list markers (1. 2. 3.) at start of lines
+    // Strip parenthetical stage directions like (Points to the 3D model)
+    .replace(/\([^)]*(?:3[dD] model|point(?:ing)?|model|voxel|screen)[^)]*\)/gi, '')
+    // Strip numbered list markers
     .replace(/^\s*\d+\.\s*/gm, '')
     // Strip bullet markers
     .replace(/^\s*[-•]\s*/gm, '')
-    // Colons at end of a line become periods (remove list-intro artifacts)
+    // Colons at end of a line
     .replace(/:\s*\n/gm, '. ')
     .replace(/:\s*$/gm, '.')
     // Remove ":1", ":2" style numbering artifacts
@@ -119,6 +201,18 @@ function cleanForPatient(text) {
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
+
+  // Strip doctor meta-note sentences (iterate to catch multiple)
+  let prev
+  do {
+    prev = t
+    t = t.replace(DOCTOR_META_RE, '')
+  } while (t !== prev)
+
+  // Apply medical term explanations
+  t = applyMedicalTerms(t)
+
+  return t.trim()
 }
 
 function splitSentences(text) {
@@ -131,11 +225,8 @@ function splitSentences(text) {
 }
 
 function makeTitle(sentence) {
-  // Clean trailing punctuation, quotes, colons
-  const clean = sentence.replace(/[.!?:]+$/, '').replace(/["""]/g, '').trim()
-  if (clean.length <= 80) return clean
-  // Trim at last word boundary before 80 chars
-  return clean.slice(0, 80).replace(/\s+\S*$/, '') + '…'
+  // Return the full sentence as the title — let CSS wrap it
+  return sentence.replace(/[.!?:]+$/, '').replace(/["""]/g, '').trim()
 }
 
 function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
@@ -143,8 +234,9 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
   const allSentences = splitSentences(cleaned)
   if (allSentences.length === 0) return null
 
-  // Group into 3–4 slides of ~3 sentences each
-  const TARGET_SLIDES = Math.min(4, Math.max(2, Math.ceil(allSentences.length / 3)))
+  // Group into 2–3 slides of ~6 sentences each (title + up to 5 bullets)
+  const SENTS_PER_SLIDE = 6
+  const TARGET_SLIDES = Math.min(3, Math.max(2, Math.ceil(allSentences.length / SENTS_PER_SLIDE)))
   const perSlide = Math.ceil(allSentences.length / TARGET_SLIDES)
   const groups = []
   for (let i = 0; i < allSentences.length; i += perSlide)
@@ -152,8 +244,6 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
 
   const slides = groups.map(sents => {
     const title = makeTitle(sents[0] || '')
-    // Bullets are all sentences EXCEPT the first (which is the title)
-    // If only 1 sentence, show it as the sole bullet too
     const bulletSents = sents.length > 1 ? sents.slice(1) : sents
     return {
       title,
