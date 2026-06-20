@@ -94,32 +94,43 @@ function detectOrganFromText(text, fallback) {
 }
 
 function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
-  // Split into paragraphs; if none, fall back to sentence groups of 2-3
-  let chunks = reply.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 40)
+  // Strip markdown formatting from AI reply
+  const cleaned = reply
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/#+\s*/g, '')
+    .trim()
 
-  if (chunks.length <= 1) {
-    // Split by sentences and group 2-3 per slide
-    const sents = reply.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 20)
-    chunks = []
-    for (let i = 0; i < sents.length; i += 2)
-      chunks.push(sents.slice(i, i + 2).join(' '))
+  // Split into individual sentences
+  const sentences = cleaned
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 20)
+
+  if (sentences.length === 0) return null
+
+  // Group into 3–4 slides of ~3 sentences each
+  const TARGET_SLIDES = Math.min(4, Math.max(2, Math.ceil(sentences.length / 3)))
+  const perSlide = Math.ceil(sentences.length / TARGET_SLIDES)
+  const chunks = []
+  for (let i = 0; i < sentences.length; i += perSlide)
+    chunks.push(sentences.slice(i, i + perSlide).join(' '))
+
+  // Build a clean title: first clause up to the first comma, or first 6 words — no mid-word cuts
+  const makeTitle = para => {
+    const words = para.replace(/["""]/g, '').split(/\s+/)
+    const commaAt = words.findIndex(w => w.endsWith(','))
+    const end = (commaAt >= 2 && commaAt <= 7) ? commaAt : Math.min(6, words.length)
+    return words.slice(0, end).join(' ').replace(/[,.:;!?]$/, '')
   }
 
-  if (chunks.length === 0) return null
-
-  const slides = chunks.map((para, i) => {
-    const firstSentence = para.split(/[.!?]/)[0].trim()
-    const title = firstSentence.length > 70
-      ? firstSentence.slice(0, 67) + '…'
-      : firstSentence || `Part ${i + 1}`
-    return {
-      title,
-      narrative: para,
-      doctorTip: null,
-      viewMode: XRAY_RE.test(para) ? 'xray' : 'normal',
-      organKey: detectOrganFromText(para, currentOrganKey),
-    }
-  })
+  const slides = chunks.map(para => ({
+    title: makeTitle(para),
+    narrative: para,
+    doctorTip: null,
+    viewMode: XRAY_RE.test(para) ? 'xray' : 'normal',
+    organKey: detectOrganFromText(para, currentOrganKey),
+  }))
 
   const shortQ = question.length > 60 ? question.slice(0, 57) + '…' : question
   return {
