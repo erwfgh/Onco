@@ -29,6 +29,7 @@ const CATEGORY_COLOR = {
 export default function InfoPanel({ organKey, stage, patientDefault = false, highlights = [], onPresent }) {
   const [tab, setTab] = useState('Consult')
   const [patientMode, setPatientMode] = useState(patientDefault)
+  const forcePatient = patientDefault
 
   const data = organKey ? CLINICAL[organKey] : null
   const organ = organKey ? ORGANS[organKey] : null
@@ -51,37 +52,39 @@ export default function InfoPanel({ organKey, stage, patientDefault = false, hig
   return (
     <div className="w-72 flex-shrink-0 bg-white border-l border-blue-100 flex flex-col overflow-hidden shadow-sm">
 
-      {/* Toggle — minimal, always visible */}
-      <div className="px-3 py-2 border-b border-blue-100 flex-shrink-0 bg-blue-50">
-        {!patientMode && (
-          <div className="flex items-center justify-between mb-1.5">
-            <div>
-              <span className="text-[10px] font-mono text-slate-400">{data.icd10}</span>
-              <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
-                Stage {['I','II','III','IV'][stage-1]}
-              </span>
+      {/* Toggle — hidden for patients */}
+      {!forcePatient && (
+        <div className="px-3 py-2 border-b border-blue-100 flex-shrink-0 bg-blue-50">
+          {!patientMode && (
+            <div className="flex items-center justify-between mb-1.5">
+              <div>
+                <span className="text-[10px] font-mono text-slate-400">{data.icd10}</span>
+                <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
+                  Stage {['I','II','III','IV'][stage-1]}
+                </span>
+              </div>
             </div>
+          )}
+          <div className="flex items-center gap-1.5 bg-white rounded-lg p-0.5 border border-blue-100">
+            <button
+              onClick={() => setPatientMode(false)}
+              className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
+                !patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Clinician
+            </button>
+            <button
+              onClick={() => setPatientMode(true)}
+              className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
+                patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Patient AI
+            </button>
           </div>
-        )}
-        <div className="flex items-center gap-1.5 bg-white rounded-lg p-0.5 border border-blue-100">
-          <button
-            onClick={() => setPatientMode(false)}
-            className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
-              !patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Clinician
-          </button>
-          <button
-            onClick={() => setPatientMode(true)}
-            className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
-              patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Patient AI
-          </button>
         </div>
-      </div>
+      )}
 
       {/* Patient mode — scrollable content + AI at bottom */}
       {patientMode ? (
@@ -283,7 +286,7 @@ export default function InfoPanel({ organKey, stage, patientDefault = false, hig
       )}
 
       {/* Footer — clinician only */}
-      {!patientMode && (
+      {!patientMode && !forcePatient && (
         <div className="px-4 py-2 border-t border-blue-100 flex-shrink-0 bg-blue-50">
           <p className="text-[9px] text-slate-400 leading-tight">
             Educational use only. Consult NCCN guidelines for treatment decisions.

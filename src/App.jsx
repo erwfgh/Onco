@@ -91,16 +91,16 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
-          <CaseBar
+          {!isPatient && <CaseBar
             caseId={caseId}
             setCaseId={setCaseId}
             notes={notes}
             setNotes={setNotes}
             showNotes={showNotes}
             setShowNotes={setShowNotes}
-          />
+          />}
 
-          {organ && (
+          {!isPatient && organ && (
             <>
               <div className="h-6 w-px bg-blue-100" />
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-50 border border-blue-200 text-sm">
@@ -123,7 +123,7 @@ export default function App() {
             </>
           )}
 
-          {highlights.length > 0 && (
+          {!isPatient && highlights.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-blue-600 font-medium">{highlights.length} site{highlights.length !== 1 ? 's' : ''} marked</span>
               <button
@@ -135,7 +135,7 @@ export default function App() {
             </div>
           )}
 
-          {organ && (
+          {!isPatient && organ && (
             <button
               onClick={() => setShowReport(true)}
               className="text-xs px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium shadow-sm"
@@ -186,7 +186,7 @@ export default function App() {
 
       {/* Main */}
       <div className="flex flex-1 overflow-hidden">
-        <OrganSelector selected={selectedOrgan} onSelect={handleOrganSelect} />
+        {!isPatient && <OrganSelector selected={selectedOrgan} onSelect={handleOrganSelect} />}
 
         <div className="flex-1 flex flex-col overflow-hidden relative">
 
@@ -234,9 +234,11 @@ export default function App() {
           </div>
 
           {/* Stage bar */}
-          <div className="px-5 py-3 border-t border-blue-200 bg-white flex-shrink-0 shadow-sm">
-            <StageSelector stage={stage} onStageChange={handleStageChange} organ={organ} clinical={clinical} />
-          </div>
+          {!isPatient && (
+            <div className="px-5 py-3 border-t border-blue-200 bg-white flex-shrink-0 shadow-sm">
+              <StageSelector stage={stage} onStageChange={handleStageChange} organ={organ} clinical={clinical} />
+            </div>
+          )}
         </div>
 
         <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} highlights={highlights} onPresent={setSlideShow} />
