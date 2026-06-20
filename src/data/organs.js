@@ -2428,14 +2428,14 @@ const ORGANS = {
     description: 'Melanoma, basal cell & squamous cell carcinoma',
     voxels: (() => {
       const v = []
-      for (let x = -11; x <= 11; x++)
-        for (let z = -11; z <= 11; z++) {
+      for (let x = -11; x <= 11; x += S)
+        for (let z = -11; z <= 11; z += S) {
           const d = x*x + z*z
           if (d <= 121) {
-            const y = Math.round(-d / 60)
-            v.push({ x, y: y-1, z, zone: 'hypodermis' })
+            const y = rndS(-d / 60)
+            v.push({ x, y: rndS(y - S), z, zone: 'hypodermis' })
             v.push({ x, y, z, zone: 'dermis' })
-            v.push({ x, y: y+1, z, zone: 'epidermis' })
+            v.push({ x, y: rndS(y + S), z, zone: 'epidermis' })
           }
         }
       return unique(v)

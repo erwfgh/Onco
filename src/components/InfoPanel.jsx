@@ -52,42 +52,22 @@ export default function InfoPanel({ organKey, stage, patientDefault = false, hig
   return (
     <div className="w-72 flex-shrink-0 bg-white border-l border-blue-100 flex flex-col overflow-hidden shadow-sm">
 
-      {/* Toggle — hidden for patients */}
+      {/* ICD10 + stage badge — clinician only */}
       {!forcePatient && (
         <div className="px-3 py-2 border-b border-blue-100 flex-shrink-0 bg-blue-50">
-          {!patientMode && (
-            <div className="flex items-center justify-between mb-1.5">
-              <div>
-                <span className="text-[10px] font-mono text-slate-400">{data.icd10}</span>
-                <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
-                  Stage {['I','II','III','IV'][stage-1]}
-                </span>
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-mono text-slate-400">{data.icd10}</span>
+              <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
+                Stage {['I','II','III','IV'][stage-1]}
+              </span>
             </div>
-          )}
-          <div className="flex items-center gap-1.5 bg-white rounded-lg p-0.5 border border-blue-100">
-            <button
-              onClick={() => setPatientMode(false)}
-              className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
-                !patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              Clinician
-            </button>
-            <button
-              onClick={() => setPatientMode(true)}
-              className={`flex-1 text-[10px] py-1 rounded-md transition-colors font-semibold ${
-                patientMode ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              Patient AI
-            </button>
           </div>
         </div>
       )}
 
-      {/* Patient mode — scrollable content + AI at bottom */}
-      {patientMode ? (
+      {/* Patient mode — patients always see this */}
+      {forcePatient ? (
         <div className="flex-1 overflow-y-auto px-4 py-3">
           <PatientMode organKey={organKey} stage={stage} />
         </div>
