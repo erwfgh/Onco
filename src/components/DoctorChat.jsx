@@ -116,12 +116,13 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
   for (let i = 0; i < sentences.length; i += perSlide)
     chunks.push(sentences.slice(i, i + perSlide).join(' '))
 
-  // Build a clean title: first clause up to the first comma, or first 6 words — no mid-word cuts
+  // Build a clean title: full first sentence if short, else first 7 words at word boundary
   const makeTitle = para => {
-    const words = para.replace(/["""]/g, '').split(/\s+/)
-    const commaAt = words.findIndex(w => w.endsWith(','))
-    const end = (commaAt >= 2 && commaAt <= 7) ? commaAt : Math.min(6, words.length)
-    return words.slice(0, end).join(' ').replace(/[,.:;!?]$/, '')
+    const stripped = para.replace(/["""]/g, '')
+    const firstSentence = stripped.split(/(?<=[.!?])\s+/)[0].trim().replace(/[.!?]$/, '')
+    if (firstSentence.length <= 55) return firstSentence
+    const words = firstSentence.split(/\s+/)
+    return words.slice(0, 7).join(' ')
   }
 
   const slides = chunks.map(para => ({
@@ -146,6 +147,7 @@ export default function DoctorChat({ organKey, stage, highlights = [], onPresent
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [lastDeck, setLastDeck] = useState(null)
   const bottomRef = useRef()
 
   useEffect(() => {
@@ -154,6 +156,7 @@ export default function DoctorChat({ organKey, stage, highlights = [], onPresent
 
   useEffect(() => {
     setMessages([])
+    setLastDeck(null)
   }, [organKey, stage])
 
   const stageLabel = ['I', 'II', 'III', 'IV'][stage - 1]
@@ -226,10 +229,8 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
       }
 
       setMessages([...newMessages, { role: 'assistant', content: reply }])
-      if (onPresent) {
-        const deck = generateDeck(text, reply, organ, stageLabel, stage, organKey)
-        if (deck) onPresent({ deck, organKey, stage })
-      }
+      const deck = generateDeck(text, reply, organ, stageLabel, stage, organKey)
+      if (deck) setLastDeck({ deck, organKey, stage })
     } catch (err) {
       setMessages([...newMessages, { role: 'assistant', content: `Error: ${err.message}` }])
     }
@@ -261,9 +262,9 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
           <div className="text-[10px] text-slate-400">{organ.label} · Stage {stageLabel} · Scripts &amp; analogies</div>
         </div>
         <div className="flex items-center gap-2">
-          {onPresent && SLIDE_DECKS[`${organKey}-${stage}`] && (
+          {onPresent && (lastDeck || SLIDE_DECKS[`${organKey}-${stage}`]) && (
             <button
-              onClick={() => onPresent({ deck: SLIDE_DECKS[`${organKey}-${stage}`], organKey, stage })}
+              onClick={() => onPresent(lastDeck || { deck: SLIDE_DECKS[`${organKey}-${stage}`], organKey, stage })}
               className="text-xs px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
             >
               ▷ Present

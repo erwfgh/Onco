@@ -113,13 +113,8 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
         }
       `}</style>
 
-      <div
-        className="fixed inset-0 z-30 flex items-center justify-center p-3"
-        style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }}
-        onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col"
-          style={{ maxHeight: '95vh' }}>
+      <div className="fixed inset-0 z-30 flex flex-col bg-white overflow-hidden">
+        <div className="flex flex-col h-full w-full overflow-hidden">
 
           {/* Progress bar */}
           <div className="h-1.5 bg-blue-100 flex-shrink-0">
@@ -144,10 +139,10 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
             </div>
           </div>
 
-          {/* 3D organ — full width, tall */}
+          {/* 3D organ — full width, taller since we're full screen */}
           <div
             className="flex-shrink-0 relative organ-glow border-b border-blue-100 bg-[#f0f6ff]"
-            style={{ height: 340 }}
+            style={{ height: '52vh' }}
           >
             {/* Remount canvas when slide or organ changes to retrigger animation */}
             <SlideOrganView
@@ -178,12 +173,24 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
           </div>
 
           {/* Slide content */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 min-h-0">
-            <h2 className="text-lg font-bold text-slate-800 leading-snug">{slide.title}</h2>
-            <p className="text-slate-700 text-sm leading-relaxed">{slide.narrative}</p>
+          <div className="flex-1 overflow-y-auto px-8 py-5 space-y-4 min-h-0">
+            <h2 className="text-2xl font-bold text-slate-800 leading-snug">{slide.title}</h2>
+            <ul className="space-y-2.5">
+              {slide.narrative
+                .split(/(?<=[.!?])\s+/)
+                .map(s => s.trim())
+                .filter(s => s.length > 10)
+                .map((bullet, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                    <span className="text-slate-700 text-base leading-relaxed">{bullet.replace(/[.!?]$/, '')}</span>
+                  </li>
+                ))
+              }
+            </ul>
             {slide.doctorTip && (
               <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-                <p className="text-blue-800 text-xs leading-relaxed italic">
+                <p className="text-blue-800 text-sm leading-relaxed italic">
                   <span className="not-italic font-semibold">💡 Doctor tip: </span>
                   {slide.doctorTip}
                 </p>
