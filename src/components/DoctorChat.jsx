@@ -93,6 +93,15 @@ function detectOrganFromText(text, fallback) {
   return fallback
 }
 
+function splitSentences(text) {
+  // Protect common abbreviations so we don't split mid-sentence
+  const safe = text.replace(/\b(Dr|Mr|Mrs|Ms|Prof|vs|etc|e\.g|i\.e|approx|No|St|Fig|Vol)\./gi, '$1<DOT>')
+  return safe
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.replace(/<DOT>/g, '.').trim())
+    .filter(s => s.length > 20)
+}
+
 function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
   // Strip markdown formatting from AI reply
   const cleaned = reply
@@ -101,12 +110,7 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
     .replace(/#+\s*/g, '')
     .trim()
 
-  // Split into individual sentences
-  const sentences = cleaned
-    .split(/(?<=[.!?])\s+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 20)
-
+  const sentences = splitSentences(cleaned)
   if (sentences.length === 0) return null
 
   // Group into 3–4 slides of ~3 sentences each
@@ -116,13 +120,14 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
   for (let i = 0; i < sentences.length; i += perSlide)
     chunks.push(sentences.slice(i, i + perSlide).join(' '))
 
-  // Build a clean title: full first sentence if short, else first 7 words at word boundary
+  // Slide title: use the full first sentence of the chunk (complete, never cut mid-phrase)
   const makeTitle = para => {
-    const stripped = para.replace(/["""]/g, '')
-    const firstSentence = stripped.split(/(?<=[.!?])\s+/)[0].trim().replace(/[.!?]$/, '')
-    if (firstSentence.length <= 55) return firstSentence
-    const words = firstSentence.split(/\s+/)
-    return words.slice(0, 7).join(' ')
+    const sents = splitSentences(para)
+    const first = (sents[0] || para).replace(/[.!?]$/, '').replace(/["""]/g, '').trim()
+    // If unusually long, trim at last word boundary before 80 chars
+    if (first.length <= 80) return first
+    const cut = first.slice(0, 80).replace(/\s+\S*$/, '')
+    return cut + '…'
   }
 
   const slides = chunks.map(para => ({
@@ -133,9 +138,9 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
     organKey: detectOrganFromText(para, currentOrganKey),
   }))
 
-  const shortQ = question.length > 60 ? question.slice(0, 57) + '…' : question
+  // Deck title: clean, complete — organ + stage, no truncated question
   return {
-    title: `${organ?.label || ''} · Stage ${stageLabel} — ${shortQ}`,
+    title: `${organ?.label || 'Your Diagnosis'} — Stage ${stageLabel}`,
     slides,
   }
 }
