@@ -174,17 +174,20 @@ function applyMedicalTerms(text) {
 const DOCTOR_META_RE = /^[^.!?]*(?:I(?:'d| would| want to)? (?:like to |now )?(?:point|refer|show|draw|highlight|direct|turn)|(?:point(?:ing)?|referring|looking|turning) to the(?: 3[dD])? model|now(?: I'?d? like)?,? let(?:'s| us)|as your doctor,?|let me (?:show|point|highlight|draw)|(?:here|here's where) (?:I|we) (?:see|look|show))[^.!?]*[.!?]\s*/gi
 
 function cleanForPatient(text) {
+function cleanForPatient(text) {
   let t = text
-    // Strip markdown
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
+    // Strip ALL markdown formatting
+    .replace(/\*{1,3}(.+?)\*{1,3}/g, '$1')
+    .replace(/_{1,2}(.+?)_{1,2}/g, '$1')
+    .replace(/`+(.+?)`+/g, '$1')
+    .replace(/["""'']/g, '')
     .replace(/#+\s*/g, '')
-    // Strip parenthetical stage directions like (Points to the 3D model)
+    // Strip parenthetical stage directions
     .replace(/\([^)]*(?:3[dD] model|point(?:ing)?|model|voxel|screen)[^)]*\)/gi, '')
     // Strip numbered list markers
     .replace(/^\s*\d+\.\s*/gm, '')
     // Strip bullet markers
-    .replace(/^\s*[-•]\s*/gm, '')
+    .replace(/^\s*[-•*]\s*/gm, '')
     // Colons at end of a line
     .replace(/:\s*\n/gm, '. ')
     .replace(/:\s*$/gm, '.')
@@ -199,14 +202,15 @@ function cleanForPatient(text) {
     .replace(/\bthe doctor\b/gi, 'your doctor')
     .replace(/\bwe (will|can|need to|want to|are going to)\b/gi, 'your care team $1')
     .replace(/\bour (goal|plan|next step|approach|treatment)\b/gi, 'your $1')
-    .replace(/\byour care team will\b/gi, 'your care team will')
     .replace(/\bin (this|the) (?:3D )?model\b/gi, 'in the image on the screen')
+    // Strip transition/meta labels like "Plain language analogies" or "What this means:"
+    .replace(/^(?:plain[- ]language analogies?|what this means|key points?|summary|important|note)[:\s]*/gim, '')
     // Clean up stray whitespace
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 
-  // Strip doctor meta-note sentences (iterate to catch multiple)
+  // Strip doctor meta-note sentences
   let prev
   do {
     prev = t
@@ -297,21 +301,14 @@ export default function DoctorChat({ organKey, stage, highlights = [], onPresent
     const markedSites = highlights.length > 0 ? ` The physician has marked ${highlights.length} tumor site${highlights.length !== 1 ? 's' : ''} on the 3D model.` : ''
     const interiorDetail = getOrganInterior(organKey, stage)
     const systemPrompt = organ && data
-      ? `You are an expert oncologist and clinical AI assistant. The physician is using a 3D anatomical model with X-Ray transparency to visualize Stage ${stageLabel} ${organ.label} cancer (${data.fullName}) — including interior anatomy (lymphatics, blood vessels, ducts, nerves).
+      ? `You are speaking directly to a patient who has just been diagnosed with Stage ${stageLabel} ${organ.label} cancer. Write everything in second person — "you", "your body", "your ${organ.label.toLowerCase()}". Never say "the patient". Never write headers, labels, or transitions like "Plain language analogies" or "What this means". Never use asterisks, quotes, or markdown. Just speak to this person warmly and clearly, as if sitting next to them.
 
-CRITICAL INSIGHT: Cancer is NOT always on the outside. ${STAGE_ANATOMY[stage]}${interiorDetail ? `\n\n${organ.label}-specific interior spread at Stage ${stageLabel}: ${interiorDetail}` : ''}${markedSites}
+What is happening in their body right now: ${STAGE_ANATOMY[stage]}${interiorDetail ? ` Specifically in their ${organ.label.toLowerCase()}: ${interiorDetail}` : ''}${markedSites}
 
-5-year survival: ${data.survival5yr?.[stage] || 'unknown'}. Common treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
+Their 5-year survival rate: ${data.survival5yr?.[stage] || 'unknown'}. Likely treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
 
-Your role:
-- Help the doctor explain to patients what is happening INSIDE the organ — in lymphatics, blood vessels, ducts, and nerves — not just the outer surface
-- Point out which interior structures visible in the 3D model are likely involved at this stage
-- Give plain-language analogies (e.g. "the cancer is using the lymph vessels like highways to spread")
-- Explain how distant organ communication is disrupted (e.g. nerve signaling, hormonal, vascular)
-- Help the doctor prepare patients for what the interior view of the model shows
-
-Be direct, medically accurate, and practical. Always emphasize that interior spread can exist even when the outer surface looks normal.`
-      : `You are an expert oncologist AI assistant. Help physicians explain how cancer spreads through interior anatomy — lymphatics, blood vessels, ducts, nerves — not just the outer organ surface. Be medically accurate and use plain language analogies.`
+Write clear, flowing sentences. Explain what is happening inside your body — not just on the surface. Use simple comparisons when helpful (for example: the cancer is using your lymph vessels the way water travels through pipes). Always explain any medical word the first time you use it. Do not list bullet points — write in full sentences that flow naturally together.`
+      : `You are speaking directly to a cancer patient. Write in second person ("you", "your body"). No headers, no markdown, no asterisks, no quotes. Use warm, plain language and always explain medical terms the first time they appear.`
 
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY
@@ -378,12 +375,12 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
   ]
 
   return (
-    <div className="rounded-xl border border-blue-100 bg-white overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+      <div className="px-4 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center justify-between flex-shrink-0 rounded-t-xl">
         <div>
           <div className="text-xs font-semibold text-slate-700">Patient Communication AI</div>
-          <div className="text-[10px] text-slate-400">{organ.label} · Stage {stageLabel} · Scripts &amp; analogies</div>
+          <div className="text-[10px] text-slate-400">{organ.label} · Stage {stageLabel}</div>
         </div>
         <div className="flex items-center gap-2">
           {onPresent && (lastDeck || SLIDE_DECKS[`${organKey}-${stage}`]) && (
@@ -399,7 +396,7 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
       </div>
 
       {/* Messages */}
-      <div className="px-4 py-3 space-y-2.5 max-h-72 overflow-y-auto bg-white">
+      <div className="flex-1 px-4 py-3 space-y-2.5 overflow-y-auto bg-white min-h-0">
         {messages.length === 0 && (
           <div className="space-y-1.5">
             <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold mb-2">Ask for help explaining</p>

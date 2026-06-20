@@ -91,7 +91,7 @@ export default function InfoPanel({ organKey, stage, patientDefault = false, hig
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 text-xs">
+          <div className={`flex-1 min-h-0 text-xs ${tab === 'Consult' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto px-4 py-3 space-y-3'}`}>
 
             {tab === 'Overview' && (
               <>
