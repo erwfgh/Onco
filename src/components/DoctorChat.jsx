@@ -56,36 +56,72 @@ function getOrganInterior(organKey, stage) {
 
 const XRAY_RE = /lymph|vessel|vein|artery|blood|inside|interior|spread|metastas|circulat|nerve|duct|capillar|emboli|thrombus/i
 
-function generateDeck(question, reply, organ, stageLabel, stage) {
-  const paras = reply
-    .split(/\n\n+/)
-    .map(p => p.trim())
-    .filter(p => p.length > 40)
-    .slice(0, 5)
+// Keyword → organKey detection for auto-selecting the right 3D model per slide
+const ORGAN_DETECT = [
+  { key: 'liver',        words: ['liver', 'hepat', 'portal vein', 'bile', 'biliary', 'cirrhosis', 'hepatocell'] },
+  { key: 'colon',        words: ['colon', 'colorect', 'rectum', 'sigmoid', 'bowel', 'mesenteric vein', 'cecum'] },
+  { key: 'lungs',        words: ['lung', 'bronch', 'pulmon', 'alveol', 'pleura', 'airway', 'trachea'] },
+  { key: 'brain',        words: ['brain', 'cerebr', 'glioma', 'cns ', 'neural', 'meninges', 'spinal cord', 'ventricle', 'csf'] },
+  { key: 'kidney',       words: ['kidney', 'renal', 'nephron', 'ureter', 'rcc'] },
+  { key: 'heart',        words: ['heart', 'cardiac', 'coronar', 'aorta', 'atrium', 'myocard', 'pericardi'] },
+  { key: 'breast',       words: ['breast', 'mammary', 'ductal', 'lobular'] },
+  { key: 'pancreas',     words: ['pancrea', 'islet', 'whipple'] },
+  { key: 'stomach',      words: ['stomach', 'gastric', 'gastro'] },
+  { key: 'lymphNodes',   words: ['lymph node', 'lymphoma', 'lymphat', 'hilum', 'mediastinal node', 'hilar'] },
+  { key: 'bonemarrow',   words: ['bone marrow', 'marrow', 'hematolog', 'leukemia', 'myeloma'] },
+  { key: 'spleen',       words: ['spleen', 'splenic'] },
+  { key: 'bladder',      words: ['bladder', 'urothelial', 'cystectomy'] },
+  { key: 'prostate',     words: ['prostate', 'psa ', 'androgen'] },
+  { key: 'ovaries',      words: ['ovari', 'fallopian', 'peritoneal'] },
+  { key: 'uterus',       words: ['uter', 'endometri', 'uterine'] },
+  { key: 'thyroid',      words: ['thyroid', 'papillary', 'follicular', 'thyroglobulin'] },
+  { key: 'esophagus',    words: ['esophag', 'barrett', 'squamous esoph'] },
+  { key: 'skin',         words: ['skin', 'melanoma', 'dermis', 'epidermis'] },
+  { key: 'bone',         words: ['bone ', 'osseous', 'osteo', 'skeletal', 'fracture'] },
+  { key: 'adrenal',      words: ['adrenal', 'cortisol', 'aldosterone', 'pheochromocytoma'] },
+  { key: 'smallintestine', words: ['small intestine', 'duodenum', 'jejunum', 'ileum'] },
+  { key: 'oralCavity',   words: ['oral', 'mouth', 'tongue', 'gingival', 'buccal'] },
+  { key: 'nasopharynx',  words: ['nasopharyn', 'epstein-barr', 'ebv'] },
+  { key: 'larynx',       words: ['laryn', 'vocal cord', 'glottis'] },
+]
 
-  if (paras.length === 0) {
-    // Fallback: split by sentences into groups of 2
-    const sents = reply.split(/(?<=[.!?])\s+/).filter(s => s.length > 20)
+function detectOrganFromText(text, fallback) {
+  const lower = text.toLowerCase()
+  for (const { key, words } of ORGAN_DETECT) {
+    if (words.some(w => lower.includes(w))) return key
+  }
+  return fallback
+}
+
+function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
+  // Split into paragraphs; if none, fall back to sentence groups of 2-3
+  let chunks = reply.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 40)
+
+  if (chunks.length <= 1) {
+    // Split by sentences and group 2-3 per slide
+    const sents = reply.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 20)
+    chunks = []
     for (let i = 0; i < sents.length; i += 2)
-      paras.push(sents.slice(i, i + 2).join(' '))
+      chunks.push(sents.slice(i, i + 2).join(' '))
   }
 
-  if (paras.length === 0) return null
+  if (chunks.length === 0) return null
 
-  const slides = paras.map((para, i) => {
+  const slides = chunks.map((para, i) => {
     const firstSentence = para.split(/[.!?]/)[0].trim()
-    const title = firstSentence.length > 65
-      ? firstSentence.slice(0, 62) + '…'
+    const title = firstSentence.length > 70
+      ? firstSentence.slice(0, 67) + '…'
       : firstSentence || `Part ${i + 1}`
     return {
       title,
       narrative: para,
       doctorTip: null,
       viewMode: XRAY_RE.test(para) ? 'xray' : 'normal',
+      organKey: detectOrganFromText(para, currentOrganKey),
     }
   })
 
-  const shortQ = question.length > 55 ? question.slice(0, 52) + '…' : question
+  const shortQ = question.length > 60 ? question.slice(0, 57) + '…' : question
   return {
     title: `${organ?.label || ''} · Stage ${stageLabel} — ${shortQ}`,
     slides,
@@ -180,7 +216,7 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
 
       setMessages([...newMessages, { role: 'assistant', content: reply }])
       if (onPresent) {
-        const deck = generateDeck(text, reply, organ, stageLabel, stage)
+        const deck = generateDeck(text, reply, organ, stageLabel, stage, organKey)
         if (deck) onPresent({ deck, organKey, stage })
       }
     } catch (err) {
