@@ -54,6 +54,44 @@ function getOrganInterior(organKey, stage) {
   return ORGAN_INTERIOR[organKey]?.[stage] || ''
 }
 
+const XRAY_RE = /lymph|vessel|vein|artery|blood|inside|interior|spread|metastas|circulat|nerve|duct|capillar|emboli|thrombus/i
+
+function generateDeck(question, reply, organ, stageLabel, stage) {
+  const paras = reply
+    .split(/\n\n+/)
+    .map(p => p.trim())
+    .filter(p => p.length > 40)
+    .slice(0, 5)
+
+  if (paras.length === 0) {
+    // Fallback: split by sentences into groups of 2
+    const sents = reply.split(/(?<=[.!?])\s+/).filter(s => s.length > 20)
+    for (let i = 0; i < sents.length; i += 2)
+      paras.push(sents.slice(i, i + 2).join(' '))
+  }
+
+  if (paras.length === 0) return null
+
+  const slides = paras.map((para, i) => {
+    const firstSentence = para.split(/[.!?]/)[0].trim()
+    const title = firstSentence.length > 65
+      ? firstSentence.slice(0, 62) + '…'
+      : firstSentence || `Part ${i + 1}`
+    return {
+      title,
+      narrative: para,
+      doctorTip: null,
+      viewMode: XRAY_RE.test(para) ? 'xray' : 'normal',
+    }
+  })
+
+  const shortQ = question.length > 55 ? question.slice(0, 52) + '…' : question
+  return {
+    title: `${organ?.label || ''} · Stage ${stageLabel} — ${shortQ}`,
+    slides,
+  }
+}
+
 export default function DoctorChat({ organKey, stage, highlights = [], onPresent }) {
   const organ = ORGANS[organKey]
   const data = CLINICAL[organKey]
@@ -141,6 +179,10 @@ Be direct, medically accurate, and practical. Always emphasize that interior spr
       }
 
       setMessages([...newMessages, { role: 'assistant', content: reply }])
+      if (onPresent) {
+        const deck = generateDeck(text, reply, organ, stageLabel, stage)
+        if (deck) onPresent({ deck, organKey, stage })
+      }
     } catch (err) {
       setMessages([...newMessages, { role: 'assistant', content: `Error: ${err.message}` }])
     }
