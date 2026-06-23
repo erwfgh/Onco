@@ -195,8 +195,9 @@ export default function App() {
             <OrganViewer
               organ={organ}
               stage={stage}
-              highlights={highlights}
-              onVoxelClick={handleVoxelClick}
+              highlights={isPatient ? [] : highlights}
+              onVoxelClick={isPatient ? () => {} : handleVoxelClick}
+              patientMode={isPatient}
             />
 
             {/* Empty state */}

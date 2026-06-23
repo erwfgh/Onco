@@ -241,16 +241,26 @@ function makeTitle(sentence) {
   return sentence.replace(/[.!?]+$/, '').replace(/["""]/g, '').trim()
 }
 
+// Strip doctor-facing opener sentences ("Today I want to explain...", "Let's talk about...")
+const DOCTOR_OPENER_RE = /^[^.!?]*(?:today (?:I(?:'d| want to| will)|we(?:'re| are| will))|let(?:'s| us) (?:talk|discuss|go over|start|begin)|I(?:'m| am) going to (?:explain|walk|talk|discuss)|in today(?:'s| session)|first(?:,| off,)? let(?:'s| me))[^.!?]*[.!?]\s*/i
+
 function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
-  // Detect organ from the doctor's question first — that determines what's shown
   const questionOrgan = detectOrganFromText(question, currentOrganKey)
 
-  const cleaned = cleanForPatient(reply)
+  let cleaned = cleanForPatient(reply)
+
+  // Strip doctor-facing openers from the very start
+  cleaned = cleaned.replace(DOCTOR_OPENER_RE, '').trim()
+
+  // Join colon-ending sentences with the next sentence so label: explanation stay together
+  cleaned = cleaned.replace(/([^.!?]{10,}:)\s+([A-Z])/g, '$1 $2')
+
   const allSentences = splitSentences(cleaned)
   if (allSentences.length === 0) return null
 
-  const SENTS_PER_SLIDE = 6
-  const TARGET_SLIDES = Math.min(3, Math.max(2, Math.ceil(allSentences.length / SENTS_PER_SLIDE)))
+  // Target 4–5 slides, ~3 sentences each (1 title + ~2 bullets)
+  const SENTS_PER_SLIDE = 3
+  const TARGET_SLIDES = Math.min(5, Math.max(4, Math.ceil(allSentences.length / SENTS_PER_SLIDE)))
   const perSlide = Math.ceil(allSentences.length / TARGET_SLIDES)
   const groups = []
   for (let i = 0; i < allSentences.length; i += perSlide)

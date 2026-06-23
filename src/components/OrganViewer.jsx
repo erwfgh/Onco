@@ -57,7 +57,7 @@ function FirstPersonController({ active, onExit }) {
   return null
 }
 
-export default function OrganViewer({ organ, stage, highlights, onVoxelClick, crossSection, onCrossSection }) {
+export default function OrganViewer({ organ, stage, highlights, onVoxelClick, crossSection, onCrossSection, patientMode }) {
   const [xrayMode, setXrayMode] = useState(false)
   const [exploreMode, setExploreMode] = useState(false)
   const controlsRef = useRef()
@@ -85,7 +85,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
   return (
     <div className="relative w-full h-full">
       <Canvas
-        camera={{ position: [0, 3, 28], fov: 50 }}
+        camera={{ position: [0, 3, patientMode ? 42 : 28], fov: 50 }}
         shadows
         style={{ background: 'transparent', width: '100%', height: '100%' }}
         gl={{ antialias: true }}
