@@ -233,7 +233,7 @@ function splitSentences(text) {
     .map(s => s.replace(/<DOT>/g, '.').trim())
     // Remove any remaining colon-only or number artifacts
     .map(s => s.replace(/:\s*\d*/g, '').replace(/\s{2,}/g, ' ').trim())
-    .filter(s => s.length > 25 && /[a-z]/i.test(s))
+    .filter(s => s.length > 15 && /[a-z]/i.test(s))
 }
 
 function makeTitle(sentence) {
@@ -306,15 +306,9 @@ export default function DoctorChat({ organKey, stage, highlights = [], onPresent
 
     const markedSites = highlights.length > 0 ? ` The physician has marked ${highlights.length} tumor site${highlights.length !== 1 ? 's' : ''} on the 3D model.` : ''
     const interiorDetail = getOrganInterior(organKey, stage)
-    const systemPrompt = organ && data
-      ? `You are speaking directly to a patient. Write everything in second person — "you", "your body". Never say "the patient". Never use asterisks, quotes, or markdown. Never comment on which organ is selected, never say things like "it looks like a different organ is involved", never acknowledge a context switch, never mention what tool or model you are using. Just explain what is happening in the patient's body based on what the doctor described. Speak warmly and clearly, as if sitting next to the patient.
+    const systemPrompt = `You are speaking directly to a patient. The doctor will describe something happening in the patient's body — explain it to the patient in plain, warm, second-person language ("you", "your body", "your [organ]"). Never say "the patient". Never use asterisks, bullet points, headers, quotes, or markdown. Never comment on which organ is selected in any tool. Just explain whatever the doctor describes, even if it involves a different organ than the one currently on screen.
 
-Background context: Stage ${stageLabel} ${organ.label} cancer. ${STAGE_ANATOMY[stage]}${interiorDetail ? ` ${interiorDetail}` : ''}${markedSites}
-
-5-year survival: ${data.survival5yr?.[stage] || 'unknown'}. Likely treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
-
-Write clear flowing sentences. Explain any medical word the first time you use it. No bullet points, no headers, no labels.`
-      : `You are speaking directly to a cancer patient. Write in second person ("you", "your body"). No headers, no markdown, no asterisks, no quotes. Use warm, plain language and always explain medical terms the first time they appear.`
+Write at least 8 full sentences. Explain every medical term the first time it appears. Be warm, clear, and thorough — this is going directly to the patient.`
 
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY
@@ -329,7 +323,7 @@ Write clear flowing sentences. Explain any medical word the first time you use i
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model: 'llama-3.1-8b-instant',
-            max_tokens: 600,
+            max_tokens: 1000,
             messages: [
               { role: 'system', content: systemPrompt },
               ...messages.slice(-10),
