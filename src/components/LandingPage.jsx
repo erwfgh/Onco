@@ -105,7 +105,7 @@ export default function LandingPage({ onEnter }) {
       <section className="flex flex-col items-center text-center px-6 py-20 flex-shrink-0 bg-gradient-to-b from-blue-50 to-white">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-blue-600 text-xs font-medium mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-          Built for oncologists · hematologists · dermatologists · and their patients
+          Built for oncologists, hematologists, dermatologists, and their patients
         </div>
 
         <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-tight mb-5 max-w-4xl">

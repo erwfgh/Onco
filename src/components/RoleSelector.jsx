@@ -43,7 +43,7 @@ export default function RoleSelector({ onAuth }) {
             className="group text-left bg-white border-2 border-blue-100 hover:border-blue-500 rounded-2xl p-8 transition-all hover:shadow-xl hover:shadow-blue-100 cursor-pointer"
           >
             <div className="text-4xl mb-5 text-blue-400 font-light group-hover:scale-110 transition-transform inline-block">✚</div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">I am a Doctor</h2>
+            <h2 className="text-xl font-black text-slate-800 mb-2">I am a doctor</h2>
             <p className="text-slate-500 text-sm leading-relaxed mb-5">
               Access the full clinical platform — 3D tumor staging, TNM classification, treatment regimens, biomarker panels, and clinical report export.
             </p>
@@ -65,7 +65,7 @@ export default function RoleSelector({ onAuth }) {
             className="group text-left bg-white border-2 border-blue-100 hover:border-blue-500 rounded-2xl p-8 transition-all hover:shadow-xl hover:shadow-blue-100 cursor-pointer"
           >
             <div className="text-4xl mb-5 text-blue-400 font-light group-hover:scale-110 transition-transform inline-block">♡</div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">I am a Patient</h2>
+            <h2 className="text-xl font-black text-slate-800 mb-2">I am a patient</h2>
             <p className="text-slate-500 text-sm leading-relaxed mb-5">
               Understand your diagnosis in plain language — see your cancer in 3D, learn what your stage means, and get questions to ask your doctor.
             </p>

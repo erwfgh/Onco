@@ -184,7 +184,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
       {/* X-Ray mode label */}
       {xrayMode && !exploreMode && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1.5 rounded-full pointer-events-none backdrop-blur-sm">
-          X-Ray view — interior anatomy visible
+          X-ray view — interior anatomy visible
         </div>
       )}
 
@@ -199,7 +199,7 @@ export default function OrganViewer({ organ, stage, highlights, onVoxelClick, cr
                 : 'bg-white/90 border border-blue-200 text-blue-700 hover:bg-blue-50'
             }`}
           >
-            {xrayMode ? '◎ Exit X-Ray' : '◎ X-Ray View'}
+            {xrayMode ? '◎ Exit X-ray' : '◎ X-ray View'}
           </button>
         </div>
       )}

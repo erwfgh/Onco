@@ -27,7 +27,7 @@ export default function CaseBar({ caseId, setCaseId, notes, setNotes, showNotes,
           <textarea
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="Add clinical notes, observations, or treatment plan notes here..."
+            placeholder="Add clinical notes, observations, or treatment plan..."
             rows={3}
             className="w-full bg-slate-800/60 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-violet-500 resize-none"
           />

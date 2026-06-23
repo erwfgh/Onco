@@ -87,7 +87,7 @@ export default function StageSelector({ stage, onStageChange, clinical }) {
           )}
         </div>
         <p className="text-xs text-slate-400">{current.detail}</p>
-        <p className="text-xs text-slate-300 mt-1">Click any voxel to mark tumor site · Multiple sites supported</p>
+        <p className="text-xs text-slate-300 mt-1">Click any voxel to mark a tumor site. Multiple sites supported.</p>
       </div>
     </div>
   )

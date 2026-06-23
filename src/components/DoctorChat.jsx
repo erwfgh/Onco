@@ -444,7 +444,7 @@ Never use asterisks, bullet points, dashes, headers, quotes, or markdown of any 
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="e.g. How do I explain metastasis simply?"
+            placeholder="e.g., How do I explain metastasis simply?"
             disabled={loading}
             className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
           />

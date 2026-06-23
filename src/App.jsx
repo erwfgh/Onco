@@ -208,7 +208,7 @@ export default function App() {
                   </div>
                   <p className="text-slate-400 text-xl font-light mb-2">Select an organ to begin</p>
                   <p className="text-slate-300 text-sm">
-                    {Object.keys(ORGANS).length} anatomical structures · spin · zoom · click to stage
+                    {Object.keys(ORGANS).length} anatomical structures — spin, zoom, click to stage
                   </p>
                 </div>
               </div>

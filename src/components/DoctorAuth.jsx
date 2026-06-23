@@ -139,7 +139,7 @@ export default function DoctorAuth({ onBack, onAuth }) {
               {error && <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
 
               <button type="submit" className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-colors shadow-sm">
-                Continue to License Verification →
+                Continue to license verification →
               </button>
             </form>
           )}
