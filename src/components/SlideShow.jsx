@@ -162,10 +162,10 @@ export default function SlideShow({ deck, organKey, stage, onClose }) {
             </div>
           </div>
 
-          {/* 3D organ — full width, taller since we're full screen */}
+          {/* 3D organ — compact so bullet content has room */}
           <div
             className="flex-shrink-0 relative organ-glow border-b border-blue-100 bg-[#f0f6ff]"
-            style={{ height: '52vh' }}
+            style={{ height: '38vh' }}
           >
             <SlideOrganView
               key={`${current}-${slideOrganKey}-${xray}`}

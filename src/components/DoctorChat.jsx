@@ -205,6 +205,8 @@ function cleanForPatient(text) {
     .replace(/\bin (this|the) (?:3D )?model\b/gi, 'in the image on the screen')
     // Strip transition/meta labels like "Plain language analogies" or "What this means:"
     .replace(/^(?:plain[- ]language analogies?|what this means|key points?|summary|important|note)[:\s]*/gim, '')
+    // If a phrase ends without punctuation then two+ spaces follow more text, add a colon
+    .replace(/([a-zA-Z])\s{2,}([A-Z])/g, '$1: $2')
     // Clean up stray whitespace
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
@@ -375,9 +377,9 @@ Write clear, flowing sentences. Explain what is happening inside your body — n
   ]
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center justify-between flex-shrink-0 rounded-t-xl">
+      <div className="px-4 py-2.5 bg-blue-50 border-b border-blue-100 flex items-center justify-between flex-shrink-0">
         <div>
           <div className="text-xs font-semibold text-slate-700">Patient Communication AI</div>
           <div className="text-[10px] text-slate-400">{organ.label} · Stage {stageLabel}</div>
@@ -437,7 +439,7 @@ Write clear, flowing sentences. Explain what is happening inside your body — n
       </div>
 
       {/* Input */}
-      <div className="px-4 py-3 border-t border-blue-100 bg-blue-50">
+      <div className="px-4 py-3 border-t border-blue-100 bg-blue-50 flex-shrink-0">
         <form onSubmit={e => { e.preventDefault(); sendMessage() }} className="flex gap-2">
           <input
             value={input}
