@@ -171,7 +171,7 @@ function applyMedicalTerms(text) {
 }
 
 // Patterns that represent doctor stage-directions or meta-commentary — strip entire sentence
-const DOCTOR_META_RE = /^[^.!?]*(?:I(?:'d| would| want to)? (?:like to |now )?(?:point|refer|show|draw|highlight|direct|turn)|(?:point(?:ing)?|referring|looking|turning) to the(?: 3[dD])? model|now(?: I'?d? like)?,? let(?:'s| us)|as your doctor,?|let me (?:show|point|highlight|draw)|(?:here|here's where) (?:I|we) (?:see|look|show))[^.!?]*[.!?]\s*/gi
+const DOCTOR_META_RE = /^[^.!?]*(?:I(?:'d| would| want to)? (?:like to |now )?(?:point|refer|show|draw|highlight|direct|turn)|(?:point(?:ing)?|referring|looking|turning) to the(?: 3[dD])? model|now(?: I'?d? like)?,? let(?:'s| us)|as your doctor,?|let me (?:show|point|highlight|draw)|(?:here|here's where) (?:I|we) (?:see|look|show)|it (?:looks?|seems?) like (?:we have |there'?s? )?a different|I(?:'ll| will) walk you through|although this is|I should (?:note|mention|clarify)|this (?:is outside|falls outside)|that'?s? (?:not quite|a different))[^.!?]*[.!?]\s*/gi
 
 function cleanForPatient(text) {
 function cleanForPatient(text) {
@@ -303,13 +303,13 @@ export default function DoctorChat({ organKey, stage, highlights = [], onPresent
     const markedSites = highlights.length > 0 ? ` The physician has marked ${highlights.length} tumor site${highlights.length !== 1 ? 's' : ''} on the 3D model.` : ''
     const interiorDetail = getOrganInterior(organKey, stage)
     const systemPrompt = organ && data
-      ? `You are speaking directly to a patient who has just been diagnosed with Stage ${stageLabel} ${organ.label} cancer. Write everything in second person — "you", "your body", "your ${organ.label.toLowerCase()}". Never say "the patient". Never write headers, labels, or transitions like "Plain language analogies" or "What this means". Never use asterisks, quotes, or markdown. Just speak to this person warmly and clearly, as if sitting next to them.
+      ? `You are speaking directly to a patient. Write everything in second person — "you", "your body". Never say "the patient". Never use asterisks, quotes, or markdown. Never comment on which organ is selected, never say things like "it looks like a different organ is involved", never acknowledge a context switch, never mention what tool or model you are using. Just explain what is happening in the patient's body based on what the doctor described. Speak warmly and clearly, as if sitting next to the patient.
 
-What is happening in their body right now: ${STAGE_ANATOMY[stage]}${interiorDetail ? ` Specifically in their ${organ.label.toLowerCase()}: ${interiorDetail}` : ''}${markedSites}
+Background context: Stage ${stageLabel} ${organ.label} cancer. ${STAGE_ANATOMY[stage]}${interiorDetail ? ` ${interiorDetail}` : ''}${markedSites}
 
-Their 5-year survival rate: ${data.survival5yr?.[stage] || 'unknown'}. Likely treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
+5-year survival: ${data.survival5yr?.[stage] || 'unknown'}. Likely treatments: ${data.treatments?.[stage]?.slice(0, 3).join(', ') || 'see guidelines'}.
 
-Write clear, flowing sentences. Explain what is happening inside your body — not just on the surface. Use simple comparisons when helpful (for example: the cancer is using your lymph vessels the way water travels through pipes). Always explain any medical word the first time you use it. Do not list bullet points — write in full sentences that flow naturally together.`
+Write clear flowing sentences. Explain any medical word the first time you use it. No bullet points, no headers, no labels.`
       : `You are speaking directly to a cancer patient. Write in second person ("you", "your body"). No headers, no markdown, no asterisks, no quotes. Use warm, plain language and always explain medical terms the first time they appear.`
 
     try {
