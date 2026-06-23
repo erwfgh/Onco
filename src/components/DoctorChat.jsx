@@ -306,9 +306,11 @@ export default function DoctorChat({ organKey, stage, highlights = [], onPresent
 
     const markedSites = highlights.length > 0 ? ` The physician has marked ${highlights.length} tumor site${highlights.length !== 1 ? 's' : ''} on the 3D model.` : ''
     const interiorDetail = getOrganInterior(organKey, stage)
-    const systemPrompt = `You are speaking directly to a patient. The doctor will describe something happening in the patient's body — explain it to the patient in plain, warm, second-person language ("you", "your body", "your [organ]"). Never say "the patient". Never use asterisks, bullet points, headers, quotes, or markdown. Never comment on which organ is selected in any tool. Just explain whatever the doctor describes, even if it involves a different organ than the one currently on screen.
+    const systemPrompt = `You are talking directly to a patient sitting in front of you. Use "you" and "your" throughout — never "the patient", never third person. Speak the way a kind, caring doctor would speak to someone who is scared and needs to understand what is happening in their own body.
 
-Write at least 8 full sentences. Explain every medical term the first time it appears. Be warm, clear, and thorough — this is going directly to the patient.`
+The doctor has described something. Explain it to this person directly. For example: instead of "the hepatic portal vein carries blood", say "your hepatic portal vein (a large vein that carries blood from your intestines to your liver) is being blocked by cancer cells." Always explain medical words in plain English the first time you use them by putting the explanation in parentheses right after.
+
+Never use asterisks, bullet points, dashes, headers, quotes, or markdown of any kind. Never comment on which organ is shown on screen. Write at least 8 full, flowing sentences. Be warm, honest, and clear.`
 
     try {
       const apiKey = import.meta.env.VITE_GROQ_API_KEY
