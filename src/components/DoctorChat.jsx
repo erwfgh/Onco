@@ -212,12 +212,13 @@ function cleanForPatient(text) {
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 
-  // Strip doctor meta-note sentences
+  // Strip doctor meta-note sentences (replace with space to preserve word boundaries)
   let prev
   do {
     prev = t
-    t = t.replace(DOCTOR_META_RE, '')
+    t = t.replace(DOCTOR_META_RE, ' ')
   } while (t !== prev)
+  t = t.replace(/\s{2,}/g, ' ').trim()
 
   // Apply medical term explanations
   t = applyMedicalTerms(t)
@@ -241,11 +242,13 @@ function makeTitle(sentence) {
 }
 
 function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
+  // Detect organ from the doctor's question first — that determines what's shown
+  const questionOrgan = detectOrganFromText(question, currentOrganKey)
+
   const cleaned = cleanForPatient(reply)
   const allSentences = splitSentences(cleaned)
   if (allSentences.length === 0) return null
 
-  // Group into 2–3 slides of ~6 sentences each (title + up to 5 bullets)
   const SENTS_PER_SLIDE = 6
   const TARGET_SLIDES = Math.min(3, Math.max(2, Math.ceil(allSentences.length / SENTS_PER_SLIDE)))
   const perSlide = Math.ceil(allSentences.length / TARGET_SLIDES)
@@ -260,13 +263,14 @@ function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey
       title,
       bullets: bulletSents,
       viewMode: XRAY_RE.test(sents.join(' ')) ? 'xray' : 'normal',
-      organKey: detectOrganFromText(sents.join(' '), currentOrganKey),
+      organKey: detectOrganFromText(sents.join(' '), questionOrgan),
     }
   })
 
   return {
     title: `${organ?.label || 'Your Diagnosis'} — Stage ${stageLabel}`,
     slides,
+    primaryOrganKey: questionOrgan,
   }
 }
 
@@ -353,7 +357,7 @@ Write clear flowing sentences. Explain any medical word the first time you use i
 
       setMessages([...newMessages, { role: 'assistant', content: reply }])
       const deck = generateDeck(text, reply, organ, stageLabel, stage, organKey)
-      if (deck) setLastDeck({ deck, organKey, stage })
+      if (deck) setLastDeck({ deck, organKey: deck.primaryOrganKey || organKey, stage })
     } catch (err) {
       setMessages([...newMessages, { role: 'assistant', content: `Error: ${err.message}` }])
     }

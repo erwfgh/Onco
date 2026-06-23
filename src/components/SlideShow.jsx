@@ -10,8 +10,10 @@ function AnimatedGroup({ children }) {
   useFrame(({ clock }) => {
     if (!groupRef.current) return
     const t = clock.getElapsedTime()
-    groupRef.current.position.y = Math.sin(t * 1.1) * 0.6
-    groupRef.current.rotation.y = t * 0.35
+    groupRef.current.position.y = Math.sin(t * 1.4) * 2.5
+    groupRef.current.rotation.y = t * 0.9
+    const pulse = 1 + Math.sin(t * 2.2) * 0.07
+    groupRef.current.scale.setScalar(pulse)
   })
   return <group ref={groupRef}>{children}</group>
 }
