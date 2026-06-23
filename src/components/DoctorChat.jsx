@@ -385,9 +385,9 @@ Write clear, flowing sentences. Explain what is happening inside your body — n
           <div className="text-[10px] text-slate-400">{organ.label} · Stage {stageLabel}</div>
         </div>
         <div className="flex items-center gap-2">
-          {onPresent && (lastDeck || SLIDE_DECKS[`${organKey}-${stage}`]) && (
+          {onPresent && lastDeck && (
             <button
-              onClick={() => onPresent(lastDeck || { deck: SLIDE_DECKS[`${organKey}-${stage}`], organKey, stage })}
+              onClick={() => onPresent(lastDeck)}
               className="text-xs px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
             >
               ▷ Present
