@@ -1,8 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import * as THREE from 'three'
 import OrganModel from './OrganModel'
 import ORGANS from '../data/organs'
+
+function AnimatedGroup({ children }) {
+  const groupRef = useRef()
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return
+    const t = clock.getElapsedTime()
+    groupRef.current.position.y = Math.sin(t * 1.1) * 0.6
+    groupRef.current.rotation.y = t * 0.35
+  })
+  return <group ref={groupRef}>{children}</group>
+}
 
 /* ─── Embedded 3D organ viewer ──────────────────────────────────────────── */
 
@@ -11,6 +23,15 @@ function SlideOrganView({ organKey, targetStage, xray, animKey }) {
   // Animate: start at stage 1, step up to targetStage to show cancer spread
   const [stageAnim, setStageAnim] = useState(1)
   const timerRef = useRef(null)
+
+  // Pick a few center voxels to always highlight as the tumor
+  const tumorHighlights = organ
+    ? organ.voxels
+        .map((v, i) => ({ i, d: Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z) }))
+        .sort((a, b) => a.d - b.d)
+        .slice(0, Math.max(1, Math.floor(organ.voxels.length * 0.04)))
+        .map(x => x.i)
+    : []
 
   useEffect(() => {
     setStageAnim(1)
@@ -53,26 +74,27 @@ function SlideOrganView({ organKey, targetStage, xray, animKey }) {
           </>
         )}
 
-        <OrganModel
-          voxels={organ.voxels}
-          baseColor={organ.color}
-          zones={organ.zones}
-          stage={stageAnim}
-          highlights={[]}
-          onVoxelClick={() => {}}
-          crossSection={false}
-          insideMode={false}
-          exploreMode={false}
-          xrayMode={xray}
-          interior={organ.interior}
-        />
+        <AnimatedGroup>
+          <OrganModel
+            voxels={organ.voxels}
+            baseColor={organ.color}
+            zones={organ.zones}
+            stage={stageAnim}
+            highlights={tumorHighlights}
+            onVoxelClick={() => {}}
+            crossSection={false}
+            insideMode={false}
+            exploreMode={false}
+            xrayMode={xray}
+            interior={organ.interior}
+          />
+        </AnimatedGroup>
 
         <OrbitControls
           enablePan={false}
           enableZoom={true}
           enableRotate={true}
-          autoRotate={true}
-          autoRotateSpeed={2.0}
+          autoRotate={false}
           makeDefault
         />
       </Canvas>
