@@ -188,9 +188,9 @@ function cleanForPatient(text) {
     .replace(/^\s*\d+\.\s*/gm, '')
     // Strip bullet markers
     .replace(/^\s*[-•*]\s*/gm, '')
-    // Colons at end of a line
-    .replace(/:\s*\n/gm, '. ')
-    .replace(/:\s*$/gm, '.')
+    // Colons at end of a line — keep them so labels like "What this means:" stay intact
+    .replace(/:\s*\n/gm, ': ')
+    .replace(/:\s*$/gm, ':')
     // Remove ":1", ":2" style numbering artifacts
     .replace(/:\d+/g, '')
     // Patient-facing substitutions
@@ -238,7 +238,7 @@ function splitSentences(text) {
 
 function makeTitle(sentence) {
   // Return the full sentence as the title — let CSS wrap it
-  return sentence.replace(/[.!?:]+$/, '').replace(/["""]/g, '').trim()
+  return sentence.replace(/[.!?]+$/, '').replace(/["""]/g, '').trim()
 }
 
 function generateDeck(question, reply, organ, stageLabel, stage, currentOrganKey) {
