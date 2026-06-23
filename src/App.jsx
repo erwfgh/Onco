@@ -235,11 +235,9 @@ export default function App() {
           </div>
 
           {/* Stage bar */}
-          {!isPatient && (
-            <div className="px-5 py-3 border-t border-blue-200 bg-white flex-shrink-0 shadow-sm">
-              <StageSelector stage={stage} onStageChange={handleStageChange} organ={organ} clinical={clinical} />
-            </div>
-          )}
+          <div className="px-5 py-3 border-t border-blue-200 bg-white flex-shrink-0 shadow-sm">
+            <StageSelector stage={stage} onStageChange={handleStageChange} organ={organ} clinical={isPatient ? null : clinical} />
+          </div>
         </div>
 
         <InfoPanel organKey={selectedOrgan} stage={stage} patientDefault={isPatient} highlights={highlights} onPresent={setSlideShow} />
