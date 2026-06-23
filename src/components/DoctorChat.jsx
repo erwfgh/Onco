@@ -171,7 +171,7 @@ function applyMedicalTerms(text) {
 }
 
 // Patterns that represent doctor stage-directions or meta-commentary — strip entire sentence
-const DOCTOR_META_RE = /^[^.!?]*(?:I(?:'d| would| want to)? (?:like to |now )?(?:point|refer|show|draw|highlight|direct|turn)|(?:point(?:ing)?|referring|looking|turning) to the(?: 3[dD])? model|now(?: I'?d? like)?,? let(?:'s| us)|as your doctor,?|let me (?:show|point|highlight|draw)|(?:here|here's where) (?:I|we) (?:see|look|show)|it (?:looks?|seems?) like (?:we have |there'?s? )?a different|I(?:'ll| will) walk you through|although this is|I should (?:note|mention|clarify)|this (?:is outside|falls outside)|that'?s? (?:not quite|a different))[^.!?]*[.!?]\s*/gi
+const DOCTOR_META_RE = /^[^.!?]*(?:I(?:'d| would| want to)? (?:like to |now )?(?:point|refer|show|draw|highlight|direct|turn)|(?:point(?:ing)?|referring|looking|turning) to the(?: 3[dD])? model|now(?: I'?d? like)?,? let(?:'s| us)|as your doctor,?|let me (?:show|point|highlight|draw)|(?:here|here's where) (?:I|we) (?:see|look|show)|it (?:looks?|seems?) like (?:we have |there'?s? )?a different|I(?:'ll| will) walk you through|although this is|I should (?:note|mention|clarify)|this (?:is outside|falls outside)|that'?s? (?:not quite|a different)|given (?:the context|that we(?:'re| are)|what you(?:'ve| have))|in this context|based on (?:what you|the context|our discussion)|(?:as we(?:'re| are)|since we(?:'re| are)) (?:discussing|talking)|we(?:'re| are) (?:discussing|talking about)|today (?:we(?:'re| are)|I(?:'m| am)) (?:going to|here to))[^.!?]*[.!?]\s*/gi
 
 function cleanForPatient(text) {
 function cleanForPatient(text) {
