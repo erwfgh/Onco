@@ -186,7 +186,7 @@ export default function App() {
 
       {/* Main */}
       <div className="flex flex-1 overflow-hidden">
-        {!isPatient && <OrganSelector selected={selectedOrgan} onSelect={handleOrganSelect} />}
+        <OrganSelector selected={selectedOrgan} onSelect={handleOrganSelect} />
 
         <div className="flex-1 flex flex-col overflow-hidden relative">
 
